@@ -51,9 +51,8 @@ class VideoFile: public FrameProvider {
     AVFrame *ptr_frame   = nullptr;  // Decoded
 
     /* Frame Data */
-    Frame frame_data_;
+    Frame frame_data_ = {};
 };
-
 
 // TODO: Display 1 frame
 // TODO: Send Y_CrCb (YUV 4:2:0 12bpp / YUV420P) image to GPU as RGB texture, and update the shader to calculate the RGB values itself.

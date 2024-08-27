@@ -67,6 +67,7 @@ VideoFile::VideoFile(std::string const& filepath) {
 
         printf("\tCodec %s ID %d bit_rate %ld\n", ptr_local_codec->name, ptr_local_codec->id, ptr_local_codec_params->bit_rate);
     }
+    printf("\n");
 
     /* Verify a video stream was found. */
     if (video_stream_index == -1) {
@@ -121,7 +122,14 @@ Frame VideoFile::getFrame() {
     int response = 0;
     bool found_packet = false;
     bool decoded_frame = false;
-    Frame frame = {};
+    Frame err_frame = {};
+
+    // DEBUG: only return 1 frame;
+    if (frame_data_.width != 0) {
+        return frame_data_;
+    }
+    
+    // TODO: Add some kind of frame scheduling
 
     /* Try to decode frame. */
     response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
@@ -129,7 +137,7 @@ Frame VideoFile::getFrame() {
         decoded_frame = false;
     } else if (response < 0) {
         printf("Error while receiving a frame from the decoder: %d", (response));
-        return frame;
+        return err_frame;
     } else {
         decoded_frame = true;
     }
@@ -145,14 +153,14 @@ Frame VideoFile::getFrame() {
             response = avcodec_send_packet(ptr_codec_context, ptr_packet);
             if (response < 0) {
                 printf("Error while sending a packet to the decoder: %d", (response));
-                return frame;
+                return err_frame;
             }
 
             /* Decode new frame */
             response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
             if (response != AVERROR(EAGAIN) && response != AVERROR_EOF && response < 0) {
                 printf("Error while receiving a frame from the decoder: %d", (response));
-                return frame;
+                return err_frame;
             } else if (response >= 0) {
                 decoded_frame = true;
             } else {
@@ -165,11 +173,11 @@ Frame VideoFile::getFrame() {
 
     if (!decoded_frame) {
         printf("\n");
-        return frame; 
+        return err_frame; 
     }
 
     printf(
-        "Frame %d (type=%c, size=%d bytes, format=%d) pts %d key_frame %d [DTS %d]\n",
+        "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d [DTS %d]\n",
         ptr_codec_context->frame_number,
         av_get_picture_type_char(ptr_frame->pict_type),
         ptr_frame->pkt_size,
@@ -184,22 +192,22 @@ Frame VideoFile::getFrame() {
         printf("Warning: the generated file may not be a grayscale image, but could e.g. be just the R component if the video format is RGB");
     }
 
-    frame.width = ptr_frame->width;
-    frame.height = ptr_frame->height;
-    frame.channels = 3;
+    frame_data_.width = ptr_frame->width;
+    frame_data_.height = ptr_frame->height;
+    frame_data_.channels = 3;
 
-    int size = frame.width * frame.height * frame.channels;
-    frame.data.resize(size);
+    int size = frame_data_.width * frame_data_.height * frame_data_.channels;
+    frame_data_.data.resize(size);
 
-    for (int yidx = 0; yidx < frame.height; yidx++) {
-        for (int xidx = 0; xidx < frame.width; xidx++) {
-            for (int ch_idx = 0; ch_idx < frame.channels; ch_idx++) {
-                int idx = yidx * frame.width + xidx;
+    for (int yidx = 0; yidx < frame_data_.height; yidx++) {
+        for (int xidx = 0; xidx < frame_data_.width; xidx++) {
+            for (int ch_idx = 0; ch_idx < frame_data_.channels; ch_idx++) {
+                int idx = yidx * frame_data_.width + xidx;
                 // NOTE: linesize is the width of the image in memory (>= width)
-                frame.data[idx + ch_idx] = *(ptr_frame->data[0] + yidx * ptr_frame->linesize[ch_idx] + xidx);
+                frame_data_.data[idx * frame_data_.channels + ch_idx] = *(ptr_frame->data[ch_idx] + yidx * ptr_frame->linesize[ch_idx] + xidx);
             }
         }
     }
 
-    return frame;
+    return frame_data_;
 }

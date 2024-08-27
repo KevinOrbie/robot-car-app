@@ -22,46 +22,38 @@
 /* ======================== Entry Point ======================== */
 int main() {
     // Setup custom objects
-    // Window& window = Window::instance();
-    // Timer stopwatch = Timer();
+    Window& window = Window::instance();
+    Timer stopwatch = Timer();
 
-    // // Load all OpenGL function pointers
-    // if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    // {
-    //     std::cout << "Failed to initialize GLAD" << std::endl;
-    //     return -1;
-    // }
+    // Load all OpenGL function pointers
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
 
-    // // Setup Logic
-    // game::initialize(); 
+    // Setup Logic
+    game::initialize(); 
 
-    // // Loop Preparations
-    // stopwatch.start();
+    // Loop Preparations
+    stopwatch.start();
 
-    // /* Render Loop */
-    // while (!window.closing())
-    // {
-    //     // FPS Counter
-    //     double timedelta = stopwatch.lap();
+    /* Render Loop */
+    while (!window.closing())
+    {
+        // FPS Counter
+        double timedelta = stopwatch.lap();
 
-    //     // Input Update
-    //     window.updateInput();
+        // Input Update
+        window.updateInput();
 
-    //     // Logic & Rendering
-    //     game::processFrame(timedelta, window.width_, window.height_, window.input_);
+        // Logic & Rendering
+        game::processFrame(timedelta, window.width_, window.height_, window.input_);
 
-    //     // Draw Window
-    //     window.loop();
-    // }
+        // Draw Window
+        window.loop();
+    }
 
-    // game::destruct();
-
-    VideoFile vf = VideoFile("/home/kevin/Videos/normal-1080p.mp4");
-    vf.getFrame();
-    vf.getFrame();
-    vf.getFrame();
-    vf.getFrame();
-    vf.getFrame();
-    vf.getFrame();
+    game::destruct();
 }
 

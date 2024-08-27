@@ -27,11 +27,11 @@ class QuadScreen {
     QuadScreen() {
         /* Setting up Vertex Data. */
         float vertices[] = {
-            // Vertex Coords        // Texture Coords
-            -1.0f,  1.0f,  0.0f,    0.0f,  1.0f,
-             1.0f,  1.0f,  0.0f,    1.0f,  1.0f,
-            -1.0f, -1.0f,  0.0f,    0.0f,  0.0f,
-             1.0f, -1.0f,  0.0f,    1.0f,  0.0f
+            // Vertex Coords        // Texture Coords (inverted)
+            -1.0f,  1.0f,  0.0f,    1.0f,  0.0f,
+             1.0f,  1.0f,  0.0f,    0.0f,  0.0f,
+            -1.0f, -1.0f,  0.0f,    1.0f,  1.0f,
+             1.0f, -1.0f,  0.0f,    0.0f,  1.0f
         };
 
         // Build / Compile Shader
@@ -40,8 +40,8 @@ class QuadScreen {
         /* Setting up Texture Data. */
         glGenTextures(1, &texture_);
         glBindTexture(GL_TEXTURE_2D, texture_);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
