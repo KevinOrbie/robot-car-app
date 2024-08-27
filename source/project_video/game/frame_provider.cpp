@@ -125,9 +125,9 @@ Frame VideoFile::getFrame() {
     Frame err_frame = {};
 
     // DEBUG: only return 1 frame;
-    if (frame_data_.width != 0) {
-        return frame_data_;
-    }
+    // if (frame_data_.width != 0) {
+    //     return frame_data_;
+    // }
     
     // TODO: Add some kind of frame scheduling
 
@@ -201,11 +201,14 @@ Frame VideoFile::getFrame() {
 
     for (int yidx = 0; yidx < frame_data_.height; yidx++) {
         for (int xidx = 0; xidx < frame_data_.width; xidx++) {
-            for (int ch_idx = 0; ch_idx < frame_data_.channels; ch_idx++) {
-                int idx = yidx * frame_data_.width + xidx;
-                // NOTE: linesize is the width of the image in memory (>= width)
-                frame_data_.data[idx * frame_data_.channels + ch_idx] = *(ptr_frame->data[ch_idx] + yidx * ptr_frame->linesize[ch_idx] + xidx);
-            }
+            int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
+
+            // NOTE: linesize is the width of the image in memory (>= width)
+            // NOTE: YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block
+
+            frame_data_.data[idx + 0] = *(ptr_frame->data[0] + yidx * ptr_frame->linesize[0] + xidx);        // Y
+            frame_data_.data[idx + 1] = *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2);  // U (use for even / uneven pixel)
+            frame_data_.data[idx + 2] = *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2);  // V (use for even / uneven pixel)
         }
     }
 

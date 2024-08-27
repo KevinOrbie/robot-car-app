@@ -54,9 +54,6 @@ class VideoFile: public FrameProvider {
     Frame frame_data_ = {};
 };
 
-// TODO: Display 1 frame
-// TODO: Send Y_CrCb (YUV 4:2:0 12bpp / YUV420P) image to GPU as RGB texture, and update the shader to calculate the RGB values itself.
-
 // TODO: Display total video
 // TODO: Fix replay rate (using PTS timestamps)
 

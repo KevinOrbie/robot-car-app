@@ -28,10 +28,10 @@ class QuadScreen {
         /* Setting up Vertex Data. */
         float vertices[] = {
             // Vertex Coords        // Texture Coords (inverted)
-            -1.0f,  1.0f,  0.0f,    1.0f,  0.0f,
-             1.0f,  1.0f,  0.0f,    0.0f,  0.0f,
-            -1.0f, -1.0f,  0.0f,    1.0f,  1.0f,
-             1.0f, -1.0f,  0.0f,    0.0f,  1.0f
+            -1.0f,  1.0f,  0.0f,    0.0f,  0.0f,
+             1.0f,  1.0f,  0.0f,    1.0f,  0.0f,
+            -1.0f, -1.0f,  0.0f,    0.0f,  1.0f,
+             1.0f, -1.0f,  0.0f,    1.0f,  1.0f
         };
 
         // Build / Compile Shader
