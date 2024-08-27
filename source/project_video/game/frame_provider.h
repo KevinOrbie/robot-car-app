@@ -25,14 +25,14 @@ struct Frame {
 class FrameProvider {
    public:
     FrameProvider() {};
-    virtual Frame getFrame() = 0;
+    virtual Frame getFrame(double curr_time) = 0;
 };
 
 class VideoFile: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
     ~VideoFile();
-    Frame getFrame() override;
+    Frame getFrame(double curr_time) override;
 
    private:
     std::string filepath_;
@@ -52,9 +52,8 @@ class VideoFile: public FrameProvider {
 
     /* Frame Data */
     Frame frame_data_ = {};
+    double play_time_ = -1.0;
 };
 
-// TODO: Display total video
 // TODO: Fix replay rate (using PTS timestamps)
-
 // TODO: Create new FrameProvider class called VideoCam

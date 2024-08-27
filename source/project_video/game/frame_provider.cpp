@@ -118,18 +118,16 @@ VideoFile:: ~VideoFile() {
     avcodec_free_context(&ptr_codec_context);
 }
 
-Frame VideoFile::getFrame() {
+Frame VideoFile::getFrame(double curr_time) {
     int response = 0;
     bool found_packet = false;
     bool decoded_frame = false;
     Frame err_frame = {};
-
-    // DEBUG: only return 1 frame;
-    // if (frame_data_.width != 0) {
-    //     return frame_data_;
-    // }
     
-    // TODO: Add some kind of frame scheduling
+    /* Set correct FPS. */
+    if (play_time_ >= curr_time) {
+        return frame_data_;
+    }
 
     /* Try to decode frame. */
     response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
@@ -176,14 +174,16 @@ Frame VideoFile::getFrame() {
         return err_frame; 
     }
 
+    play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
     printf(
-        "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d [DTS %d]\n",
+        "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]\n",
         ptr_codec_context->frame_number,
         av_get_picture_type_char(ptr_frame->pict_type),
         ptr_frame->pkt_size,
         ptr_frame->format,
         ptr_frame->pts,
         ptr_frame->key_frame,
+        play_time_,
         ptr_frame->coded_picture_number
     );
 

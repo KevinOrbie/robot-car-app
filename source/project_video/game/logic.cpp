@@ -111,7 +111,7 @@ int processFrame(float timedelta, int width, int height, Input& input) {
     );
 
     /* Load Image */
-    Frame new_frame = gamestate.frame_provider->getFrame();
+    Frame new_frame = gamestate.frame_provider->getFrame(gamestate.time);
     gamestate.screen->load_texture(&new_frame.data[0], new_frame.width, new_frame.height, new_frame.channels, GL_RGB);
 
     /* Rendering */
