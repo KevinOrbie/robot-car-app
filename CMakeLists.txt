@@ -15,6 +15,9 @@ find_package(glfw3 3.4 REQUIRED)
 # [FFmpeg] record, convert and stream audio and video
 add_subdirectory(thirdparty/ffmpeg)
 
+# [v4l2] realtime video capture on Linux systems
+add_subdirectory(thirdparty/v4l2)
+
 # [GLM] OpenGL Mathematics library
 # Add glm as part of the project (header-only)
 add_subdirectory(thirdparty/glm)

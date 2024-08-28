@@ -28,6 +28,9 @@ class FrameProvider {
     virtual Frame getFrame(double curr_time) = 0;
 };
 
+/**
+ * @brief Class to obtain frames from a file.
+ */
 class VideoFile: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
@@ -55,5 +58,12 @@ class VideoFile: public FrameProvider {
     double play_time_ = -1.0;
 };
 
-// TODO: Fix replay rate (using PTS timestamps)
-// TODO: Create new FrameProvider class called VideoCam
+/**
+ * @brief Class to obtain frames from a camera device (on linux).
+ */
+class VideoCam: public FrameProvider {
+   public:
+    VideoCam();
+    ~VideoCam();
+    Frame getFrame(double curr_time) override;
+};

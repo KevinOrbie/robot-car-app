@@ -21,7 +21,7 @@ list(APPEND INSTALL_TARGETS ${TARGET_NAME})
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Link External Libraries
-target_link_libraries(${TARGET_NAME} PRIVATE glad glfw stb_image glm ffmpeg)
+target_link_libraries(${TARGET_NAME} PRIVATE glad glfw stb_image glm ffmpeg v4l2)
 
 
 ## ------------------------- Installation -------------------------

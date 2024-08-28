@@ -49,7 +49,8 @@ int initialize() {
     gamestate.camera->lookAt(0.0f, 0.0f, 0.0f);
 
     // Setup frame provider
-    gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
+    // gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
+    gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/ultrawide-1440p.mp4");
 
     gamestate.initialized = true;
 

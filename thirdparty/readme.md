@@ -2,12 +2,27 @@
 Below, we describe how to obtain the required libraries for this project.
 
 ## CMake 
+Cross-platform free and open-source software for build automation, testing, packaging and installation of software by using a compiler-independent method. ([source](https://en.wikipedia.org/wiki/CMake))
 ```shell
 sudo apt update
 sudo apt install cmake
 ```
 
+## V4L2 (Ubuntu 24.04)
+A collection of device drivers and an API for supporting realtime video capture on Linux systems. ([source](https://en.wikipedia.org/wiki/Video4Linux))
+
+Download all V4L2 development files:
+```shell
+sudo apt-get update
+sudo apt-get install libv4l-dev     # libv4l consists of 3 different libraries: libv4lconvert, libv4l1 and libv4l2.
+
+# Optional
+sudo apt-get install v4l-utils      # Included: v4l2-clt (An application to control video4linux drivers).
+```
+
 ## FFmpeg (Ubuntu 24.04)
+Free and open-source software project consisting of a suite of libraries and programs for handling video, audio, and other multimedia files and streams. ([source](https://en.wikipedia.org/wiki/FFmpeg))
+
 Download all ffmpeg development files:
 ```shell
 sudo apt update
@@ -15,6 +30,8 @@ sudo apt install libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev 
 ``` 
 
 ## GLFW (Ubuntu 24.04)
+A lightweight utility library for use with OpenGL. It provides programmers with the ability to create and manage windows and OpenGL contexts, as well as handle joystick, keyboard and mouse input. ([source](https://en.wikipedia.org/wiki/GLFW))
+
 Specific compilation documentation can be found [here](https://www.glfw.org/docs/latest/compile.html).
 From the thirdparty directory, run:
 ```shell
