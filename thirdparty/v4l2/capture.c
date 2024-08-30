@@ -187,6 +187,9 @@ static void mainloop(void)
                         tv.tv_sec = 2;
                         tv.tv_usec = 0;
 
+                        /* select() allows a program to monitor multiple file descriptors,
+                        waiting until one or more of the file descriptors become "ready"
+                        for some class of I/O operation (e.g., input possible). */
                         r = select(fd + 1, &fds, NULL, NULL, &tv);
 
                         if (-1 == r) {
@@ -299,6 +302,7 @@ static void uninit_device(void)
 
 static void init_read(unsigned int buffer_size)
 {
+        /* Allocates memory for an array of num objects of size and initializes all bytes in the allocated storage to zero. */
         buffers = calloc(1, sizeof(*buffers));
 
         if (!buffers) {

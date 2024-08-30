@@ -18,8 +18,8 @@
 /* Custom Libraries */
 #include "learnopengl/shader.h"
 #include "learnopengl/camera.h"
-#include "frame_provider.h"
 #include "quad_screen.h"
+#include "video_file.h"
 
 /* ========================= Functions ========================= */
 namespace game

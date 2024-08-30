@@ -2,12 +2,15 @@
 list(APPEND HEADER_FILES 
   ${CMAKE_CURRENT_SOURCE_DIR}/quad_screen.h 
   ${CMAKE_CURRENT_SOURCE_DIR}/frame_provider.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/video_file.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/video_cam.h 
   ${CMAKE_CURRENT_SOURCE_DIR}/logic.h
 )
 
 list(APPEND SOURCE_FILES 
   ${CMAKE_CURRENT_SOURCE_DIR}/logic.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/frame_provider.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/video_file.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/video_cam.cpp
 )
 
 
