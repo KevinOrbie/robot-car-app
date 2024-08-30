@@ -16,12 +16,14 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Support other I/O types (Part of constructor call? Different Sub classes?).
 // TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
-// TODO: Remove unneeded functions
+// TODO: Remove unneeded functions.
+// TODO: Write basic unit tests.
+// TODO: Create way to test performance.
 
-// TODO: Test with other camera (double frame?, maybe StereoCam class?)
+// TODO: Create a Stereo CAM class
 
+// TODO: Maybe Don't make the control loop linked to the Camera FPS.
 
 /* ============================ Defines ============================ */
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
@@ -163,6 +165,13 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
             It is important to understand a video camera does not expose one frame at a time, merely transmitting the frames separated into fields.
             In Interlaced operation, both top and bottom fields (taken at different times) are transmitted as one image.
             https://www.kernel.org/doc/html/v4.9/media/uapi/v4l/field-order.html#field-order */
+            fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 
+            break;
+        
+        case CamType::MYNT_EYE_STEREO:
+            fmt.fmt.pix.width       = 1280;
+            fmt.fmt.pix.height      = 720;
+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;  // YUV 4:2:2
             fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 
             break;
         
@@ -563,7 +572,7 @@ Frame* VideoCam::getFrame(double curr_time){
         FD_SET(fd_, &fds);
 
         /* Reset Timeout. */
-        tv.tv_sec = 2;   /* Seconds */
+        tv.tv_sec = 5;   /* Seconds */
         tv.tv_usec = 0;  /* Microseconds */
 
         /**
@@ -632,6 +641,7 @@ void VideoCam::readFrame(unsigned int buffer_index){
     frame_data_.data.resize(size);
 
     switch (cam_type_) {
+        case CamType::MYNT_EYE_STEREO:
         case CamType::ARKMICRO_WEBCAM:
             for (int yidx = 0; yidx < frame_data_.height; yidx++) {
                 for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {

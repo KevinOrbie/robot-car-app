@@ -30,7 +30,8 @@ class VideoCam: public FrameProvider {
 
    public:
     enum class CamType {
-        ARKMICRO_WEBCAM
+        ARKMICRO_WEBCAM,
+        MYNT_EYE_STEREO
     };
 
     enum class IO_Method {
@@ -41,7 +42,7 @@ class VideoCam: public FrameProvider {
 
     /* --------------- Function Declarations -------------- */
    public:
-    VideoCam(CamType type=CamType::ARKMICRO_WEBCAM, IO_Method io_method=IO_Method::MMAP);
+    VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP);
     ~VideoCam();
     Frame* getFrame(double curr_time) override;
     void start();
