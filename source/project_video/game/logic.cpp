@@ -19,7 +19,8 @@
 #include "learnopengl/shader.h"
 #include "learnopengl/camera.h"
 #include "quad_screen.h"
-#include "video_file.h"
+// #include "video_file.h"
+#include "video_cam.h"
 
 /* ========================= Functions ========================= */
 namespace game
@@ -50,8 +51,9 @@ int initialize() {
 
     // Setup frame provider
     // gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
-    gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/ultrawide-1440p.mp4");
 
+    gamestate.frame_provider = std::make_unique<VideoCam>();
+    gamestate.frame_provider->start();
     gamestate.initialized = true;
 
     /* Initialize OpenGL */

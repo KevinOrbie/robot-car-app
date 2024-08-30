@@ -16,7 +16,8 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Test / Debug with WebCam
+// TODO: Display Frame in OpenGL
+// TODO: Test with WebCam
 
 // TODO: Rethink how to store and share Frames.
 // TODO: Support other I/O types (Part of constructor call? Different Sub classes?).
@@ -426,8 +427,6 @@ void VideoCam::readFrame(v4l2_buffer buf){
     int size = frame_data_.width * frame_data_.height * frame_data_.channels;
     frame_data_.data.resize(size);
 
-    fprintf(stderr, "Reading in Frame ...\n");
-
     switch (cam_type_) {
         case CamType::ARKMICRO_WEBCAM:
             for (int yidx = 0; yidx < frame_data_.height; yidx++) {
@@ -457,12 +456,12 @@ void VideoCam::readFrame(v4l2_buffer buf){
             break;
     }
 
-    fprintf(stderr, "Frame Read\n");
-
     return;
 }
 
-bool VideoCam::getFrame_IO_READ() {}
+bool VideoCam::getFrame_IO_READ() {
+    return true;
+}
 
 bool VideoCam::getFrame_IO_MMAP() {
     struct v4l2_buffer buf;
@@ -500,4 +499,6 @@ bool VideoCam::getFrame_IO_MMAP() {
     return true;
 }
 
-bool VideoCam::getFrame_IO_USRP() {}
+bool VideoCam::getFrame_IO_USRP() {
+    return true;
+}
