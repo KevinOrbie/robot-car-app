@@ -43,11 +43,13 @@ class VideoCam: public FrameProvider {
    public:
     VideoCam(CamType type=CamType::ARKMICRO_WEBCAM, IO_Method io_method=IO_Method::MMAP);
     ~VideoCam();
-    Frame getFrame(double curr_time) override;
+    Frame* getFrame(double curr_time) override;
     void start();
     void stop();
 
    private:
+    void setCamControl(unsigned int control_id, int value);
+
     void init_IO_READ(unsigned int size);
     void init_IO_MMAP();
     void init_IO_USRP(unsigned int size);

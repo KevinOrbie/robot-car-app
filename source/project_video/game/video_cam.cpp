@@ -16,9 +16,6 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Display Frame in OpenGL
-// TODO: Test with WebCam
-
 // TODO: Rethink how to store and share Frames.
 // TODO: Support other I/O types (Part of constructor call? Different Sub classes?).
 // TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
@@ -174,7 +171,7 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
             break;
     }
 
-    /* Set format info */
+    /* Set format info. */
     if (xioctl(fd_, VIDIOC_S_FMT, &fmt) == -1)
         errno_exit("VIDIOC_S_FMT");
 
@@ -193,6 +190,16 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
         fmt.fmt.pix.sizeimage = min;
 
     fprintf(stderr, "Setup & Verified Video Format\n");
+    
+    /* -------------- Set Camera Controls -------------- */
+    /* Enable Manual Exposure Control */
+    /* NOTE: V4L2_EXPOSURE_MANUAL is not supported, and V4L2_EXPOSURE_SHUTTER_PRIORITY seems to not affect anything directly. */
+    // fprintf(stderr, "Setting V4L2_CID_EXPOSURE_AUTO\n");
+    // setCamControl(V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO); 
+
+    // /* Set minimal exposure time of the camera sensor (1 = 0.1 ms, 1000 = 0.1s). */
+    // fprintf(stderr, "Setting V4L2_CID_EXPOSURE_ABSOLUTE\n");
+    // setCamControl(V4L2_CID_EXPOSURE_ABSOLUTE, 100); /* Permission Denied */
 
     /* ------------- Initialize IO Memory -------------- */
     switch (io_method_) {
@@ -213,6 +220,44 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
     }
 
     fprintf(stderr, "Initialized IO Memory\n");
+
+    // Initialize Frame
+    int size = frame_data_.width * frame_data_.height * frame_data_.channels;
+    frame_data_.data = std::vector<uint8_t>(size, 0);
+}
+
+void VideoCam::setCamControl(unsigned int control_id, int value) {
+    /* https://www.kernel.org/doc/html/v4.9/media/uapi/v4l/extended-controls.html?highlight=exposure */
+    /* https://www.kernel.org/doc/html/v4.9/media/uapi/v4l/control.html#example-changing-controls */
+
+    struct v4l2_queryctrl queryctrl;
+    struct v4l2_control control;
+
+    CLEAR(queryctrl);
+    queryctrl.id = control_id;
+
+    /* Verify that control is supported & enabled. */
+    if (xioctl(fd_, VIDIOC_QUERYCTRL, &queryctrl) == -1) {
+        if (errno != EINVAL) {
+            errno_exit("VIDIOC_QUERYCTRL");
+            exit(EXIT_FAILURE);
+        } else {
+            printf("Camera control is not supported: id=%d\n", control_id);
+        }
+    } else if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
+        printf("Camera control is not supported: id=%d\n", control_id);
+    } else {
+        /* Update Control. */
+        CLEAR(control);
+        control.id = control_id;
+        control.value = value; 
+
+        /* Set a specifc control value. */
+        if (xioctl(fd_, VIDIOC_S_CTRL, &control) == -1) {
+            errno_exit("VIDIOC_S_CTRL");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void VideoCam::init_IO_READ(unsigned int size){
@@ -353,7 +398,7 @@ VideoCam::~VideoCam(){
     fprintf(stderr, "Destructed VideoCam\n");
 }
 
-Frame VideoCam::getFrame(double curr_time){
+Frame* VideoCam::getFrame(double curr_time){
     while (true) {
         fd_set fds;         /* Represent a set of file descriptors. */
         struct timeval tv;  /* Specifies the interval that select() should block waiting for a file descriptor to become ready. */
@@ -398,19 +443,19 @@ Frame VideoCam::getFrame(double curr_time){
         switch (io_method_) {
             case IO_Method::READ:
                 if (getFrame_IO_READ()) {
-                    return frame_data_;
+                    return &frame_data_;
                 }
                 break;
 
             case IO_Method::MMAP:
                 if (getFrame_IO_MMAP()) {
-                    return frame_data_;
+                    return &frame_data_;
                 }
                 break;
 
             case IO_Method::USERPTR:
                 if (getFrame_IO_USRP()) {
-                    return frame_data_;
+                    return &frame_data_;
                 }
                 break;
             
@@ -419,8 +464,12 @@ Frame VideoCam::getFrame(double curr_time){
         }
 
         /* NOTE: Working with Non-Blocking I/O, this point is only reached after recieving a EAGAIN error,
-        i.e. there is no data available right now, try again later. Thus, we try again to read a frame. */ 
+        i.e. there is no data available right now, try again later. Thus, we try again to read a frame. */
+        break; // Uncomment if you need a new frame for every call.
     }
+
+    fprintf(stderr, "Broke out of get frame loop.\n"); // Never reached.
+    return &frame_data_;
 }
 
 void VideoCam::readFrame(v4l2_buffer buf){

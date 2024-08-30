@@ -26,7 +26,7 @@ class VideoFile: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
     ~VideoFile();
-    Frame getFrame(double curr_time) override;
+    Frame* getFrame(double curr_time) override;
     void start() override {return;};
     void stop() override {return;};
 

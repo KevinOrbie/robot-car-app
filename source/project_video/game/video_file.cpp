@@ -118,15 +118,14 @@ VideoFile:: ~VideoFile() {
     avcodec_free_context(&ptr_codec_context);
 }
 
-Frame VideoFile::getFrame(double curr_time) {
+Frame* VideoFile::getFrame(double curr_time) {
     int response = 0;
     bool found_packet = false;
     bool decoded_frame = false;
-    Frame err_frame = {};
     
     /* Set correct FPS. */
     if (play_time_ >= curr_time) {
-        return frame_data_;
+        return &frame_data_;
     }
 
     /* Try to decode frame. */
@@ -135,7 +134,7 @@ Frame VideoFile::getFrame(double curr_time) {
         decoded_frame = false;
     } else if (response < 0) {
         printf("Error while receiving a frame from the decoder: %d", (response));
-        return err_frame;
+        return &frame_data_;
     } else {
         decoded_frame = true;
     }
@@ -151,14 +150,14 @@ Frame VideoFile::getFrame(double curr_time) {
             response = avcodec_send_packet(ptr_codec_context, ptr_packet);
             if (response < 0) {
                 printf("Error while sending a packet to the decoder: %d", (response));
-                return err_frame;
+                return &frame_data_;
             }
 
             /* Decode new frame */
             response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
             if (response != AVERROR(EAGAIN) && response != AVERROR_EOF && response < 0) {
                 printf("Error while receiving a frame from the decoder: %d", (response));
-                return err_frame;
+                return &frame_data_;
             } else if (response >= 0) {
                 decoded_frame = true;
             } else {
@@ -171,7 +170,7 @@ Frame VideoFile::getFrame(double curr_time) {
 
     if (!decoded_frame) {
         printf("\n");
-        return err_frame; 
+        return &frame_data_; 
     }
 
     play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
@@ -212,5 +211,5 @@ Frame VideoFile::getFrame(double curr_time) {
         }
     }
 
-    return frame_data_;
+    return &frame_data_;
 }
