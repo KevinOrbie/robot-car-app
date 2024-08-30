@@ -10,13 +10,12 @@
 
 /* OS provided C extentions. */
 #include <sys/stat.h>     // Data returned by the stat() function 
-#include <sys/ioctl.h>    // Control IO device
 #include <sys/mman.h>     // Memory management declarations
+#include <sys/ioctl.h>    // Control IO device
 
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Rethink how to store and share Frames.
 // TODO: Support other I/O types (Part of constructor call? Different Sub classes?).
 // TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
 // TODO: Remove unneeded functions
@@ -51,7 +50,8 @@ static int xioctl(int fh, int request, void *arg) {
 }
 
 
-/* ============================ Classes ============================ */
+/* =============================== Classes =============================== */
+
 VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_method_(io_method) {
     device_name_ = "/dev/video0";
 
@@ -261,7 +261,21 @@ void VideoCam::setCamControl(unsigned int control_id, int value) {
 }
 
 void VideoCam::init_IO_READ(unsigned int size){
-    // Uses one buffer of 1 imagesize (via malloc)
+    // Uses only one buffer of 1 imagesize (via malloc)
+    buffers_ = (VideoCam::buffer*) calloc(1, sizeof(*buffers_));
+
+    if (!buffers_) {
+        fprintf(stderr, "Out of memory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    buffers_[0].length = size;
+    buffers_[0].start = (uint8_t*) malloc(size);
+
+    if (!buffers_[0].start) {
+        fprintf(stderr, "Out of memory\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void VideoCam::init_IO_MMAP(){
@@ -294,8 +308,7 @@ void VideoCam::init_IO_MMAP(){
         exit(EXIT_FAILURE);
     }
 
-    buffers_ = (buffer*) calloc(req.count, sizeof(*buffers_));
-
+    buffers_ = (VideoCam::buffer*) calloc(req.count, sizeof(*buffers_));
     if (!buffers_) {
             fprintf(stderr, "Out of memory\n");
             exit(EXIT_FAILURE);
@@ -333,11 +346,67 @@ void VideoCam::init_IO_USRP(unsigned int size){
     // Requires V4L2_CAP_STREAMING flag
     // Makes the application allocate 4 buffers (in user space).
     // Buffers (planes) are allocated by the application itself, and can reside for example in virtual or shared memory. 
-    // Switches the driver into user pointer I/O mode and setup some internal structures.
+
+    struct v4l2_requestbuffers req;
+    CLEAR(req);
+
+    req.count  = 4;
+    req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    req.memory = V4L2_MEMORY_USERPTR;
+
+    /* Switches the driver into user pointer I/O mode and setup some internal structures. */
+    if (xioctl(fd_, VIDIOC_REQBUFS, &req) == -1) {
+        if (EINVAL == errno) {
+            fprintf(stderr, "%s does not support user pointer i/o \n", device_name_.c_str());
+            exit(EXIT_FAILURE);
+        } else {
+            errno_exit("VIDIOC_REQBUFS");
+        }
+    }
+
+    buffers_ = (VideoCam::buffer*) calloc(4, sizeof(*buffers_));
+    if (!buffers_) {
+        fprintf(stderr, "Out of memory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (n_buffers = 0; n_buffers < 4; ++n_buffers) {
+        buffers_[n_buffers].length = size;
+        buffers_[n_buffers].start = (uint8_t*) malloc(size);
+
+        if (!buffers_[n_buffers].start) {
+            fprintf(stderr, "Out of memory\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
+/* ############################## START ############################## */
+
 void VideoCam::start() {
-    // NOTE: only IO_METHOD_MMAP method
+    switch (io_method_) {
+        case IO_Method::READ:
+            start_IO_READ();
+            break;
+
+        case IO_Method::MMAP:
+            start_IO_MMAP();
+            break;
+
+        case IO_Method::USERPTR:
+            start_IO_USRP();
+            break;
+    }
+
+    return;
+}
+
+void VideoCam::start_IO_READ() {
+    /* Nothing to do. */
+    return;
+}
+
+void VideoCam::start_IO_MMAP() {
     unsigned int i;
     enum v4l2_buf_type type;
 
@@ -355,6 +424,7 @@ void VideoCam::start() {
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
     /* Start streaming I/O */
     if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1)
         errno_exit("VIDIOC_STREAMON");
@@ -362,41 +432,126 @@ void VideoCam::start() {
     capturing = true;
 
     fprintf(stderr, "Started Capturing Frames\n");
+    return;
 }
 
-void VideoCam::stop() {
-    // NOTE: only IO_METHOD_MMAP && IO_METHOD_USERPTR method
+void VideoCam::start_IO_USRP() {
     enum v4l2_buf_type type;
+    unsigned int i;
+
+    for (i = 0; i < n_buffers; ++i) {
+        struct v4l2_buffer buf;
+
+        CLEAR(buf);
+        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buf.memory = V4L2_MEMORY_USERPTR;
+        buf.index = i;
+        buf.m.userptr = (unsigned long)buffers_[i].start;
+        buf.length = buffers_[i].length;
+
+        /* Exchange a buffer with the driver. */
+        if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
+            errno_exit("VIDIOC_QBUF");
+    }
+
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (xioctl(fd_, VIDIOC_STREAMOFF, &type) == -1)
-        errno_exit("VIDIOC_STREAMOFF");
-
-    capturing = false;
-
-    fprintf(stderr, "Stopped Capturing Frames\n");
+    /* Start streaming I/O. */
+    if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1)
+            errno_exit("VIDIOC_STREAMON");
 }
 
+/* ########################### Destructor ########################## */
+
 VideoCam::~VideoCam(){
-    /* ------------ Stop Capturing Frames ------------ */
+    /* Stop Capturing Frames */
     if (capturing) {
         stop();
     }
 
-    /* ------------ Unitinitalize Device ------------- */
-    unsigned int i;
-    for (i = 0; i < n_buffers; ++i)
-        if (munmap(buffers_[i].start, buffers_[i].length) == -1)
-            errno_exit("munmap");
+    /* Unitinitalize Device */
+    switch (io_method_) {
+        case IO_Method::READ:
+            uinit_IO_READ();
+            break;
 
-    /* ------------- Close Camera Device ------------- */
+        case IO_Method::MMAP:
+            uinit_IO_MMAP();
+            break;
+
+        case IO_Method::USERPTR:
+            uinit_IO_USRP();
+            break;
+    }
+
+    free(buffers_);
+
+    /* Close Camera Device */
     if (close(fd_) == -1)
         errno_exit("close");
 
     fd_ = -1;
-
     fprintf(stderr, "Destructed VideoCam\n");
 }
+
+/* ############################## STOP ############################# */
+
+void VideoCam::stop() {
+    switch (io_method_) {
+        case IO_Method::READ:
+            stop_IO_READ();
+            break;
+
+        case IO_Method::MMAP:
+        case IO_Method::USERPTR:
+            stop_IO_STREAM();
+            break;
+    }
+    
+    fprintf(stderr, "Stopped Capturing Frames\n");
+    return;
+}
+
+void VideoCam::stop_IO_READ() {
+    /* Nothing to do. */
+    return;
+}
+
+void VideoCam::stop_IO_STREAM() {
+    enum v4l2_buf_type type;
+    type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    /* Stop streaming I/O. */
+    if (xioctl(fd_, VIDIOC_STREAMOFF, &type) == -1)
+        errno_exit("VIDIOC_STREAMOFF");
+
+    capturing = false;
+    return;
+}
+
+/* ############################## UN-Init ############################# */
+
+void VideoCam::uinit_IO_READ() {
+    free(buffers_[0].start);
+    return;
+}
+
+void VideoCam::uinit_IO_MMAP() {
+    unsigned int i;
+    for (i = 0; i < n_buffers; ++i)
+        if (munmap(buffers_[i].start, buffers_[i].length) == -1)
+            errno_exit("munmap");
+    return;
+}
+
+void VideoCam::uinit_IO_USRP() {
+    unsigned int i;
+    for (i = 0; i < n_buffers; ++i)
+        free(buffers_[i].start);
+    return;
+}
+
+/* ############################## GetFrame ############################ */
 
 Frame* VideoCam::getFrame(double curr_time){
     while (true) {
@@ -472,7 +627,7 @@ Frame* VideoCam::getFrame(double curr_time){
     return &frame_data_;
 }
 
-void VideoCam::readFrame(v4l2_buffer buf){
+void VideoCam::readFrame(unsigned int buffer_index){
     int size = frame_data_.width * frame_data_.height * frame_data_.channels;
     frame_data_.data.resize(size);
 
@@ -487,15 +642,15 @@ void VideoCam::readFrame(v4l2_buffer buf){
                     // NOTE: YUV 422 has 1 Cr & 1 Cb value per 2 Y values (YUYV = 2 pixels, using same U,V)
 
                     /* Read even pixel. */
-                    frame_data_.data[idx + 0] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 0);  // Y1
-                    frame_data_.data[idx + 1] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-                    frame_data_.data[idx + 2] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
+                    frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 0);  // Y1
+                    frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
+                    frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
                     idx += 3;
 
                     /* Read uneven pixel. */
-                    frame_data_.data[idx + 0] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 2);  // Y2
-                    frame_data_.data[idx + 1] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-                    frame_data_.data[idx + 2] = *(buffers_[buf.index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
+                    frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 2);  // Y2
+                    frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
+                    frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
                 }
             }
             break;
@@ -509,12 +664,27 @@ void VideoCam::readFrame(v4l2_buffer buf){
 }
 
 bool VideoCam::getFrame_IO_READ() {
+    if (read(fd_, buffers_[0].start, buffers_[0].length) == -1) {
+        switch (errno) {
+            case EAGAIN:
+                return false;
+
+            case EIO:
+                /* Could ignore EIO, see spec. */
+                /* fall through */
+
+            default:
+                errno_exit("read");
+        }
+    }
+
+    readFrame(0);
+
     return true;
 }
 
 bool VideoCam::getFrame_IO_MMAP() {
     struct v4l2_buffer buf;
-    Frame err_frame = {};
     unsigned int i;
 
     CLEAR(buf);
@@ -539,7 +709,7 @@ bool VideoCam::getFrame_IO_MMAP() {
 
     assert(buf.index < n_buffers);
 
-    readFrame(buf);
+    readFrame(buf.index);
 
     /* Enqueue an empty buffer in the driver’s incoming queue. */
     if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
@@ -549,5 +719,41 @@ bool VideoCam::getFrame_IO_MMAP() {
 }
 
 bool VideoCam::getFrame_IO_USRP() {
+    struct v4l2_buffer buf;
+    unsigned int i;
+
+    CLEAR(buf);
+
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_USERPTR;
+
+    /* Dequeue a filled buffer from the driver’s outgoing queue. */
+    if (xioctl(fd_, VIDIOC_DQBUF, &buf) == -1) {
+        switch (errno) {
+            case EAGAIN:
+                return true;
+
+            case EIO:
+                /* Could ignore EIO, see spec. */
+                /* fall through */
+
+            default:
+                errno_exit("VIDIOC_DQBUF");
+        }
+    }
+
+    for (i = 0; i < n_buffers; ++i)
+        if (buf.m.userptr == (unsigned long)buffers_[i].start
+            && buf.length == buffers_[i].length)
+                break;
+
+    assert(i < n_buffers);
+
+    readFrame(buf.index);
+
+    /* Enqueue an empty buffer in the driver’s incoming queue. */
+    if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
+            errno_exit("VIDIOC_QBUF");
+
     return true;
 }

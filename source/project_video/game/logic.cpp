@@ -52,7 +52,10 @@ int initialize() {
     // Setup frame provider
     // gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
 
-    gamestate.frame_provider = std::make_unique<VideoCam>();
+    gamestate.frame_provider = std::make_unique<VideoCam>(
+        VideoCam::CamType::ARKMICRO_WEBCAM, 
+        VideoCam::IO_Method::MMAP
+    );
     gamestate.frame_provider->start();
     gamestate.initialized = true;
 

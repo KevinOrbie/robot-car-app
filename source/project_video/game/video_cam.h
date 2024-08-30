@@ -54,22 +54,21 @@ class VideoCam: public FrameProvider {
     void init_IO_MMAP();
     void init_IO_USRP(unsigned int size);
 
-    // void uinit_IO_READ();
-    // void uinit_IO_MMAP();
-    // void uinit_IO_USRP();
+    void uinit_IO_READ();
+    void uinit_IO_MMAP();
+    void uinit_IO_USRP();
 
-    // void start_IO_READ();
-    // void start_IO_MMAP();
-    // void start_IO_USRP();
+    void start_IO_READ();
+    void start_IO_MMAP();
+    void start_IO_USRP();
 
-    // void stop_IO_READ();
-    // void stop_IO_MMAP();
-    // void stop_IO_USRP();
+    void stop_IO_READ();
+    void stop_IO_STREAM();
 
-    void readFrame(v4l2_buffer buffer);
     bool getFrame_IO_READ();
     bool getFrame_IO_MMAP();
     bool getFrame_IO_USRP();
+    void readFrame(unsigned int buffer_index);
 
     /* -------------- Variable Declarations -------------- */
    private:
