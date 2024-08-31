@@ -1,3 +1,9 @@
 build/
 _build/
 _deploy/
+
+// Python
+test/venv/
+
+**/.cache/
+**/.python_history

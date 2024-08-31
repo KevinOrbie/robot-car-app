@@ -16,8 +16,8 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
+// TODO: Add source & pid control scripts / alias
 // TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
-// TODO: Remove unneeded functions.
 // TODO: Write basic unit tests.
 // TODO: Create way to test performance.
 

@@ -1,5 +1,6 @@
-# OpenGL Project
-A simple OpenGL project to allow for easy OpenGL testing.
+# Robotic Car Application
+An application to support a custom robotic car.
+It containts both the program to run on the car target, and an OpenGL based GUI application to run on a desktop.
 
 ## Setup
 1. Clone this repository: 
@@ -8,6 +9,9 @@ git clone https://github.com/KevinOrbie/opengl-workspace.git opengl-workspace
 ```
 
 2. Download and setup the required thirparty packages, as described [here](./thirdparty/readme.md).
+
+3. (optional) Source the `aliases.sh` file your `.bashrc`: adds a bunch of ease of use development aliases starting with "`rca-`".
+
 
 ## Build Instructions (Ubuntu)
 ```shell
@@ -24,6 +28,7 @@ cmake --build ./_build && cmake --install ./_build
 # Run the Application
 (cd ./_deploy/grass && ./grass)
 ```
+
 
 ## Run Insturctions
 1. Start the desired executable.
