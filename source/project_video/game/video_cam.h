@@ -5,6 +5,9 @@
 /* ========================== Include ========================== */
 #include "frame_provider.h"
 
+/* C++ STL Includes */
+#include <vector>
+
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
@@ -24,8 +27,10 @@
 class VideoCam: public FrameProvider {
     /* --------------- Classes / Structures --------------- */
     struct buffer {
-        uint8_t  *start;
-        size_t   length;
+        /* Because start can point to memory allocated with mmap, I chose to keep this a normal pointer. */
+        /* I could make this a custom unique pointer that also supports unmmap, but that might be too complex. */
+        uint8_t  *start = nullptr;  
+        size_t   length = 0;
     };
 
    public:
@@ -81,8 +86,7 @@ class VideoCam: public FrameProvider {
     /* IO variables */
     int fd_ = -1;
     IO_Method io_method_;
-    struct buffer *buffers_;
-    unsigned int n_buffers = 0;
+    std::vector<buffer> buffers_;
     int frame_bytes_per_line_ = 0;
 
     /* Frame Data */

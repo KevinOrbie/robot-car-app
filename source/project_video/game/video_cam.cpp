@@ -2,6 +2,7 @@
 #include "video_cam.h"
 
 /* C Standard Libs. */
+#include <poll.h>    // poll()
 #include <fcntl.h>   // Manipulate file descriptor: open()
 #include <errno.h>   // errno
 #include <unistd.h>  // close()
@@ -16,11 +17,6 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
-// TODO: Maybe Don't make the control loop linked to the Camera FPS.
-
-// TODO: Add timing logging for pipeline.
-// TODO: Write basic unit tests.
 
 /* ============================ Defines ============================ */
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
@@ -275,9 +271,9 @@ void VideoCam::setCamControl(unsigned int control_id, int value) {
 
 void VideoCam::init_IO_READ(unsigned int size){
     // Uses only one buffer of 1 imagesize (via malloc)
-    buffers_ = (VideoCam::buffer*) calloc(1, sizeof(*buffers_));
+    buffers_.push_back(buffer());
 
-    if (!buffers_) {
+    if (buffers_.empty()) {
         fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
@@ -321,27 +317,30 @@ void VideoCam::init_IO_MMAP(){
         exit(EXIT_FAILURE);
     }
 
-    buffers_ = (VideoCam::buffer*) calloc(req.count, sizeof(*buffers_));
-    if (!buffers_) {
-            fprintf(stderr, "Out of memory\n");
-            exit(EXIT_FAILURE);
+    // buffers_ = (VideoCam::buffer*) calloc(req.count, sizeof(*buffers_));
+
+    /* Initialize count buffers. */
+    buffers_.resize(req.count);
+    if (buffers_.empty()) {
+        // TODO: is not needed ?
+        fprintf(stderr, "Out of memory\n");
+        exit(EXIT_FAILURE);
     }
 
-    for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
+    for (int buff_idx = 0; buff_idx < req.count; ++buff_idx) {
         struct v4l2_buffer buf;
-
         CLEAR(buf);
 
         buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory      = V4L2_MEMORY_MMAP;
-        buf.index       = n_buffers;
+        buf.index       = buff_idx;
 
         /* Query the status of a buffer */
         if (xioctl(fd_, VIDIOC_QUERYBUF, &buf) == -1)
             errno_exit("VIDIOC_QUERYBUF");
 
-        buffers_[n_buffers].length = buf.length;
-        buffers_[n_buffers].start = (uint8_t*)
+        buffers_[buff_idx].length = buf.length;
+        buffers_[buff_idx].start = (uint8_t*)
             mmap(NULL                   /* addr: the kernel chooses the (page-aligned) address at which to create the mapping. */,
                 buf.length,             /* length: specifies the length of the mapping. */
                 PROT_READ | PROT_WRITE  /* prot: allows for READ & WRITE access (required). */,
@@ -350,7 +349,7 @@ void VideoCam::init_IO_MMAP(){
                 buf.m.offset            /* offset: file content initialization starts from offset of the file beginning. */
             );
 
-        if (MAP_FAILED == buffers_[n_buffers].start)
+        if (buffers_[buff_idx].start == MAP_FAILED)
             errno_exit("mmap");
     }
 }
@@ -377,17 +376,19 @@ void VideoCam::init_IO_USRP(unsigned int size){
         }
     }
 
-    buffers_ = (VideoCam::buffer*) calloc(4, sizeof(*buffers_));
-    if (!buffers_) {
+    /* Initialize count buffers. */
+    buffers_.resize(req.count);
+    if (buffers_.empty()) {
+        // TODO: is not needed ?
         fprintf(stderr, "Out of memory\n");
         exit(EXIT_FAILURE);
     }
 
-    for (n_buffers = 0; n_buffers < 4; ++n_buffers) {
-        buffers_[n_buffers].length = size;
-        buffers_[n_buffers].start = (uint8_t*) malloc(size);
+    for (int buff_idx = 0; buff_idx < req.count; ++buff_idx) {
+        buffers_[buff_idx].length = size;
+        buffers_[buff_idx].start = (uint8_t*) malloc(size);
 
-        if (!buffers_[n_buffers].start) {
+        if (!buffers_[buff_idx].start) {
             fprintf(stderr, "Out of memory\n");
             exit(EXIT_FAILURE);
         }
@@ -423,7 +424,7 @@ void VideoCam::start_IO_MMAP() {
     unsigned int i;
     enum v4l2_buf_type type;
 
-    for (i = 0; i < n_buffers; ++i) {
+    for (i = 0; i < buffers_.size(); ++i) {
         struct v4l2_buffer buf;
 
         CLEAR(buf);
@@ -452,7 +453,7 @@ void VideoCam::start_IO_USRP() {
     enum v4l2_buf_type type;
     unsigned int i;
 
-    for (i = 0; i < n_buffers; ++i) {
+    for (i = 0; i < buffers_.size(); ++i) {
         struct v4l2_buffer buf;
 
         CLEAR(buf);
@@ -496,8 +497,6 @@ VideoCam::~VideoCam(){
             uinit_IO_USRP();
             break;
     }
-
-    free(buffers_);
 
     /* Close Camera Device */
     if (close(fd_) == -1)
@@ -551,7 +550,7 @@ void VideoCam::uinit_IO_READ() {
 
 void VideoCam::uinit_IO_MMAP() {
     unsigned int i;
-    for (i = 0; i < n_buffers; ++i)
+    for (i = 0; i < buffers_.size(); ++i)
         if (munmap(buffers_[i].start, buffers_[i].length) == -1)
             errno_exit("munmap");
     return;
@@ -559,7 +558,7 @@ void VideoCam::uinit_IO_MMAP() {
 
 void VideoCam::uinit_IO_USRP() {
     unsigned int i;
-    for (i = 0; i < n_buffers; ++i)
+    for (i = 0; i < buffers_.size(); ++i)
         free(buffers_[i].start);
     return;
 }
@@ -567,46 +566,43 @@ void VideoCam::uinit_IO_USRP() {
 /* ############################## GetFrame ############################ */
 
 Frame* VideoCam::getFrame(double curr_time){
+    int poll_result = -1;
+    int poll_timeout_ms = 5000;
+    struct pollfd poll_fds;
+
+    /* Setup Poll FD Settings */
+    poll_fds.fd = fd_;
+    poll_fds.events = POLLIN;  // Wait for available data to read
+
     while (true) {
-        fd_set fds;         /* Represent a set of file descriptors. */
-        struct timeval tv;  /* Specifies the interval that select() should block waiting for a file descriptor to become ready. */
-        int r;
+        /* Block for I/O operations. */
+        poll_result = poll(&poll_fds, 1, poll_timeout_ms);
 
-        FD_ZERO(&fds);
-        FD_SET(fd_, &fds);
-
-        /* Reset Timeout. */
-        tv.tv_sec = 5;   /* Seconds */
-        tv.tv_usec = 0;  /* Microseconds */
-
-        /**
-         * @brief select() allows a program to monitor multiple file descriptors,
-         * waiting until one or more of the file descriptors become "ready"
-         * for some class of I/O operation (e.g., input possible).
-         *
-         * @param nfds:      The highest-numbered file descriptor in any of the given fd_sets, plus 1.
-         * @param readfds:   Set of fds, watched to see if they are ready for reading.
-         * @param writefds:  (NONE) Set of fds, watched to see if they are ready for writing.
-         * @param exceptfds: (NONE) Set of fds, watched for any "exceptional conditions".
-         * @param timeout:   Specifies the interval that select() should block
-         * 
-         * @warning: On Linux, overwrites timeval struct.
-         */
-        r = select(fd_ + 1, &fds, NULL, NULL, &tv);
-
-        /* Select() returned errors. */
-        if (-1 == r) {
+        /* Poll() returned errors. */
+        if (poll_result == -1) {
             if (EINTR == errno)
                 continue;
-            errno_exit("select");
+            errno_exit("poll");
         }
 
-        /* Select() timed outed. */
-        if (0 == r) {
-            fprintf(stderr, "select timeout\n");
+        /* Poll() timed outed. */
+        if (poll_result == 0) {
+            fprintf(stderr, "Poll timeout\n");
+            exit(EXIT_FAILURE);  // Currently Limits GUI to camera framerate
+            // return &frame_data_;
+        }
+
+        /* Check for ERROR. */
+        if (poll_fds.revents & POLLERR) { 
+            errno_exit("poll");
+        }
+
+        /* Check for closed stream. */
+        if (poll_fds.revents & POLLHUP) { 
+            fprintf(stderr, "Poll: Stream has been closed.\n");
             exit(EXIT_FAILURE);
         }
-
+        
         /* Try to read frame. */
         switch (io_method_) {
             case IO_Method::READ:
@@ -721,7 +717,7 @@ bool VideoCam::getFrame_IO_MMAP() {
         }
     }
 
-    assert(buf.index < n_buffers);
+    assert(buf.index < buffers_.size());
 
     readFrame(buf.index);
 
@@ -756,12 +752,12 @@ bool VideoCam::getFrame_IO_USRP() {
         }
     }
 
-    for (i = 0; i < n_buffers; ++i)
+    for (i = 0; i < buffers_.size(); ++i)
         if (buf.m.userptr == (unsigned long)buffers_[i].start
             && buf.length == buffers_[i].length)
                 break;
 
-    assert(i < n_buffers);
+    assert(i < buffers_.size());
 
     readFrame(buf.index);
 
