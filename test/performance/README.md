@@ -1,9 +1,15 @@
 # Recording the Application Performance (Linux)
-This file describes how we can record this program's performance on linux, using top.
+This file describes how we can record this program's performance on linux.
 
+- TODO: Give an overview of the PIPELINE TIMINGS, and specific sub function timings (without requiring a camera to be connected).
+    - We should be able to verify what the max achievable FPS is on any platform.
+- TODO: Give an overview of the MEMORY usage after running a representative example program (stack, heap, static) (without requiring a camera to be connected).
+    - We should be able to find the memory requirements, this should be more or less independent from the platform used.
+
+<span style="color: red">
 !!! NOTE: The steps in this document are depricated, as they were too complex for what they did. <br>
 !!! For now, to save time, we will just use `top` as normal, with a custom configuration.
-!!! Later this might need to be converted to a way to visualize **pipeline timings**.
+</span>
 
 Usefull Resources:
 - https://man7.org/linux/man-pages/man1/top.1.html

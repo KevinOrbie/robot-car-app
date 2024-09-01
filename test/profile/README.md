@@ -1,12 +1,52 @@
 # Profiling the Application (Linux)
-This document describes how to use perf tool to profile this application, and visualize the reslts.
+This document describes what tools we use to dynamically profile different aspects of our application.
+
+# General Real-Time Profiling
+To get a first indication of how our code is running, we can run `top` or `htop` while running our code.<br>
+Using `top` allows us to watch both the CPU usage, and different type of MEMORY usage.
+
+Metrics available with top:
+- CPU Usage over time
+    - **%CPU**: CPU usage since last sample.
+    - **%CUU**: Total CPU time / run time.
+
+- Memory Usage over time (Primary)
+    - **%MEM**: RES in percentage.
+    - **RES**:  Non-swapped physical memory (RAM).
+    - **SWAP**: RAM overflow, written to the Swap Space.
+    - **VIRT**: Total amount of virtual memory used by the task.
+- Memory Usage over time (Extra)
+    - **SHR**:  Shared subset of resident memory (< RES).
+    - **DATA**: Private memory reserved by a process (> RES, < VIRT).
+    - **CODE**: Code in RAM.
+    - **USED**: RES + SWAP
+
+Usefull Resources:
+- https://man7.org/linux/man-pages/man1/top.1.html
+
+## Run Instrutions (With Aliases)
+After starting the application, run the following in a different terminal:
+```shell
+# Run top, showing only information relevant to our aplication
+rca-top
+```
+
+## Run Instrutions (Vanilla)
+```shell
+# Run top (possibly with following options)
+# -p <PID>    : PID of the process to monitor.
+# -d <float>  : Delay between performance samples (seconds).
+# -E k        : Force summary area memory to be scaled as (KiB), no automatic downscaling
+top [options]
+```
+
+# CPU Usage Profiling
+To find bottlenecks in the code, this section describes how we can find which percentage of CPU time, each of the functions take up. 
+For this we make use of **perf**.
 
 Usefull Resources:
 - https://profiler.firefox.com/docs/#/./guide-perf-profiling
 - https://stackoverflow.com/questions/2229336/linux-application-profiling
-
-## Information Gathered
-In which function the program spends the most time.
 
 ## Run Instrutions (With Aliases)
 ```shell
@@ -56,4 +96,8 @@ perf script -F +pid > /tmp/test.perf
 
 
 ## Setup Instrutions
-No setup required on Ubuntu 24.04.
+No setup required for this on Ubuntu 24.04.
+
+# Memory Usage Profiling
+Possibly use this: https://github.com/KDE/heaptrack
+

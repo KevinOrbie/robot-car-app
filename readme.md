@@ -9,7 +9,6 @@ git clone https://github.com/KevinOrbie/robot-car-app ./RCA
 ```
 
 2. Download and setup the required thirparty packages, as described [here](./thirdparty/readme.md).
-    - Make sure CMake is installed (I use version 3.28.3)
 
 3. (optional) Source the `aliases.sh` file your `.bashrc`: adds a bunch of ease of use development aliases starting with "`rca-`".
 
