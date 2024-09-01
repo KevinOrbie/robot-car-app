@@ -3,7 +3,7 @@ This file describes how we can record this program's performance on linux, using
 
 !!! NOTE: The steps in this document are depricated, as they were too complex for what they did. <br>
 !!! For now, to save time, we will just use `top` as normal, with a custom configuration.
-!!! Later this might need to be converted to a way to visualize pipeline timings.
+!!! Later this might need to be converted to a way to visualize **pipeline timings**.
 
 Usefull Resources:
 - https://man7.org/linux/man-pages/man1/top.1.html

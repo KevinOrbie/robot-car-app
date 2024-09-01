@@ -31,6 +31,7 @@ class VideoCam: public FrameProvider {
    public:
     enum class CamType {
         ARKMICRO_WEBCAM,
+        MYNT_EYE_SINGLE,
         MYNT_EYE_STEREO
     };
 

@@ -16,14 +16,11 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
-// TODO: Add source & pid control scripts / alias
 // TODO: Rewrite with C++ syntax (change select to poll(?), smart_ptrs, etc.).
-// TODO: Write basic unit tests.
-// TODO: Create way to test performance.
-
-// TODO: Create a Stereo CAM class
-
 // TODO: Maybe Don't make the control loop linked to the Camera FPS.
+
+// TODO: Add timing logging for pipeline.
+// TODO: Write basic unit tests.
 
 /* ============================ Defines ============================ */
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
@@ -168,8 +165,15 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
             fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 
             break;
         
-        case CamType::MYNT_EYE_STEREO:
+        case CamType::MYNT_EYE_SINGLE:
             fmt.fmt.pix.width       = 1280;
+            fmt.fmt.pix.height      = 720;
+            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;  // YUV 4:2:2
+            fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 
+            break;
+
+        case CamType::MYNT_EYE_STEREO:
+            fmt.fmt.pix.width       = 2560;
             fmt.fmt.pix.height      = 720;
             fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;  // YUV 4:2:2
             fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 
