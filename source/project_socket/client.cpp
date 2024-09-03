@@ -23,7 +23,7 @@ void error(char *msg) {
 
 int main(void) {
     char* hostname = "localhost";
-    int portno = 2566;  // Port Number
+    int portno = 2556;  // Port Number
 
     int sockfd;  // fd of socket system
     int n;       // Number of characters read or written

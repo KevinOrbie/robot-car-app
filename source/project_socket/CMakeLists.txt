@@ -6,15 +6,15 @@ set(HEADER_FILES "")
 set(SOURCE_FILES "")
 
 ## Include files in this directory
-list(APPEND SOURCE_FILES client.cpp)	
-list(APPEND SOURCE_FILES server.cpp)	
+list(APPEND SOURCE_FILES client_class.cpp)	
+list(APPEND SOURCE_FILES server_class.cpp)	
 
 ## Include code in sub-directories
 # NONE
 
 ## Create Executable
-add_executable(${TARGET_NAME}_client ${HEADER_FILES} client.cpp)
-add_executable(${TARGET_NAME}_server ${HEADER_FILES} server.cpp)
+add_executable(${TARGET_NAME}_client ${HEADER_FILES} client_class.cpp)
+add_executable(${TARGET_NAME}_server ${HEADER_FILES} server_class.cpp)
 list(APPEND INSTALL_TARGETS ${TARGET_NAME}_client)	
 list(APPEND INSTALL_TARGETS ${TARGET_NAME}_server)	
 

@@ -23,6 +23,8 @@
 #include <sys/socket.h>     // Sockets support
 #include <netinet/in.h>     // Internet domain address support (sockaddr_in)
 
+/* Standard C++ Libraries */
+#include <string>
 
 /* ========================= Functions ========================= */
 void error(char *msg) {
@@ -30,6 +32,7 @@ void error(char *msg) {
   exit(1);
 }
 
+/* ========================= Entry-Point ========================= */
 int main(void) {
     int sockfd;     // fd of socket system
     int newsockfd;  // fd of established connection
