@@ -1,11 +1,16 @@
 /**
- * @brief Arduino controller to command the car's motor drivers.
+ * @brief Arduino controller to cmd the car's motor drivers.
  * 
  * The car can be controlled with a single byte over serial:
  *  > 0bxx000000: Direction Control [straight, left   , right  , NOT USED]
  *  > 0b00xx0000: Throttle  Control [standby , forward, reverse, brake   ]
  *  > 0b0000xxxx: PWM value to select the forward or reverse speed
+ *
+ * If no command is recieved in the last TIMEOUT_MS, the car goes to IDLE.
  */
+
+/* Software Configuration. */
+#define TIMEOUT_MS 500
 
 /* Hardware Configuration. */
 #define BAUD_RATE 9600
@@ -15,21 +20,24 @@
 #define PIN_L 7
 
 /* Command Variables. */
-size_t bytes_read = 0;
-uint8_t command_buffer[8] = {0};
-uint8_t command = 0;
+bool timedout                = true;    // Only timeout once.
+unsigned long last_cmd_time  = 0;       // Last time we recieved a command (msec).
+size_t bytes_read            = 0;       // Number of bytes read last from serial.
+uint8_t cmd                  = 0;       // The last command recieved.
+uint8_t cmd_buffer[8]        = {0};     // A buffer to store recieved commands.
 
 /* State Variables. */
 enum class Throttle: uint8_t {STANDBY, FORWARD, REVERSE, BRAKE};
 enum class Direction: uint8_t {STRAIGHT, LEFT, RIGHT};
 
 struct State {
-  int pwm               = 0;
-  Throttle  throttle    = Throttle::STANDBY;
-  Direction direction   = Direction::STRAIGHT;
-} state = {};
+  Direction direction   = Direction::STRAIGHT;  // Direction state
+  Throttle  throttle    = Throttle::STANDBY;    // Throttle state
+  int pwm               = 0;                    // PWM value for speed control
+};
 
-bool updated = false;
+State state  = {};     // Current state of the motors.
+bool updated = false;  // If the state was updated this loop() iteration.
 
 
 /* ======================== SETUP ======================== */
@@ -57,7 +65,7 @@ void loop() {
      */
 
     /* Process up to 8 commands at a time. */
-    bytes_read = Serial.readBytes(command_buffer, 8);
+    bytes_read = Serial.readBytes(cmd_buffer, 8);
 
     /* Detect when nothing recieved. */
     if (bytes_read <= 0) {
@@ -65,9 +73,11 @@ void loop() {
     }
 
     /* Read the last command. */
-    command = command_buffer[bytes_read - 1];
+    cmd = cmd_buffer[bytes_read - 1];
 
     /* Update state. */
+    last_cmd_time = millis();
+    timedout = false;
     updated = true;
   }
 
@@ -75,7 +85,7 @@ void loop() {
   if (updated) {
     /* Direction Control Bytes. */
     // Bytes: 0bxx000000
-    switch((command & 0xC0) >> 6) {
+    switch((cmd & 0xC0) >> 6) {
       case 0:
         state.direction = Direction::STRAIGHT;
         break;
@@ -93,7 +103,7 @@ void loop() {
 
     /* Throttle Control Bytes. */
     // Bytes: 0b00xx0000
-    switch((command & 0x30) >> 4) {
+    switch((cmd & 0x30) >> 4) {
       case 0:
         state.throttle = Throttle::STANDBY;
         break;
@@ -111,7 +121,16 @@ void loop() {
 
     /* Speed Control Bytes. */
     // Bytes: 0b0000xxxx
-    state.pwm = (command & 0x0F) << 4;
+    state.pwm = (cmd & 0x0F) << 4;
+  }
+
+  /* If we don't reviece commands for a while, go idle. */
+  if (!timedout && (millis() - last_cmd_time > TIMEOUT_MS)) {
+    state.direction = Direction::STRAIGHT;
+    state.throttle = Throttle::STANDBY;
+    state.pwm = 0;
+    timedout = true;  // Make sure we only go to idle once.
+    updated = true;   // Update Motor Commands to idle.
   }
 
   /* ----------------- Command Motors ----------------- */
