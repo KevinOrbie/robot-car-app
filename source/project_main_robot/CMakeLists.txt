@@ -7,6 +7,9 @@ set(SOURCE_FILES "")
 
 ## Include files in this directory
 list(APPEND SOURCE_FILES main.cpp)	
+list(APPEND SOURCE_FILES arduino_socket.cpp)	
+
+list(APPEND HEADER_FILES arduino_socket.h)	
 
 ## Include code in sub-directories
 # None
@@ -32,5 +35,5 @@ endif()
 
 ## Install to the specified install directory.
 install(TARGETS ${INSTALL_TARGETS} DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
+# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
 # install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})

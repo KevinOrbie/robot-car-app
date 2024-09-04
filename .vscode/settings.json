@@ -67,6 +67,7 @@
         "types.h": "c",
         "getopt.h": "c",
         "errno.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "map": "cpp"
     }
 }
