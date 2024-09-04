@@ -1,4 +1,4 @@
-set(TARGET_NAME video)
+set(TARGET_NAME test_socket)
 
 ## --------------------------- Sources ---------------------------
 set(INSTALL_TARGETS "")
@@ -6,23 +6,24 @@ set(HEADER_FILES "")
 set(SOURCE_FILES "")
 
 ## Include files in this directory
-list(APPEND SOURCE_FILES main.cpp)	
+list(APPEND SOURCE_FILES client_class.cpp)	
+list(APPEND SOURCE_FILES server_class.cpp)	
 
 ## Include code in sub-directories
-add_subdirectory(platform)
-add_subdirectory(utils)
-add_subdirectory(game)
+# NONE
 
 ## Create Executable
-add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
-list(APPEND INSTALL_TARGETS ${TARGET_NAME})	
+add_executable(${TARGET_NAME}_client ${HEADER_FILES} client_class.cpp)
+add_executable(${TARGET_NAME}_server ${HEADER_FILES} server_class.cpp)
+list(APPEND INSTALL_TARGETS ${TARGET_NAME}_client)	
+list(APPEND INSTALL_TARGETS ${TARGET_NAME}_server)	
 
 ## Specify the root from which headers are defined
-target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET_NAME}_client PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET_NAME}_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Link External Libraries
-target_link_libraries(${TARGET_NAME} PRIVATE glad glfw stb_image glm ffmpeg v4l2)
-
+# NONE
 
 ## ------------------------- Installation -------------------------
 ## Set the install location if not specified by user (using -DCMAKE_INSTALL_PREFIX= when configuring a build tree).
@@ -34,5 +35,5 @@ endif()
 
 ## Install to the specified install directory.
 install(TARGETS ${INSTALL_TARGETS} DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
+# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
 # install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
