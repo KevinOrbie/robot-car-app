@@ -52,11 +52,11 @@ int initialize() {
     // Setup frame provider
     // gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
 
-    gamestate.frame_provider = std::make_unique<VideoCam>(
-        VideoCam::CamType::MYNT_EYE_STEREO, 
-        VideoCam::IO_Method::MMAP
-    );
-    gamestate.frame_provider->start();
+    // gamestate.frame_provider = std::make_unique<VideoCam>(
+    //     VideoCam::CamType::MYNT_EYE_STEREO, 
+    //     VideoCam::IO_Method::MMAP
+    // );
+    // gamestate.frame_provider->start();
     gamestate.initialized = true;
 
     /* Initialize OpenGL */
@@ -109,22 +109,22 @@ int processFrame(float timedelta, int width, int height, Input& input) {
     // }
 
     /* Transformations */
-    glm::mat4 view = gamestate.camera->GetViewMatrix();
-    glm::mat4 projection = glm::perspective(
-        glm::radians(gamestate.camera->Zoom), 
-        (float)width / (float)height, 
-        0.1f, 500.0f
-    );
+    // glm::mat4 view = gamestate.camera->GetViewMatrix();
+    // glm::mat4 projection = glm::perspective(
+    //     glm::radians(gamestate.camera->Zoom), 
+    //     (float)width / (float)height, 
+    //     0.1f, 500.0f
+    // );
 
     /* Load Image */
-    Frame* ptr_new_frame = gamestate.frame_provider->getFrame(gamestate.time);
-    gamestate.screen->load_texture(
-        &ptr_new_frame->data[0], 
-        ptr_new_frame->width, 
-        ptr_new_frame->height, 
-        ptr_new_frame->channels, 
-        GL_RGB
-    );
+    // Frame* ptr_new_frame = gamestate.frame_provider->getFrame(gamestate.time);
+    // gamestate.screen->load_texture(
+    //     &ptr_new_frame->data[0], 
+    //     ptr_new_frame->width, 
+    //     ptr_new_frame->height, 
+    //     ptr_new_frame->channels, 
+    //     GL_RGB
+    // );
 
     /* Rendering */
     // Clear Screen

@@ -112,7 +112,7 @@ std::string Server::recieve() {
 
     /* Check for errors. */
     if (!blocking && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
-        fprintf(stderr, "Nothing to read.\n");
+        // fprintf(stderr, "Nothing to read.\n");
         return std::string();
 
     } else if (chars_read < 0) {

@@ -22,6 +22,7 @@ struct Button {
     enum {
         SPACE = 0,
         A, W, S, D,
+        LEFT, RIGHT, UP, DOWN,
         BUTTON_COUNT
     };
 

@@ -1,4 +1,4 @@
-set(TARGET_NAME video)
+set(TARGET_NAME main_controller)
 
 ## --------------------------- Sources ---------------------------
 set(INSTALL_TARGETS "")
@@ -13,6 +13,8 @@ add_subdirectory(platform)
 add_subdirectory(utils)
 add_subdirectory(game)
 
+
+
 ## Create Executable
 add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 list(APPEND INSTALL_TARGETS ${TARGET_NAME})	
@@ -21,7 +23,7 @@ list(APPEND INSTALL_TARGETS ${TARGET_NAME})
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Link External Libraries
-target_link_libraries(${TARGET_NAME} PRIVATE glad glfw stb_image glm ffmpeg v4l2)
+target_link_libraries(${TARGET_NAME} PRIVATE glad glfw stb_image glm ffmpeg v4l2 rca_common)
 
 
 ## ------------------------- Installation -------------------------
@@ -34,5 +36,5 @@ endif()
 
 ## Install to the specified install directory.
 install(TARGETS ${INSTALL_TARGETS} DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
-# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})
 # install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_INSTALL_PREFIX}/${TARGET_NAME})

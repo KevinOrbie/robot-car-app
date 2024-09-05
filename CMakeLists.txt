@@ -28,5 +28,6 @@ add_subdirectory(thirdparty/stb_image)      # [STB_image] Image library
 
 
 ## ------------------- Call other code --------------------
+# add_subdirectory(pilots)
 add_subdirectory(source)
 

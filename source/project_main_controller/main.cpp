@@ -13,6 +13,7 @@
 
 /* Custom Libraries */
 #include "platform/window.h"
+#include "common/client.h"
 #include "utils/timer.h"
 #include "game/logic.h"
 
@@ -24,6 +25,10 @@ int main() {
     // Setup custom objects
     Window& window = Window::instance();
     Timer stopwatch = Timer();
+
+    // Setup connection
+    Client client = Client("localhost", 2556, false);
+    client.link();
 
     // Load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -46,6 +51,16 @@ int main() {
 
         // Input Update
         window.updateInput();
+
+        // Send input to server
+        std::string input_msg = "[xxxx]";
+        input_msg[1] = (window.input_.keys[Button::LEFT ].held) ? 'L' : 'x';
+        input_msg[2] = (window.input_.keys[Button::RIGHT].held) ? 'R' : 'x';
+        input_msg[3] = (window.input_.keys[Button::UP   ].held) ? 'U' : 'x';
+        input_msg[4] = (window.input_.keys[Button::DOWN ].held) ? 'D' : 'x';
+        if (input_msg != "[xxxx]"){
+            client.send(input_msg);
+        }
 
         // Logic & Rendering
         game::processFrame(timedelta, window.width_, window.height_, window.input_);

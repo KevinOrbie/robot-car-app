@@ -19,36 +19,36 @@
 /* ======================== Entry Point ======================== */
 int main() {
     /* Setup LAN connection. */
-    // Server server = Server(2556, false);
-    // server.link();
+    Server server = Server(2556, false);
+    server.link();
 
     /* Setup Arduino connection. */
-    ArduinoSocket arduino_ctrl = ArduinoSocket();
+    // ArduinoSocket arduino_ctrl = ArduinoSocket();
 
     /* Simulate control loop. */
     while (true) {
         /* Recieve commands over LAN. */
-        // std::string recv_msg = server.recieve();
-        // if (!recv_msg.empty()) {
-        //     fprintf(stderr, "Recieved message: '%s'\n", recv_msg.c_str());
-        // } else {
-        //     fprintf(stderr, "Nothing to recieve.\n");
-        // }
+        std::string recv_msg = server.recieve();
+        if (!recv_msg.empty()) {
+            fprintf(stderr, "Recieved message: '%s'\n", recv_msg.c_str());
+        } else {
+            // fprintf(stderr, "Nothing to recieve.\n");
+        }
 
         /* Read user input. */
-        std::string x;
-        std::cout << "Type a char: "; // Type a number and press enter
-        std::cin >> x;
+        // std::string x;
+        // std::cout << "Type a char: "; // Type a number and press enter
+        // std::cin >> x;
 
         /* Command the Arduino. */
-        arduino_ctrl.send(x);
+        // arduino_ctrl.send("???");
 
-        std::string rec_msg = "";
-        arduino_ctrl.recieve(rec_msg);
-        fprintf(stderr, "Recieved message: %s\n", rec_msg.c_str());
+        // std::string rec_msg = "";
+        // arduino_ctrl.recieve(rec_msg);
+        // fprintf(stderr, "Recieved message: %s\n", rec_msg.c_str());
 
         /* Slow down loop. */
-        // std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::microseconds(50));
     }
 
     return 0;

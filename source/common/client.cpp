@@ -84,7 +84,7 @@ std::string Client::recieve() {
 
     /* Recieve socket data (blocking wait). */
     if (!blocking && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
-        fprintf(stderr, "Nothing to read.\n");
+        // fprintf(stderr, "Nothing to read.\n");
         return std::string();
 
     } else if (chars_read < 0) {

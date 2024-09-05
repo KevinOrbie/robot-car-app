@@ -1,9 +1,7 @@
 ## Include libraries
-add_subdirectory(common)
+# None here
 
 ## Include executables
 # add_subdirectory(project_test_texture)
 # add_subdirectory(project_test_video)
 # add_subdirectory(project_test_socket)
-add_subdirectory(project_main_robot)
-add_subdirectory(project_main_controller)
