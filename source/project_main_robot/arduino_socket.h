@@ -4,7 +4,11 @@
  */
 
 /* =========================== Imports =========================== */
+/* Standard C Libraries */
+#include <stdint.h>
+
 /* Standard C++ Libraries */
+#include<vector>
 #include <string>
 #include <string_view>
 
@@ -30,7 +34,7 @@ class ArduinoSocket {
     ~ArduinoSocket();
 
     bool recieve(std::string& recieved_msg);
-    bool send(std::string_view msg);
+    bool send(std::vector<uint8_t> msg);
 
    private:
     int fd_;

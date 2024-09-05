@@ -10,6 +10,7 @@
 
 /* Standard C++ Libraries */
 #include<array>
+#include<vector>
 
 /* Standard C Libraries */
 #include <stdio.h>
@@ -102,9 +103,9 @@ bool ArduinoSocket:: recieve(std::string& recieved_msg) {
     return true;
 }
 
-bool ArduinoSocket::send(const std::string_view msg) {
+bool ArduinoSocket::send(const std::vector<uint8_t> msg) {
     /* Write bites over serial port. */
-    int num_bytes = write(fd_, msg.data(), msg.length());
+    int num_bytes = write(fd_, msg.data(), msg.size());
 
     if (num_bytes < 0) {
         printf("Error writing to file descriptor: %s\n", strerror(errno));

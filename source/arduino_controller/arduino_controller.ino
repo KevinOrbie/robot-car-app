@@ -10,7 +10,7 @@
  */
 
 /* Software Configuration. */
-#define TIMEOUT_MS 500
+#define TIMEOUT_MS 2000
 
 /* Hardware Configuration. */
 #define BAUD_RATE 9600
