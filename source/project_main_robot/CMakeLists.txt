@@ -10,6 +10,7 @@ list(APPEND SOURCE_FILES main.cpp)
 list(APPEND SOURCE_FILES arduino_socket.cpp)	
 
 list(APPEND HEADER_FILES arduino_socket.h)	
+list(APPEND HEADER_FILES local.h)	
 
 ## Include code in sub-directories
 # None

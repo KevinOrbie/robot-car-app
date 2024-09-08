@@ -8,25 +8,27 @@
 
 /* Standard C++ Libraries */
 #include <string>
+#include <memory>
+
+/* Custom C++ Libraries */
+#include "connection.h"
 
 
 /* ========================== Classes ========================== */
-class Server {
+class ServerSocket {
    public:
-    Server(int port, bool blocking);
-    ~Server();
+    ServerSocket(int port, bool blocking);
+    ~ServerSocket();
 
-    void link();
-    /**
-     * @warning: This reads all recieved message, and outputs them on after another, in the same string.
-     */
-    std::string recieve();
-    void send(std::string msg);
+    Connection link();
 
    private:
     int socket_fd      = -1;
-    int connection_fd  = -1;
 
     int port_number;
     bool blocking = false;
+};
+
+class Server {
+
 };

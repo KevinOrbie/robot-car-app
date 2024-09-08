@@ -12,8 +12,7 @@ list(APPEND SOURCE_FILES main.cpp)
 add_subdirectory(platform)
 add_subdirectory(utils)
 add_subdirectory(game)
-
-
+add_subdirectory(robot)
 
 ## Create Executable
 add_executable(${TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})

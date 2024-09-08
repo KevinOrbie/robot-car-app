@@ -8,21 +8,27 @@
 
 /* Standard C++ Libraries */
 #include <string>
+#include <memory>
+
+/* Custom C++ Libraries */
+#include "connection.h"
 
 
 /* ========================== Classes ========================== */
-class Client {
+class ClientSocket {
    public:
-    Client(std::string server_address, int port, bool blocking);
-    ~Client();
+    ClientSocket(std::string server_address, int port, bool blocking);
+    ~ClientSocket();
 
-    void link();
-    std::string recieve();
-    void send(std::string msg);
+    Connection link();
 
    private:
     int socket_fd;
 
     sockaddr_in serv_addr;
     bool blocking = false;
+};
+
+class Client {
+
 };

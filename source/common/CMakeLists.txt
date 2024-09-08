@@ -5,11 +5,15 @@ set(SOURCE_FILES "")
 ## Define Sources
 list(APPEND SOURCE_FILES client.cpp)
 list(APPEND SOURCE_FILES server.cpp)
+list(APPEND SOURCE_FILES connection.cpp)
 
 ## Define Headers
+list(APPEND HEADER_FILES connection.h)
 list(APPEND HEADER_FILES messages.h)
 list(APPEND HEADER_FILES client.h)
 list(APPEND HEADER_FILES server.h)
+list(APPEND HEADER_FILES logger.h)
+list(APPEND HEADER_FILES robot.h)
 
 ## Define the common library
 add_library(rca_common ${HEADER_FILES} ${SOURCE_FILES})

@@ -1,5 +1,5 @@
 /**
- * @brief C++ Server POSIX socket interface.
+ * @brief C++ ServerSocket POSIX socket interface.
  * @link https://www.linuxhowtos.org/C_C++/socket.htm
  */
 
@@ -21,6 +21,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <utility>  // std::move()
 
 
 /* ========================= Functions ========================= */
@@ -31,8 +32,8 @@ static void error(char *msg) {
 
 
 /* ========================== Classes ========================== */
-Server::Server(int port, bool blocking): port_number(port), blocking(blocking) {
-    sockaddr_in serv_addr = {};  // Server internet address
+ServerSocket::ServerSocket(int port, bool blocking): port_number(port), blocking(blocking) {
+    sockaddr_in serv_addr = {};  // ServerSocket internet address
 
     /* Creates a new socket */
     fprintf(stderr, "Creating Socket.\n");
@@ -62,17 +63,13 @@ Server::Server(int port, bool blocking): port_number(port), blocking(blocking) {
     listen(socket_fd, 5);
 };
 
-Server::~Server() {
+ServerSocket::~ServerSocket() {
     if (socket_fd >= 0) {
         close(socket_fd);
     }
-
-    if (connection_fd >= 0) {
-        close(connection_fd);
-    }
 }
 
-void Server::link() {
+Connection ServerSocket::link() {
     socklen_t clilen;  // Size of the address of the client
     sockaddr_in cli_addr = {};  // Client internet address
 
@@ -81,61 +78,26 @@ void Server::link() {
     fprintf(stderr,"Waiting for a client connection...");
 
     /* Connect to socket. */
-    connection_fd = accept(socket_fd, (struct sockaddr *) &cli_addr, &clilen);  // Block until a client connects to the server
+    int connection_fd = accept(socket_fd, (struct sockaddr *) &cli_addr, &clilen);  // Block until a client connects to the server
     if (connection_fd < 0) {
         error("ERROR on accept");
     }
 
-    /* Make it socket non-blocking. */
-    if (!blocking) {
-        fcntl(connection_fd, F_SETFL, O_NONBLOCK);
-    }
+    /* Construct connection. */
+    fprintf(stderr, " >>> Client connected: %d\n", cli_addr.sin_addr.s_addr);
+    Connection connection = Connection(connection_fd, blocking);
 
     /* We only need the established connection, delete the server socket. */
     close(socket_fd);
     socket_fd = -1;
 
-    fprintf(stderr, " >>> Client connected: %d\n", cli_addr.sin_addr.s_addr);
-};
-
-/**
- * @warning: This reads all recieved message, and outputs them on after another, in the same string.
- */
-std::string Server::recieve() {
-    int chars_read = -1;
-    std::string buffer = "";
-    buffer.resize(255, 0);
-
-    /* Recieve socket data (blocking wait). */
-    chars_read = read(connection_fd, &buffer[0], 255);
-    buffer.resize(strlen(buffer.c_str()));
-
-    /* Check for errors. */
-    if (!blocking && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
-        // fprintf(stderr, "Nothing to read.\n");
-        return std::string();
-
-    } else if (chars_read < 0) {
-        error("ERROR reading from socket");
-    }
-
-    return buffer;
-};
-
-void Server::send(std::string msg) {
-    int chars_written = -1;
-
-    /* Send socket data. */
-    chars_written = write(connection_fd, msg.c_str(), msg.size()); 
-    if (chars_written < 0) error("ERROR writing to socket");
-
-    return;
+    return connection;
 };
 
 
 /* ========================= Entry-Point ========================= */
 // int main(void) {
-//     Server server = Server(2556, false);
+//     ServerSocket server = ServerSocket(2556, false);
 //     server.link();
 
 //     /* Simulate control loop. */

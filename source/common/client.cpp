@@ -30,7 +30,7 @@ static void error(char *msg) {
 
 
 /* ========================== Classes ========================== */
-Client::Client(std::string server_address, int port, bool blocking): blocking(blocking) {
+ClientSocket::ClientSocket(std::string server_address, int port, bool blocking): blocking(blocking) {
     serv_addr = {};    // Address of the server to connect to
     hostent *server;   // Defines this host computer on the Internet
 
@@ -58,52 +58,28 @@ Client::Client(std::string server_address, int port, bool blocking): blocking(bl
     serv_addr.sin_port = htons(port);
 };
 
-Client::~Client() {
+ClientSocket::~ClientSocket() {
     if (socket_fd >= 0) {
         close(socket_fd);
     }
 }
 
-void Client::link() {
+Connection ClientSocket::link() {
     /* Establish a connection with the server. */
     fprintf(stderr, "Connecting to the Server.\n");
     if (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
     }
 
-    /* Make it socket non-blocking. */
-    if (!blocking) {
-        fcntl(socket_fd, F_SETFL, O_NONBLOCK);
-    }
+    /* Construct connection. */
+    Connection connection = Connection(socket_fd, blocking);
+
+    /* Make sure new destructor does not close connection. */
+    socket_fd = -1;
+
+    return connection;
 };
 
-std::string Client::recieve() {
-    int chars_read = -1;
-    std::string buffer = "";
-    buffer.resize(255, 0);
-
-    /* Recieve socket data (blocking wait). */
-    if (!blocking && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
-        // fprintf(stderr, "Nothing to read.\n");
-        return std::string();
-
-    } else if (chars_read < 0) {
-        error("ERROR reading from socket");
-    }
-
-    return buffer;
-};
-
-void Client::send(std::string msg) {
-    int chars_written = -1;
-
-    /* Send socket data. */
-    chars_written = write(socket_fd, msg.c_str(), msg.size()); 
-    // NOTE: I don't know if we really need to check if non-blocking is ready here?
-    if (chars_written < 0) error("ERROR writing to socket");
-
-    return;
-};
 
 
 /* ========================= Entry-Point ========================= */
