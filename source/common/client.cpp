@@ -74,12 +74,27 @@ Connection ClientSocket::link() {
     /* Construct connection. */
     Connection connection = Connection(socket_fd, blocking);
 
-    /* Make sure new destructor does not close connection. */
+    /* Make sure the new destructor does not close connection. */
     socket_fd = -1;
 
     return connection;
 };
 
+
+Client::Client(std::string server_address, int port, bool blocking) {
+    ClientSocket socket = ClientSocket(server_address, port, blocking);
+    connection_ = socket.link(); // Wait for server response.
+}
+
+void Client::send(const MessageData& message_data) {
+    Message msg = Message(&message_data);
+    msg.serialize(connection_);
+};
+
+std::unique_ptr<MessageData> Client::recieve() {
+    Message msg = Message();
+    return msg.deserialize(connection_);
+};
 
 
 /* ========================= Entry-Point ========================= */

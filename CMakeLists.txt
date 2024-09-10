@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(OpenGLTests LANGUAGES C CXX VERSION 1.0)
 
+
 # ## ---------------- Find external packages ----------------
 # NOTE: Working with already build versions of these libs, allows us to skip building them over and over again.
 
@@ -27,7 +28,21 @@ add_subdirectory(thirdparty/glad)           # [GLAD] GL loader-generator
 add_subdirectory(thirdparty/stb_image)      # [STB_image] Image library
 
 
-## ------------------- Call other code --------------------
+## ---------------- Include Project Code ------------------
+# Include pilot projects
 # add_subdirectory(pilots)
+
+# Include source code
 add_subdirectory(source)
 
+
+## -------------------- Testing Setup ---------------------
+# Configure a project for testing with CTest
+# + Allows us to specify different types of test
+include(CTest)
+
+# Allows user to disable test building
+# To Disable specify when setting up build: "-DBUILD_TESTING='OFF'"
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()

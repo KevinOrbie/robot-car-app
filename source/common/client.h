@@ -12,6 +12,7 @@
 
 /* Custom C++ Libraries */
 #include "connection.h"
+#include "message.h"
 
 
 /* ========================== Classes ========================== */
@@ -30,5 +31,12 @@ class ClientSocket {
 };
 
 class Client {
+   public:
+    Client(std::string server_address, int port, bool blocking);
 
+    void send(const MessageData& message_data);
+    std::unique_ptr<MessageData> recieve();
+
+   private:
+    Connection connection_;
 };

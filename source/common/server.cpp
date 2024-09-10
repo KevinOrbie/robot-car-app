@@ -95,6 +95,22 @@ Connection ServerSocket::link() {
 };
 
 
+Server::Server(int port, bool blocking) {
+    ServerSocket socket = ServerSocket(port, blocking);
+    connection_ = socket.link(); // Wait for one client to connect.
+};
+
+void Server::send(const MessageData& message_data) {
+    Message msg = Message(&message_data);
+    msg.serialize(connection_);
+};
+
+std::unique_ptr<MessageData> Server::recieve() {
+    Message msg = Message();
+    return msg.deserialize(connection_);
+};
+
+
 /* ========================= Entry-Point ========================= */
 // int main(void) {
 //     ServerSocket server = ServerSocket(2556, false);

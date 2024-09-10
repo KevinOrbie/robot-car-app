@@ -65,7 +65,7 @@ Connection& Connection::operator=(Connection&& other) {
     return *this;
 }
 
-bool Connection::recieve(char* buffer, int bytes) {
+bool Connection::recieve(char* buffer, int bytes) const {
     int chars_read = -1;
 
     /* Read socket data to the given buffer. */
@@ -83,7 +83,7 @@ bool Connection::recieve(char* buffer, int bytes) {
     return true;
 };
 
-bool Connection::send(char* buffer, int bytes) {
+bool Connection::send(char* buffer, int bytes) const {
     int chars_written = -1;
 
     /* Send socket data. */
@@ -92,5 +92,5 @@ bool Connection::send(char* buffer, int bytes) {
     // NOTE: I don't know if we really need to check if non-blocking is ready here?
     if (chars_written < 0) error("ERROR writing to socket");
 
-    return;
+    return true;
 };

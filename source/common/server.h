@@ -12,6 +12,7 @@
 
 /* Custom C++ Libraries */
 #include "connection.h"
+#include "message.h"
 
 
 /* ========================== Classes ========================== */
@@ -30,5 +31,13 @@ class ServerSocket {
 };
 
 class Server {
+   public:
+    // TODO: Constructor should not block.
+    Server(int port, bool blocking);
 
+    void send(const MessageData& message_data);
+    std::unique_ptr<MessageData> recieve();
+
+   private:
+    Connection connection_;
 };

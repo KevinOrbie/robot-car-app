@@ -2,6 +2,8 @@
  * @brief Header for C++ POSIX socket interface.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 #include <stdint.h>
@@ -13,7 +15,8 @@
 /* ========================== Classes ========================== */
 class Connection {
    public:
-    Connection(int fd, bool blocking);
+    /* Also acts as default constructor. */
+    Connection(int fd=-1, bool blocking=false);
 
     /**
      * @note By only allowing move semantics, we make sure that the 
@@ -29,11 +32,12 @@ class Connection {
     ~Connection();
 
    public:
-    bool recieve(char* buffer, int bytes);
-    bool send(char* buffer, int bytes);
+    bool recieve(char* buffer, int bytes) const;
+    bool send(char* buffer, int bytes) const;
+    bool valid() const { return connection_fd_ >= 0; };
 
    private:
     int connection_fd_  = -1;
-    bool blocking_ = false;
+    bool blocking_      = false;
 };
 
