@@ -95,6 +95,7 @@ Connection ServerSocket::link() {
 };
 
 
+// TODO Update
 Server::Server(int port, bool blocking) {
     ServerSocket socket = ServerSocket(port, blocking);
     connection_ = socket.link(); // Wait for one client to connect.

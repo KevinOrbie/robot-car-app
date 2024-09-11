@@ -8,7 +8,9 @@ list(APPEND SOURCE_FILES server.cpp)
 list(APPEND SOURCE_FILES connection.cpp)
 
 ## Define Headers
+list(APPEND HEADER_FILES message_handler.h)
 list(APPEND HEADER_FILES connection.h)
+list(APPEND HEADER_FILES messages.h)
 list(APPEND HEADER_FILES message.h)
 list(APPEND HEADER_FILES client.h)
 list(APPEND HEADER_FILES server.h)

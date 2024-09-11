@@ -12,7 +12,7 @@
 
 /* Custom C++ Libraries */
 #include "connection.h"
-#include "message.h"
+#include "messages.h"
 
 
 /* ========================== Classes ========================== */
@@ -35,8 +35,10 @@ class Server {
     // TODO: Constructor should not block.
     Server(int port, bool blocking);
 
-    void send(const MessageData& message_data);
-    std::unique_ptr<MessageData> recieve();
+    template<message::MessageID ID, class payload_t>
+    void send(const message::Message<ID>, payload_t payload);
+
+    void recieve();
 
    private:
     Connection connection_;

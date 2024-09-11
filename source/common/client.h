@@ -30,13 +30,13 @@ class ClientSocket {
     bool blocking = false;
 };
 
-class Client {
-   public:
-    Client(std::string server_address, int port, bool blocking);
+// class Client {
+//    public:
+//     Client(std::string server_address, int port, bool blocking);
 
-    void send(const MessageData& message_data);
-    std::unique_ptr<MessageData> recieve();
+//     void send(const MessageData& message_data);
+//     std::unique_ptr<MessageData> recieve();
 
-   private:
-    Connection connection_;
-};
+//    private:
+//     Connection connection_;
+// };

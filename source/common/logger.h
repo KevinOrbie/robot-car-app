@@ -3,8 +3,14 @@
  * @author Kevin Orbie
  * 
  * @brief Defines macros to setup the project's logging inferastructure.
- * @note By exclusivley making use of macros, we make it possible to compile without any print statements.
+ * @note By exclusivley making use of macros, we make it possible to compile 
+ * without any print statements.
+ * @note All logs should done in one line, as multiple printf statements for 
+ * a single log can get messy when working with multiple threads.
  */
+
+// TODO: Add the time to logs
+// TODO: support multi thread logging
 
 #pragma once
 
