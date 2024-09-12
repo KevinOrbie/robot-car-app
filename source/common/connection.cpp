@@ -9,6 +9,7 @@
 /* Standard C Libraries */
 // #include <poll.h>           // poll()
 #include <stdio.h>          // IO Declarations
+#include <errno.h>          // errno, ...
 #include <fcntl.h>          // fcntl()
 #include <string.h>         // bzero()
 #include <stdlib.h>         // exit()
@@ -18,9 +19,7 @@
 #include <netinet/in.h>     // Internet domain address support (sockaddr_in)
 
 /* Standard C++ Libraries */
-#include <string>
-#include <chrono>
-#include <thread>
+// None
 
 
 /* ========================= Functions ========================= */
@@ -65,6 +64,7 @@ Connection& Connection::operator=(Connection&& other) {
     return *this;
 }
 
+/* ------------------------------------- Reception ------------------------------------ */
 bool Connection::recieve(char* buffer, int bytes) const {
     int chars_read = -1;
 
@@ -83,6 +83,7 @@ bool Connection::recieve(char* buffer, int bytes) const {
     return true;
 };
 
+/* ----------------------------------- Transmission ----------------------------------- */
 bool Connection::send(char* buffer, int bytes) const {
     int chars_written = -1;
 

@@ -2,6 +2,8 @@
  * @brief Message Definitions.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 // None
@@ -15,12 +17,19 @@
 
 namespace message {
 /* =========================== Macros ========================== */
-#define CREATE_MESSAGE(msg_id, payload_t) template<> class Message<msg_id>: public MessageBase<payload_t> {}
-
+#define CREATE_MESSAGE(msg_id, payload_t) template<>                \
+class Message<msg_id>: public MessageBase<payload_t> {              \
+   public:                                                          \
+    Message(payload_t payload): MessageBase<payload_t>(payload) {}; \
+    MessageID getID() { return msg_id; };                           \
+}
 
 
 /* ==================== Message Declarations =================== */
-/* Declate Message and give it an ID. */
+/**
+ * @brief Declares all message types as an enum, and as a result, 
+ * assigns them an ID.
+ */
 enum class MessageID {
     EMPTY = 0,  // Empty Message
     CMD_DRIVE   // Command the robot to update it's Drive Control State.
@@ -28,7 +37,10 @@ enum class MessageID {
 
 
 /* ==================== Message Definitions ==================== */
-/* Create Specific Message Class. */
+/**
+ * @brief Creates a template specialization of the Message<ID> class 
+ * for every message type, for the associated payload type.
+ */
 CREATE_MESSAGE(MessageID::CMD_DRIVE, bool);
 
 

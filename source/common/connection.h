@@ -33,7 +33,11 @@ class Connection {
 
    public:
     bool recieve(char* buffer, int bytes) const;
+    // bool recieve(int &value) const; (In case of memory mismatch)
+
     bool send(char* buffer, int bytes) const;
+    // bool send(int value) const;
+
     bool valid() const { return connection_fd_ >= 0; };
 
    private:

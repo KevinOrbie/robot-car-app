@@ -7,7 +7,7 @@ set(SOURCE_FILES "")
 
 ## Include files in this directory
 list(APPEND SOURCE_FILES main_server.cpp)	
-list(APPEND SOURCE_FILES main_client.cpp)	
+list(APPEND SOURCE_FILES main_client.cpp)
 
 ## Include code in sub-directories
 # None

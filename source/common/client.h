@@ -11,15 +11,17 @@
 #include <memory>
 
 /* Custom C++ Libraries */
+#include "message_transciever.h"
 #include "connection.h"
 #include "message.h"
 
 
+namespace client {
 /* ========================== Classes ========================== */
-class ClientSocket {
+class Socket {
    public:
-    ClientSocket(std::string server_address, int port, bool blocking);
-    ~ClientSocket();
+    Socket(std::string server_address, int port, bool blocking);
+    ~Socket();
 
     Connection link();
 
@@ -30,13 +32,39 @@ class ClientSocket {
     bool blocking = false;
 };
 
-// class Client {
-//    public:
-//     Client(std::string server_address, int port, bool blocking);
 
-//     void send(const MessageData& message_data);
-//     std::unique_ptr<MessageData> recieve();
+class Client : public message::Transciever {
+   public:
+    Client(std::string server_address, int port, bool blocking);
 
-//    private:
-//     Connection connection_;
-// };
+    /**
+     * @brief Block until a Server connects to this client.
+     */
+    void connect();
+
+   protected:
+    /**
+     * @brief When a message is recieved, this function calls 
+     * the appropriate Message Handler. 
+     */
+    void pipeMessage(message::MessageID id) override;
+
+    /**
+     * @brief Recieve message payload & take relevant actions.
+     */
+    template<message::MessageID ID> void handleMessage();
+
+   private:
+    std::string server_address_ = "localhost";
+    int port_                   = 2556;
+    bool blocking_              = false;
+};
+
+
+/* ====================== Message Handlers ===================== */
+/* NOTE: Declarations with template specialization are best done in the same header file. */
+
+template<> void Client::handleMessage<message::MessageID::CMD_DRIVE>();
+
+
+} // namespace client

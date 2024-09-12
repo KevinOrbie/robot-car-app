@@ -6,9 +6,13 @@ set(SOURCE_FILES "")
 list(APPEND SOURCE_FILES client.cpp)
 list(APPEND SOURCE_FILES server.cpp)
 list(APPEND SOURCE_FILES connection.cpp)
+list(APPEND SOURCE_FILES message_transciever.cpp)
+
+list(APPEND SOURCE_FILES client_handler.cpp)
+list(APPEND SOURCE_FILES server_handler.cpp)
 
 ## Define Headers
-list(APPEND HEADER_FILES message_handler.h)
+list(APPEND HEADER_FILES message_transciever.h)
 list(APPEND HEADER_FILES connection.h)
 list(APPEND HEADER_FILES messages.h)
 list(APPEND HEADER_FILES message.h)

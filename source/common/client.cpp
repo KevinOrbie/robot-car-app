@@ -18,10 +18,10 @@
 #include <netdb.h>          // hostent
 
 /* Standard C++ Libraries */
-#include <string>
-#include <iostream>
+// None
 
 
+namespace client {
 /* ========================= Functions ========================= */
 static void error(char *msg) {
   perror(msg);
@@ -30,7 +30,10 @@ static void error(char *msg) {
 
 
 /* ========================== Classes ========================== */
-ClientSocket::ClientSocket(std::string server_address, int port, bool blocking): blocking(blocking) {
+
+/* --------------------- Socket --------------------- */
+
+Socket::Socket(std::string server_address, int port, bool blocking): blocking(blocking) {
     serv_addr = {};    // Address of the server to connect to
     hostent *server;   // Defines this host computer on the Internet
 
@@ -58,13 +61,13 @@ ClientSocket::ClientSocket(std::string server_address, int port, bool blocking):
     serv_addr.sin_port = htons(port);
 };
 
-ClientSocket::~ClientSocket() {
+Socket::~Socket() {
     if (socket_fd >= 0) {
         close(socket_fd);
     }
 }
 
-Connection ClientSocket::link() {
+Connection Socket::link() {
     /* Establish a connection with the server. */
     fprintf(stderr, "Connecting to the Server.\n");
     if (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
@@ -81,33 +84,15 @@ Connection ClientSocket::link() {
 };
 
 
-// Client::Client(std::string server_address, int port, bool blocking) {
-//     ClientSocket socket = ClientSocket(server_address, port, blocking);
-//     connection_ = socket.link(); // Wait for server response.
-// }
+/* --------------------- Client --------------------- */
 
-// void Client::send(const MessageData& message_data) {
-//     Message msg = Message(&message_data);
-//     msg.serialize(connection_);
-// };
+Client::Client(std::string server_address, int port, bool blocking): 
+    server_address_(server_address), port_(port), blocking_(blocking) {};
 
-// std::unique_ptr<MessageData> Client::recieve() {
-//     Message msg = Message();
-//     return msg.deserialize(connection_);
-// };
+void Client::connect() {
+    Socket socket = Socket(server_address_, port_, blocking_);
+    connection_ = socket.link(); // Wait for server response.
+}
 
 
-/* ========================= Entry-Point ========================= */
-// int main(void) {
-//     Client client = Client("localhost", 2556, false);
-//     client.link();
-
-//     /* Simulate control loop. */
-//     while (true) {
-//         std::string msg;
-//         std::cin >> msg;
-//         client.send(msg);
-//     }
-    
-//     return 0;
-// }
+} // namespace client

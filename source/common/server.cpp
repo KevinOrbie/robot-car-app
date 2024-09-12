@@ -1,5 +1,5 @@
 /**
- * @brief C++ ServerSocket POSIX socket interface.
+ * @brief C++ Socket POSIX socket interface.
  * @link https://www.linuxhowtos.org/C_C++/socket.htm
  */
 
@@ -18,10 +18,7 @@
 #include <netinet/in.h>     // Internet domain address support (sockaddr_in)
 
 /* Standard C++ Libraries */
-#include <string>
-#include <chrono>
-#include <thread>
-#include <utility>  // std::move()
+// None
 
 
 /* ========================= Functions ========================= */
@@ -31,9 +28,13 @@ static void error(char *msg) {
 }
 
 
+namespace server {
 /* ========================== Classes ========================== */
-ServerSocket::ServerSocket(int port, bool blocking): port_number(port), blocking(blocking) {
-    sockaddr_in serv_addr = {};  // ServerSocket internet address
+
+/* --------------------- Socket --------------------- */
+
+Socket::Socket(int port, bool blocking): port_number(port), blocking(blocking) {
+    sockaddr_in serv_addr = {};  // Socket internet address
 
     /* Creates a new socket */
     fprintf(stderr, "Creating Socket.\n");
@@ -63,13 +64,13 @@ ServerSocket::ServerSocket(int port, bool blocking): port_number(port), blocking
     listen(socket_fd, 5);
 };
 
-ServerSocket::~ServerSocket() {
+Socket::~Socket() {
     if (socket_fd >= 0) {
         close(socket_fd);
     }
 }
 
-Connection ServerSocket::link() {
+Connection Socket::link() {
     socklen_t clilen;  // Size of the address of the client
     sockaddr_in cli_addr = {};  // Client internet address
 
@@ -95,41 +96,14 @@ Connection ServerSocket::link() {
 };
 
 
-// TODO Update
-Server::Server(int port, bool blocking) {
-    ServerSocket socket = ServerSocket(port, blocking);
+/* --------------------- Server --------------------- */
+
+Server::Server(int port, bool blocking): port_(port), blocking_(blocking_) {};
+
+void Server::connect() {
+    Socket socket = Socket(port_, blocking_);
     connection_ = socket.link(); // Wait for one client to connect.
-};
+}
 
-void Server::send(const MessageData& message_data) {
-    Message msg = Message(&message_data);
-    msg.serialize(connection_);
-};
+} // namespace server
 
-std::unique_ptr<MessageData> Server::recieve() {
-    Message msg = Message();
-    return msg.deserialize(connection_);
-};
-
-
-/* ========================= Entry-Point ========================= */
-// int main(void) {
-//     ServerSocket server = ServerSocket(2556, false);
-//     server.link();
-
-//     /* Simulate control loop. */
-//     while (true) {
-//         std::string recv_msg = server.recieve();
-//         if (!recv_msg.empty()) {
-//             fprintf(stderr, "Recieved message: '%s'\n", recv_msg.c_str());
-//         } else {
-//             fprintf(stderr, "Nothing to recieve.\n");
-//         }
-
-//         /* Slow down loop. */
-//         std::this_thread::sleep_for(std::chrono::seconds(5));
-//     }
-
-//     // server.send("The server recieved a message!\n");
-//     return 0;
-// }

@@ -2,6 +2,8 @@
  * @brief Header for our C++ Messaging functionality.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 // None
@@ -31,37 +33,41 @@ enum class MessageID;
 template<class T>
 class MessageBase {
    public:
-    void serialize(Connection& connection, T payload) {LOGW("Not yet implemented MessageBase type!");};
-    T deserialize(Connection& connection) {LOGW("Not yet implemented MessageBase type!");};
+    MessageBase(T &payload): payload_(payload) {};
+
+    void serialize(Connection& connection) {
+        LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+        connection.send(reinterpret_cast<char*>(&payload_), sizeof(T));
+    };
+
+    static T deserialize(Connection& connection) {
+        LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+        T payload;
+        connection.recieve(reinterpret_cast<char*>(&payload), sizeof(T));
+        return payload;
+    };
+
+   private:
+    T &payload_;
 };
 
 /* Custom Class for Bool Message Payloads. */
-template<>
-class MessageBase<bool> {
-   public:
-    void serialize(Connection& connection, bool payload) {
-        LOGI("Bool class serialization!");
-    };
+// template<>
+// class MessageBase<bool> {
+//    public:
+//     void serialize(Connection& connection, bool payload) {
+//         LOGI("Bool class serialization!");
+//     };
 
-    bool deserialize(Connection& connection) {
-        LOGI("Bool class deserialization!");
-        return true;
-    };
-};
+//     bool deserialize(Connection& connection) {
+//         LOGI("Bool class deserialization!");
+//         return true;
+//     };
 
-/* Custom Class for Float Message Payloads. */
-template<>
-class MessageBase<float> {
-   public:
-    void serialize(Connection& connection, float payload) {
-        LOGI("Float class serialization!");
-    };
-
-    float deserialize(Connection& connection) {
-        LOGI("Float class deserialization!");
-        return 0;
-    };
-};
+//     int num_data_bytes() {
+//         return sizeof(bool);
+//     }
+// };
 
 /* Custom Class for Serializable Message Payloads. */
 // TODO: Implement
@@ -75,5 +81,6 @@ template<MessageID ID>
 class Message : public MessageBase<int> {
     static_assert(false);  // ERROR: Message corresponding with MessageID not yet created with CREATE_MESSAGE()!
 };
+
 
 } // namespace message

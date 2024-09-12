@@ -2,6 +2,8 @@
  * @brief Header for C++ Server POSIX socket interface.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 // None
@@ -11,15 +13,17 @@
 #include <memory>
 
 /* Custom C++ Libraries */
+#include "message_transciever.h"
 #include "connection.h"
 #include "messages.h"
 
 
+namespace server {
 /* ========================== Classes ========================== */
-class ServerSocket {
+class Socket {
    public:
-    ServerSocket(int port, bool blocking);
-    ~ServerSocket();
+    Socket(int port, bool blocking);
+    ~Socket();
 
     Connection link();
 
@@ -30,16 +34,38 @@ class ServerSocket {
     bool blocking = false;
 };
 
-class Server {
+
+class Server: public message::Transciever {
    public:
-    // TODO: Constructor should not block.
     Server(int port, bool blocking);
 
-    template<message::MessageID ID, class payload_t>
-    void send(const message::Message<ID>, payload_t payload);
+    /**
+     * @brief Block until a client connects to the server.
+     */
+    void connect();
 
-    void recieve();
+   protected:
+    /**
+     * @brief When a message is recieved, this function calls 
+     * the appropriate Message Handler. 
+     */
+    void pipeMessage(message::MessageID id) override;
+
+    /**
+     * @brief Recieve message payload & take relevant actions.
+     */
+    template<message::MessageID ID> void handleMessage();
 
    private:
-    Connection connection_;
+    int port_        = 2556;
+    bool blocking_   = false;
 };
+
+
+/* ====================== Message Handlers ===================== */
+/* NOTE: Declarations with template specialization is best done in the same header file. */
+
+template<> void Server::handleMessage<message::MessageID::CMD_DRIVE>();
+
+
+} // namespace server
