@@ -18,17 +18,15 @@
 #include <netdb.h>          // hostent
 
 /* Standard C++ Libraries */
-// None
+#include <system_error>
+#include <stdexcept>
+#include <cstring>
+
+/* Custom C++ Libraries */
+#include "logger.h"
 
 
 namespace client {
-/* ========================= Functions ========================= */
-static void error(char *msg) {
-  perror(msg);
-  exit(1);
-}
-
-
 /* ========================== Classes ========================== */
 
 /* --------------------- Socket --------------------- */
@@ -38,21 +36,22 @@ Socket::Socket(std::string server_address, int port, bool blocking): blocking(bl
     hostent *server;   // Defines this host computer on the Internet
 
     /* Creates a new socket */
-    fprintf(stderr, "Creating Socket.\n");
+    LOGI("Creating Socket.");
     socket_fd = socket(
         AF_INET,        // Address domain: AF_INET (internet domain).
         SOCK_STREAM,    // Socket Type: SOCK_STREAM (characters are read in a continuous stream).
         0               // Protocol: 0 (Choose appropiate protocol; TCP for stream socket).
     );
     if (socket_fd < 0) {
-        error("ERROR opening socket");
+        LOGE("Opening Socket: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Opening Socket");
     }
 
     /* Get hostent corresponding to hostname. */
     server = gethostbyname(server_address.c_str());
     if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host");
-        exit(0);
+        LOGE("%s", ("No such host '" + server_address + "'").c_str());
+        throw std::runtime_error("No such host '" + server_address + "'");
     }
 
     /* Setup Server Address */
@@ -69,9 +68,10 @@ Socket::~Socket() {
 
 Connection Socket::link() {
     /* Establish a connection with the server. */
-    fprintf(stderr, "Connecting to the Server.\n");
+    LOGI("Connecting to the Server.");
     if (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        error("ERROR connecting");
+        LOGE("Connecting: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Connecting");
     }
 
     /* Construct connection. */

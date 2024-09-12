@@ -31,8 +31,8 @@ int main() {
         std::string input = "";
         while (input.empty() || (input[0] != 't' && input[0] != 'f')) {
             input = "";
+            std::cout << "INPUT: ";
             std::cin >> input;
-            LOGI("Recieved: %s", input.c_str());
         }
         
         /* Send Message. */
@@ -53,8 +53,7 @@ int main() {
     return 0;
 }
 
-// TODO: Make test project work as expected.
-// TODO: Replace all fprintf with the correct logs.
-// TODO: Remove perror and error function for logging.
+// TODO: Fix nothing recieved warning of -1
 // TODO: update Class Diagram.
 // TODO: add Drive Controller & make control message work as intented.
+// TODO: Add Segfault Catch: https://stackoverflow.com/questions/77005/how-to-automatically-generate-a-stacktrace-when-my-program-crashes

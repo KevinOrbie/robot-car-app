@@ -18,14 +18,12 @@
 #include <netinet/in.h>     // Internet domain address support (sockaddr_in)
 
 /* Standard C++ Libraries */
-// None
+#include <system_error>
+#include <stdexcept>
+#include <cstring>
 
-
-/* ========================= Functions ========================= */
-static void error(char *msg) {
-  perror(msg);
-  exit(1);
-}
+/* Custom C++ Libraries */
+#include "logger.h"
 
 
 namespace server {
@@ -37,14 +35,15 @@ Socket::Socket(int port, bool blocking): port_number(port), blocking(blocking) {
     sockaddr_in serv_addr = {};  // Socket internet address
 
     /* Creates a new socket */
-    fprintf(stderr, "Creating Socket.\n");
+    LOGI("Creating Socket.");
     socket_fd = socket(
         AF_INET,        // Address domain: AF_INET (internet domain).
         SOCK_STREAM,    // Socket Type: SOCK_STREAM (characters are read in a continuous stream).
         0               // Protocol: 0 (Choose appropiate protocol; TCP for stream socket).
     );
     if (socket_fd < 0) {
-        error("ERROR opening socket");
+        LOGE("Opening Socket: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Opening Socket");
     }
 
     /* Fill in internet address. */
@@ -53,14 +52,15 @@ Socket::Socket(int port, bool blocking): port_number(port), blocking(blocking) {
     serv_addr.sin_addr.s_addr = INADDR_ANY;   // Set IP to the server's host IP.
 
     /* Binds the opened socket to an address. */
-    fprintf(stderr, "Binding Socket to address.\n");
+    LOGI("Binding Socket to address.");
     if (bind(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        error("ERROR on binding");
+        LOGE("Binding socket to server address: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Binding socket to server address");
     }
 
     /* Listen on the socket for connections. */
     // > Backlog Queue Size: 5 (the number of connections that can be waiting)
-    fprintf(stderr,"Listening for client connections.\n");
+    LOGI("Listening for client connections.");
     listen(socket_fd, 5);
 };
 
@@ -76,16 +76,17 @@ Connection Socket::link() {
 
     /* Establish a connection with a single client. */
     clilen = sizeof(cli_addr);
-    fprintf(stderr,"Waiting for a client connection...");
+    LOGI("Waiting for a client connection...");
 
     /* Connect to socket. */
     int connection_fd = accept(socket_fd, (struct sockaddr *) &cli_addr, &clilen);  // Block until a client connects to the server
     if (connection_fd < 0) {
-        error("ERROR on accept");
+        LOGE("Socket on accepting clients: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Socket on accepting clients");
     }
 
     /* Construct connection. */
-    fprintf(stderr, " >>> Client connected: %d\n", cli_addr.sin_addr.s_addr);
+    LOGI("Connected to client: %d", cli_addr.sin_addr.s_addr);
     Connection connection = Connection(connection_fd, blocking);
 
     /* We only need the established connection, delete the server socket. */

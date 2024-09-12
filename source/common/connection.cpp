@@ -19,17 +19,12 @@
 #include <netinet/in.h>     // Internet domain address support (sockaddr_in)
 
 /* Standard C++ Libraries */
-// None
+#include <system_error>
+#include <stdexcept>
+#include <cstring>
 
 /* Custom C++ Includes */
 #include "common/logger.h"
-
-
-/* ========================= Functions ========================= */
-static void error(char *msg) {
-  perror(msg);
-  exit(1);
-}
 
 
 /* ========================== Classes ========================== */
@@ -76,11 +71,11 @@ bool Connection::recieve(char* buffer, int bytes) const {
 
     /* Recieve socket data (blocking wait). */
     if (!blocking_ && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
-        // fprintf(stderr, "Nothing to read.\n");
-        return false;
+        return false; /* Nothing read. */
 
     } else if (chars_read < 0) {
-        error("ERROR reading from socket");
+        LOGE("Reading from socket: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Reading from socket");
     }
 
     return true;
@@ -95,7 +90,10 @@ bool Connection::send(char* buffer, int bytes) const {
     chars_written = write(connection_fd_, buffer, bytes); 
     
     // NOTE: I don't know if we really need to check if non-blocking is ready here?
-    if (chars_written < 0) error("ERROR writing to socket");
+    if (chars_written < 0) {
+        LOGE("Writing to socket: %s", std::strerror(errno));
+        throw std::system_error(errno, std::generic_category(), "Writing to socket");
+    }
 
     return true;
 };

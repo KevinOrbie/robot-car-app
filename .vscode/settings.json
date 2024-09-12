@@ -68,6 +68,13 @@
         "getopt.h": "c",
         "errno.h": "c",
         "stat.h": "c",
-        "map": "cpp"
+        "map": "cpp",
+        "any": "cpp",
+        "condition_variable": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "mutex": "cpp"
     }
 }
