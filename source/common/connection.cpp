@@ -21,6 +21,9 @@
 /* Standard C++ Libraries */
 // None
 
+/* Custom C++ Includes */
+#include "common/logger.h"
+
 
 /* ========================= Functions ========================= */
 static void error(char *msg) {
@@ -85,6 +88,7 @@ bool Connection::recieve(char* buffer, int bytes) const {
 
 /* ----------------------------------- Transmission ----------------------------------- */
 bool Connection::send(char* buffer, int bytes) const {
+    LOGI("Sending Bytes: %d bytes, buffer @ %p ", bytes, buffer);
     int chars_written = -1;
 
     /* Send socket data. */

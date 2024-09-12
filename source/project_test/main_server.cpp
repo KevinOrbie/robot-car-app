@@ -13,6 +13,7 @@
 // None
 
 /* Custom C++ Includes */
+#include "common/logger.h"
 #include "common/server.h"
 
 

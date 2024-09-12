@@ -15,6 +15,7 @@
 // None
 
 /* Custom Includes */
+#include "common/logger.h"
 #include "common/client.h"
 
 
@@ -31,6 +32,7 @@ int main() {
         while (input.empty() || (input[0] != 't' && input[0] != 'f')) {
             input = "";
             std::cin >> input;
+            LOGI("Recieved: %s", input.c_str());
         }
         
         /* Send Message. */
