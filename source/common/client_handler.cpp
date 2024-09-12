@@ -41,7 +41,7 @@ template<> void Client::handleMessage<message::MessageID::CMD_DRIVE>() {
     using namespace message;
 
     bool value = Message<MessageID::CMD_DRIVE>::deserialize(connection_);
-    LOGI("Recieved CMD_Drive Message: %d", static_cast<int>(value));
+    LOGI("Recieved CMD_Drive Message: %s", (value) ? "true" : "false");
 }
 
 } // namespace client

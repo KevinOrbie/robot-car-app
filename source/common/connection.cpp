@@ -69,6 +69,10 @@ bool Connection::recieve(char* buffer, int bytes) const {
     /* Read socket data to the given buffer. */
     chars_read = read(connection_fd_, buffer, bytes);
 
+    if (chars_read == 0) {
+        return false; /* Nothing read. */
+    }
+
     /* Recieve socket data (blocking wait). */
     if (!blocking_ && chars_read < 0 && ((errno & EAGAIN) || (errno & EWOULDBLOCK))){
         return false; /* Nothing read. */

@@ -13,13 +13,6 @@
 // None
 
 
-/* ========================= Functions ========================= */
-static void error(char *msg) {
-  perror(msg);
-  exit(1);
-}
-
-
 namespace message {
 /* ========================== Classes ========================== */
 
@@ -47,8 +40,11 @@ void Transciever::recieve() {
     /* Recieve Header. */
     MessageID id = recieveMessageID();
     
-    /* Recieve Message & Process Further. */
-    pipeMessage(id);
+    /* Ignore if nothing was recieved. */
+    if (id != MessageID::EMPTY) { 
+        /* Recieve Message & Process Further. */
+        pipeMessage(id);
+    }
 };
 
 
@@ -61,11 +57,18 @@ void Transciever::sendMessageID(MessageID id) {
 }
 
 MessageID Transciever::recieveMessageID() {
-    LOGI("Recieving MessageID...");
     int message_id = -1;
-    connection_.recieve(reinterpret_cast<char*>(&message_id), sizeof(int));
+
+    /* Recieve the MessageID as an interger. */
+    bool message_available = connection_.recieve(reinterpret_cast<char*>(&message_id), sizeof(int));
+
+    /* Check if something was recieved. */
+    if(!message_available) {
+        return MessageID::EMPTY;
+    };
+
+    /* Find the corresponding MessageID. */
     MessageID id = static_cast<MessageID>(message_id);
-    LOGI("Recieved MessageID: %d", static_cast<int>(id));
     return id;
 }
 

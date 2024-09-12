@@ -53,7 +53,7 @@ int main() {
     return 0;
 }
 
-// TODO: Fix nothing recieved warning of -1
 // TODO: update Class Diagram.
-// TODO: add Drive Controller & make control message work as intented.
+// TODO: Add Drive Controller & make control message work as intented.
+// TODO: Make system robust to message payload not directly arriving?
 // TODO: Add Segfault Catch: https://stackoverflow.com/questions/77005/how-to-automatically-generate-a-stacktrace-when-my-program-crashes
