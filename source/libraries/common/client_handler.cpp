@@ -1,12 +1,12 @@
 /**
- * @file server_handler.cpp
+ * @file client_handler.cpp
  * @author Kevin Orbie
  * 
- * @brief Implements the message handlers for messages recieved by the server for this project.
+ * @brief Implements the message handlers for messages recieved by the client for this project.
  */
 
 /* ========================== Include ========================== */
-#include "server.h"
+#include "client.h"
 
 /* Standard C Libraries */
 // None
@@ -18,15 +18,15 @@
 #include "messages.h"
 
 
-namespace server {
+namespace client {
 /* ==================== Handler Multiplexer ==================== */
 
-void Server::pipeMessage(message::MessageID id) {
+void Client::pipeMessage(message::MessageID id) {
     using namespace message;
 
     switch (id) {
         /* ################ MESSAGE PIPES ################ */
-        case MessageID::CMD_DRIVE:  handleMessage<MessageID::CMD_DRIVE>(); break;
+        // case MessageID::CMD_DRIVE:  handleMessage<MessageID::CMD_DRIVE>(); break;
         
         /* ############################################### */
         default:
@@ -37,12 +37,12 @@ void Server::pipeMessage(message::MessageID id) {
 
 
 /* ====================== Message Handlers ===================== */
-template<> void Server::handleMessage<message::MessageID::CMD_DRIVE>() {
-    using namespace message;
+// template<> void Client::handleMessage<message::MessageID::CMD_DRIVE>() {
+//     using namespace message;
 
-    bool value = Message<MessageID::CMD_DRIVE>::deserialize(connection_);
-    LOGI("Recieved CMD_Drive Message: %s", (value) ? "true" : "false");
-}
+//     bool value = Message<MessageID::CMD_DRIVE>::deserialize(connection_);
+//     LOGI("Recieved CMD_Drive Message: %s", (value) ? "true" : "false");
+// }
 
-} // namespace server
+} // namespace client
 

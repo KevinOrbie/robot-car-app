@@ -13,7 +13,9 @@ list(APPEND SOURCE_FILES server_handler.cpp)
 
 ## Define Headers
 list(APPEND HEADER_FILES message_transciever.h)
+list(APPEND HEADER_FILES drive_controller.h)
 list(APPEND HEADER_FILES connection.h)
+list(APPEND HEADER_FILES data_type.h)
 list(APPEND HEADER_FILES messages.h)
 list(APPEND HEADER_FILES message.h)
 list(APPEND HEADER_FILES client.h)

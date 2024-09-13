@@ -15,6 +15,7 @@
 // None
 
 /* Custom Includes */
+#include "common/data_type.h"
 #include "common/logger.h"
 #include "common/client.h"
 
@@ -28,20 +29,15 @@ int main() {
     /* Simulate control loop. */
     while (true) {
         /* Read user input. */
-        std::string input = "";
-        while (input.empty() || (input[0] != 't' && input[0] != 'f')) {
-            input = "";
-            std::cout << "INPUT: ";
-            std::cin >> input;
-        }
+        float input = 0.0;
+        std::cout << "INPUT: ";
+        std::cin >> input;
         
         /* Send Message. */
-        bool value = (input == "true");
-        LOGI("Sending Message: '%s'", input.c_str());
-        client.send(message::Message<message::MessageID::CMD_DRIVE>(value));  // TODO: this line fails linking
-        // I think this fails because the template is part of a library that is included, and thus, 
-        // if this function is not used in the LIB code, then the template is not generated.
-        // One solution could be to add a specialization in the library.
+        LOGI("Sending Message: '%f'", input);
+        DriveControl payload = {};
+        payload.speed = input;
+        client.send(message::Message<message::MessageID::CMD_DRIVE>(payload));
 
         /* Recieve commands over LAN. */
         client.recieve();
@@ -53,7 +49,8 @@ int main() {
     return 0;
 }
 
-// TODO: update Class Diagram.
-// TODO: Add Drive Controller & make control message work as intented.
+// TODO: Redesign total system (how to access data in handleMessage function)
+//     > Don't try to mess with the memory, a full stereo image is ~ 5MB, thus having 2 or 3 copies between different threads should be no issue (we can swap different frames).
+// TODO: Setup main system with new messaging.
 // TODO: Make system robust to message payload not directly arriving?
 // TODO: Add Segfault Catch: https://stackoverflow.com/questions/77005/how-to-automatically-generate-a-stacktrace-when-my-program-crashes

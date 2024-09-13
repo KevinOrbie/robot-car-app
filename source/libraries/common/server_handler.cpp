@@ -1,12 +1,12 @@
 /**
- * @file client_handler.cpp
+ * @file server_handler.cpp
  * @author Kevin Orbie
  * 
- * @brief Implements the message handlers for messages recieved by the client for this project.
+ * @brief Implements the message handlers for messages recieved by the server for this project.
  */
 
 /* ========================== Include ========================== */
-#include "client.h"
+#include "server.h"
 
 /* Standard C Libraries */
 // None
@@ -15,13 +15,14 @@
 // None
 
 /* Custom C++ Libraries */
+#include "data_type.h"
 #include "messages.h"
 
 
-namespace client {
+namespace server {
 /* ==================== Handler Multiplexer ==================== */
 
-void Client::pipeMessage(message::MessageID id) {
+void Server::pipeMessage(message::MessageID id) {
     using namespace message;
 
     switch (id) {
@@ -37,12 +38,12 @@ void Client::pipeMessage(message::MessageID id) {
 
 
 /* ====================== Message Handlers ===================== */
-template<> void Client::handleMessage<message::MessageID::CMD_DRIVE>() {
+template<> void Server::handleMessage<message::MessageID::CMD_DRIVE>() {
     using namespace message;
 
-    bool value = Message<MessageID::CMD_DRIVE>::deserialize(connection_);
-    LOGI("Recieved CMD_Drive Message: %s", (value) ? "true" : "false");
+    DriveControl state = Message<MessageID::CMD_DRIVE>::deserialize(connection_);
+    LOGI("Recieved state speed: %f", state.speed);
 }
 
-} // namespace client
+} // namespace server
 

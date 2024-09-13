@@ -12,6 +12,7 @@
 // None
 
 /* Custom C++ Libraries */
+#include "data_type.h"
 #include "message.h"
 
 
@@ -41,7 +42,7 @@ enum class MessageID {
  * @brief Creates a template specialization of the Message<ID> class 
  * for every message type, for the associated payload type.
  */
-CREATE_MESSAGE(MessageID::CMD_DRIVE, bool);
+CREATE_MESSAGE(MessageID::CMD_DRIVE, DriveControl);
 
 
 

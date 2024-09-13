@@ -12,8 +12,9 @@
 // None
 
 /* Custom C++ Libraries */
-#include "logger.h"
 #include "connection.h"
+#include "data_type.h"
+#include "logger.h"
 
 
 namespace message {
@@ -52,21 +53,22 @@ class MessageBase {
 };
 
 /* Custom Class for Bool Message Payloads. */
+// ERROR: Is not used when a baseclass is provided !!!
 // template<>
-// class MessageBase<bool> {
+// class MessageBase<Serializable> {
 //    public:
-//     void serialize(Connection& connection, bool payload) {
-//         LOGI("Bool class serialization!");
+//     MessageBase(Serializable &payload): payload_(payload) {};
+
+//     void serialize(Connection& connection) {
+//         payload_.serialize(connection);
 //     };
 
-//     bool deserialize(Connection& connection) {
-//         LOGI("Bool class deserialization!");
-//         return true;
+//     static void deserialize(Connection& connection, Serializable& recipient) {
+//         recipient.deserialize(connection);
 //     };
 
-//     int num_data_bytes() {
-//         return sizeof(bool);
-//     }
+//    private:
+//     Serializable &payload_;
 // };
 
 /* Custom Class for Serializable Message Payloads. */
