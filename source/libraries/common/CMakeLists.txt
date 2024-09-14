@@ -1,3 +1,6 @@
+set(LIB_NAME rca_common)
+
+## --------------------------- Sources ---------------------------
 set(INSTALL_TARGETS "")
 set(HEADER_FILES "")
 set(SOURCE_FILES "")
@@ -18,13 +21,16 @@ list(APPEND HEADER_FILES connection.h)
 list(APPEND HEADER_FILES data_type.h)
 list(APPEND HEADER_FILES messages.h)
 list(APPEND HEADER_FILES message.h)
+list(APPEND HEADER_FILES looper.h)
 list(APPEND HEADER_FILES client.h)
 list(APPEND HEADER_FILES server.h)
 list(APPEND HEADER_FILES logger.h)
 list(APPEND HEADER_FILES robot.h)
 
+
+## --------------------------- Config ----------------------------
 ## Define the common library
-add_library(rca_common ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 ## Specify the root from which headers are defined
-target_include_directories(rca_common PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)

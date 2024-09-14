@@ -1,7 +1,7 @@
 
 # =================================== Variables ===================================
 APP_ROOT="/home/kevin/projects/RCA"
-PROJECT_NAME="test"
+PROJECT_NAME="controller"
 
 
 # ==================================== Aliases ====================================
