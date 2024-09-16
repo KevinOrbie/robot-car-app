@@ -2,14 +2,14 @@
  * @brief C++ wrapper around ffmpeg functionality.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 #include "frame_provider.h"
 
-/* C++ STL Includes */
+/* Standard C++ Libraries */
 #include <vector>
 
-/* Thirdparty includes. */
-#include <linux/videodev2.h>
 
 /* ========================== Classes ========================== */
 
@@ -50,7 +50,7 @@ class VideoCam: public FrameProvider {
    public:
     VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP);
     ~VideoCam();
-    Frame* getFrame(double curr_time) override;
+    Frame getFrame(double curr_time) override;
     void start();
     void stop();
 

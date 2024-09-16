@@ -5,8 +5,10 @@
 #pragma once
 
 /* ========================== Include ========================== */
+/* Standard C Libraries */
 #include <stdint.h>
 
+/* Standard C++ Libraries */
 #include <vector>
 #include <string>
 
@@ -22,7 +24,7 @@ struct Frame {
 class FrameProvider {
    public:
     FrameProvider() {};
-    virtual Frame* getFrame(double curr_time) = 0;
+    virtual Frame getFrame(double curr_time) = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
 };

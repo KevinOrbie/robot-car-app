@@ -36,6 +36,7 @@ class ControlPanel: public Looper {
     void cleanup() override;
 
    private:
-    Window *window_;
     Timer stopwatch_;
+    Window *window_ = nullptr;
+    std::unique_ptr<Application> application_ = nullptr;
 };

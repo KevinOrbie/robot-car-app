@@ -565,7 +565,7 @@ void VideoCam::uinit_IO_USRP() {
 
 /* ############################## GetFrame ############################ */
 
-Frame* VideoCam::getFrame(double curr_time){
+Frame VideoCam::getFrame(double curr_time){
     int poll_result = -1;
     int poll_timeout_ms = 5000;
     struct pollfd poll_fds;
@@ -607,19 +607,19 @@ Frame* VideoCam::getFrame(double curr_time){
         switch (io_method_) {
             case IO_Method::READ:
                 if (getFrame_IO_READ()) {
-                    return &frame_data_;
+                    return frame_data_;
                 }
                 break;
 
             case IO_Method::MMAP:
                 if (getFrame_IO_MMAP()) {
-                    return &frame_data_;
+                    return frame_data_;
                 }
                 break;
 
             case IO_Method::USERPTR:
                 if (getFrame_IO_USRP()) {
-                    return &frame_data_;
+                    return frame_data_;
                 }
                 break;
             
@@ -633,7 +633,7 @@ Frame* VideoCam::getFrame(double curr_time){
     }
 
     fprintf(stderr, "Broke out of get frame loop.\n"); // Never reached.
-    return &frame_data_;
+    return frame_data_;
 }
 
 void VideoCam::readFrame(unsigned int buffer_index){

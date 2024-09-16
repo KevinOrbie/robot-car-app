@@ -6,7 +6,7 @@
 /* ========================== Include ========================== */
 #include "logic.h"
 
-/* C/C++ Libraries */
+/* Standard C++ Libraries */
 #include <memory>
 
 /* Third Party Libraries */
@@ -25,117 +25,95 @@
 #include "camera.h"
 
 
-namespace game {
-/* ========================= Functions ========================= */
+/* ========================== Classes ========================== */
+Application::Application(FrameProvider* frame_provider): frame_provider_(frame_provider) {
+    /* Initialize Application State. */
+    state = std::make_unique<AppState>();
 
-struct GameState {
-    int fps = 0;
-    int fps_counter = 0;
-    double fps_time = 0.0f;
-    double time = 0.0f;
-
-    std::unique_ptr<FrameProvider> frame_provider = nullptr;
-    std::unique_ptr<QuadScreen> screen = nullptr;
-    std::unique_ptr<Camera> camera  = nullptr;
-    bool initialized = false;
+    /* Setup Start Camera. */
+    state->camera = std::make_unique<Camera>(glm::vec3(0.0f, 3.0f, 2.0f));
+    state->camera->lookAt(0.0f, 0.0f, 0.0f);
 };
 
-static GameState gamestate;
+void Application::glsetup() {
+    LOGI("Initializing GL.");
 
-
-int initialize() {
-    LOGI("Initializing Gamestate.");
-
-    /* Initialize GameState */
-    gamestate.screen = std::make_unique<QuadScreen>();
-
-    // Set Start Camera
-    gamestate.camera = std::make_unique<Camera>(glm::vec3(0.0f, 3.0f, 2.0f));
-    gamestate.camera->lookAt(0.0f, 0.0f, 0.0f);
-
-    // Setup frame provider
-    // gamestate.frame_provider = std::make_unique<VideoFile>("/home/kevin/Videos/normal-1080p.mp4");
-
-    // gamestate.frame_provider = std::make_unique<VideoCam>(
-    //     VideoCam::CamType::MYNT_EYE_STEREO, 
-    //     VideoCam::IO_Method::MMAP
-    // );
-    // gamestate.frame_provider->start();
-    gamestate.initialized = true;
+    /* Initialize OpenGL Objects */
+    state->screen = std::make_unique<QuadScreen>();
 
     /* Initialize OpenGL */
     glEnable(GL_DEPTH_TEST);
 
-    return 0;
+    state->opengl_initialized = true;
 };
 
-int destruct() {
-    gamestate.screen.release();
-    gamestate.camera.release();
-    return 0;
+void Application::glcleanup() {
+    /* Destory OpenGL Objects */
+    state->screen.release();
 };
 
-int processFrame(float timedelta, int width, int height, Input& input) {
-    if (!gamestate.initialized)
-    { // Detect Wrong Order
-        return 1;
+bool Application::processFrame(float timedelta, int width, int height, Input& input) {
+    /* Make sure OpenGL is initialized. */
+    if (!state->opengl_initialized) {
+        return false;
     }
 
     /* FPS Counter */
-    gamestate.time += timedelta;
-    gamestate.fps_time += timedelta;
-    gamestate.fps_counter++;
-    if (gamestate.fps_time > 1.0f)
-    {
-        std::cout << "FPS: " << gamestate.fps_counter << "\n";
-        gamestate.fps = gamestate.fps_counter;
-        gamestate.fps_counter = 0;
-        gamestate.fps_time -= 1.0f;
+    state->time += timedelta;
+    state->fps_time += timedelta;
+    state->fps_counter++;
+    if (state->fps_time > 1.0f) {
+        std::cout << "FPS: " << state->fps_counter << "\n";
+        state->fps = state->fps_counter;
+        state->fps_counter = 0;
+        state->fps_time -= 1.0f;
     }
 
     /* Process Input */
     if (input.keys[Button::W].held) {
-        gamestate.camera->ProcessKeyboard(FORWARD, timedelta); 
+        state->camera->ProcessKeyboard(FORWARD, timedelta); 
         LOGI("W held!");
     }
     if (input.keys[Button::A].held) {
-        gamestate.camera->ProcessKeyboard(LEFT, timedelta); 
+        state->camera->ProcessKeyboard(LEFT, timedelta); 
         LOGI("A held!");
     }
     if (input.keys[Button::S].held) {
-        gamestate.camera->ProcessKeyboard(BACKWARD, timedelta); 
+        state->camera->ProcessKeyboard(BACKWARD, timedelta); 
         LOGI("S held!");
     }
     if (input.keys[Button::D].held) {
-        gamestate.camera->ProcessKeyboard(RIGHT, timedelta); 
+        state->camera->ProcessKeyboard(RIGHT, timedelta); 
         LOGI("D held!");
     }
     if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f)
-        gamestate.camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
+        state->camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
     if (input.scroll_y_offset != 0.0f)
-        gamestate.camera->ProcessMouseScroll(input.scroll_y_offset);
+        state->camera->ProcessMouseScroll(input.scroll_y_offset);
     // if (input.keys[Button::SPACE].pressed) {
-    //     gamestate.grass->num_blades += 100000;
-    //     std::cout << "Number of Blades: " << gamestate.grass->num_blades << "\n";
+    //     grass->num_blades += 100000;
+    //     std::cout << "Number of Blades: " << grass->num_blades << "\n";
     // }
 
     /* Transformations */
-    // glm::mat4 view = gamestate.camera->GetViewMatrix();
+    // glm::mat4 view = state->camera->GetViewMatrix();
     // glm::mat4 projection = glm::perspective(
-    //     glm::radians(gamestate.camera->Zoom), 
+    //     glm::radians(state->camera->Zoom), 
     //     (float)width / (float)height, 
     //     0.1f, 500.0f
     // );
 
-    /* Load Image */
-    // Frame* ptr_new_frame = gamestate.frame_provider->getFrame(gamestate.time);
-    // gamestate.screen->load_texture(
-    //     &ptr_new_frame->data[0], 
-    //     ptr_new_frame->width, 
-    //     ptr_new_frame->height, 
-    //     ptr_new_frame->channels, 
-    //     GL_RGB
-    // );
+    /* Load Image (optional) */
+    if (frame_provider_) {
+        Frame new_frame = frame_provider_->getFrame(state->time);
+        state->screen->load_texture(
+            &new_frame.data[0], 
+            new_frame.width, 
+            new_frame.height, 
+            new_frame.channels, 
+            GL_RGB
+        );
+    }
 
     /* Rendering */
     // Clear Screen
@@ -143,8 +121,6 @@ int processFrame(float timedelta, int width, int height, Input& input) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    gamestate.screen->draw();
-    return 0;
+    state->screen->draw();
+    return true;
 };
-
-} // namespace game

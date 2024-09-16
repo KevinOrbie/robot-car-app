@@ -23,4 +23,5 @@ add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)
 
 ## Link External Libraries
-target_link_libraries(${LIB_NAME} PRIVATE ffmpeg v4l2 rca_common)
+target_link_libraries(${LIB_NAME} PUBLIC ffmpeg)
+target_link_libraries(${LIB_NAME} PRIVATE v4l2 rca_common)

@@ -2,21 +2,25 @@
  * @brief C++ wrapper around ffmpeg functionality.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 #include "frame_provider.h"
 
+/* Standard C Libraries */
 #include <stdint.h>
 
-#include <array>
+/* Standard C++ Libraries */
 #include <vector>
 #include <string>
 
-extern "C" {
+/* Third Party C++ Libraries */
+extern "C" { // ffmpeg
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }
 
- 
+
 /* ========================== Classes ========================== */
 
 /**
@@ -26,7 +30,7 @@ class VideoFile: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
     ~VideoFile();
-    Frame* getFrame(double curr_time) override;
+    Frame getFrame(double curr_time) override;
     void start() override {return;};
     void stop() override {return;};
 

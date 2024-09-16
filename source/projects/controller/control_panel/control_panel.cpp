@@ -23,7 +23,8 @@
 
 
 /* ========================== Classes ========================== */
-ControlPanel::ControlPanel(FrameProvider *frame_provider, InputSink *input_sink): stopwatch_(Timer()) {
+ControlPanel::ControlPanel(FrameProvider *frame_provider, InputSink *input_sink): 
+    stopwatch_(Timer()), application_(std::make_unique<Application>(frame_provider)) {
     LOGI("Building Control Panel.");
 };
 
@@ -42,22 +43,22 @@ void ControlPanel::setup() {
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    /* Setup Logic */
-    game::initialize(); 
+    /* Setup GL State */
+    application_->glsetup(); // Is this the best way of doing it?, maybe split OpenGL and other data, and initialize gamestate in ControlPanel constructor.
 
     /* Loop Preparations. */
     stopwatch_.start();
-}
+};
 
 /**
  * @note All OpenGL functions need to be called from the same thread where the OpenGL context is created.
  */
 void ControlPanel::cleanup() {
-    game::destruct();
+    application_->glcleanup();
     if (window_) {
         window_->cleanup();
     }
-}
+};
 
 /**
  * @brief Render Loop iteration.
@@ -73,7 +74,7 @@ void ControlPanel::iteration() {
     window_->updateInput();
 
     /* Logic & Rendering. */
-    game::processFrame(timedelta, window_->width_, window_->height_, window_->input_);
+    application_->processFrame(timedelta, window_->width_, window_->height_, window_->input_);
 
     /* Draw Window. */
     window_->loop();
