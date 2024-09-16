@@ -1,4 +1,7 @@
 /**
+ * @file video_file.h
+ * @author Kevin Orbie
+ * 
  * @brief C++ wrapper around ffmpeg functionality.
  */
 

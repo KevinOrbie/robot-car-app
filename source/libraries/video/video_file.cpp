@@ -1,9 +1,19 @@
 /**
- * @link https://github.com/leandromoreira/ffmpeg-libav-tutorial?tab=readme-ov-file#learn-ffmpeg-libav-the-hard-way
+ * @file video_file.cpp
+ * @author Kevin Orbie
+ * 
+ * @brief C++ wrapper around ffmpeg functionality.
+ * @link based on: https://github.com/leandromoreira/ffmpeg-libav-tutorial?tab=readme-ov-file#learn-ffmpeg-libav-the-hard-way
  */
 
 /* ============================ Includes ============================ */
 #include "video_file.h"
+
+/* Standard C++ Libraries */
+#include <stdexcept>
+
+/* Custom C++ Libraries */
+#include "common/logger.h"
 
 
 /* ============================ Classes ============================ */
@@ -13,22 +23,22 @@ VideoFile::VideoFile(std::string const& filepath) {
     /* ---------------- Setup Container Context ----------------- */
     ptr_format_context = avformat_alloc_context();
     if (!ptr_format_context) {
-        printf("ERROR could not allocate memory for Format Context\n");
-        return;
+        LOGE("Could not allocate memory for Format Context.");
+        throw std::runtime_error("Failed to allocate memory for Format Context.");
     }
     
     /* Get Header Information */
     if (avformat_open_input(&ptr_format_context, filepath.c_str(), NULL, NULL) != 0) {
-        printf("ERROR could not open the file\n");
-        return;
+        LOGE("Could not open the video file.");
+        throw std::runtime_error("Failed to open video file.");
     }
 
-    printf("format %s, duration %ld us, bit_rate %ld\n", ptr_format_context->iformat->name, ptr_format_context->duration, ptr_format_context->bit_rate);
+    LOGI("format %s, duration %ld us, bit_rate %ld", ptr_format_context->iformat->name, ptr_format_context->duration, ptr_format_context->bit_rate);
 
     /* Get Stream Information */
     if (avformat_find_stream_info(ptr_format_context,  NULL) < 0) {
-        printf("ERROR could not get the stream info\n");
-        return;
+        LOGE("Could not get the stream info.");
+        throw std::runtime_error("Could not get the stream info.");
     }
 
     /* ---------------------- Setup CODEC ----------------------- */
@@ -38,19 +48,19 @@ VideoFile::VideoFile(std::string const& filepath) {
         AVCodecParameters *ptr_local_codec_params =  NULL;
         ptr_local_codec_params = ptr_format_context->streams[i]->codecpar;
 
-        printf("\n ======== Stream %d ========\n", i);
-        printf("AVStream->time_base before open coded %d/%d\n", ptr_format_context->streams[i]->time_base.num, ptr_format_context->streams[i]->time_base.den);
-        printf("AVStream->r_frame_rate before open coded %d/%d\n", ptr_format_context->streams[i]->r_frame_rate.num, ptr_format_context->streams[i]->r_frame_rate.den);
-        printf("AVStream->start_time %ld\n" PRId64, ptr_format_context->streams[i]->start_time);
-        printf("AVStream->duration %ld\n" PRId64, ptr_format_context->streams[i]->duration);
+        LOGI(" ======== Stream %d ========", i);
+        LOGI("AVStream->time_base before open coded %d/%d", ptr_format_context->streams[i]->time_base.num, ptr_format_context->streams[i]->time_base.den);
+        LOGI("AVStream->r_frame_rate before open coded %d/%d", ptr_format_context->streams[i]->r_frame_rate.num, ptr_format_context->streams[i]->r_frame_rate.den);
+        LOGI("AVStream->start_time %ld" PRId64, ptr_format_context->streams[i]->start_time);
+        LOGI("AVStream->duration %ld" PRId64, ptr_format_context->streams[i]->duration);
 
         /* Find CODEC decoder for the current stream. */
         AVCodec const *ptr_local_codec = NULL;
         ptr_local_codec = avcodec_find_decoder(ptr_local_codec_params->codec_id);
 
         if (ptr_local_codec==NULL) {
-            printf("ERROR unsupported codec!\n");
-            continue;
+            LOGE("Unsupported CODEC!");
+            throw std::runtime_error("Unsupported CODEC");
         }
 
         if (ptr_local_codec_params->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -60,54 +70,56 @@ VideoFile::VideoFile(std::string const& filepath) {
                 ptr_codec = ptr_local_codec;
                 ptr_codec_parameters = ptr_local_codec_params;
             }
-            printf("Video Codec: resolution %d x %d\n", ptr_local_codec_params->width, ptr_local_codec_params->height);
-        } else if (ptr_local_codec_params->codec_type == AVMEDIA_TYPE_AUDIO) {
-            printf("Audio Codec: %d channels, sample rate %d\n", ptr_local_codec_params->channels, ptr_local_codec_params->sample_rate);
-        }
+            LOGI("Video Codec: resolution %d x %d", ptr_local_codec_params->width, ptr_local_codec_params->height);
+        } 
+        
+        /* Ignore the audio streams. */
+        // if (ptr_local_codec_params->codec_type == AVMEDIA_TYPE_AUDIO) {
+        //     LOGI("Audio Codec: %d channels, sample rate %d", ptr_local_codec_params->channels, ptr_local_codec_params->sample_rate);
+        // }
 
-        printf("\tCodec %s ID %d bit_rate %ld\n", ptr_local_codec->name, ptr_local_codec->id, ptr_local_codec_params->bit_rate);
+        LOGI("\tCodec %s ID %d bit_rate %ld", ptr_local_codec->name, ptr_local_codec->id, ptr_local_codec_params->bit_rate);
     }
-    printf("\n");
 
     /* Verify a video stream was found. */
     if (video_stream_index == -1) {
-        printf("File %s does not contain a video stream!", filepath.c_str());
-        return;
+        LOGE("File %s does not contain a video stream!", filepath.c_str());
+        throw std::runtime_error("No video stream in file");
     }
 
     /* Allocate video CODEC Context. */
     ptr_codec_context = avcodec_alloc_context3(ptr_codec);
     if (!ptr_codec_context)
     {
-        printf("failed to allocated memory for AVCodecContext");
-        return;
+        LOGE("Failed to allocated memory for AVCodecContext.");
+        throw std::runtime_error("Failed to allocated memory for AVCodecContext");
     }
 
     /* Fill the codec context based on the values from the supplied codec parameters */
     if (avcodec_parameters_to_context(ptr_codec_context, ptr_codec_parameters) < 0)
     {
-        printf("failed to copy codec params to codec context");
-        return;
+        LOGE("Failed to copy codec params to codec context.");
+        throw std::runtime_error("Failed to copy CODEC params to codec context");
     }
 
     /* Initialize the AVCodecContext to use the given AVCodec. */
     if (avcodec_open2(ptr_codec_context, ptr_codec, NULL) < 0)
     {
-        printf("failed to open codec through avcodec_open2");
-        return;
+        LOGE("Failed to open CODEC through avcodec_open2.");
+        throw std::runtime_error("Failed to open CODEC through avcodec_open2");
     }
 
     /* ---------------- Allocate Packet / Frame ----------------- */
     ptr_frame = av_frame_alloc();
     if (!ptr_frame) {
-        printf("failed to allocate memory for AVFrame");
-        return;
+        LOGE("Failed to allocate memory for AVFrame.");
+        throw std::runtime_error("Failed to allocate memory for AVFrame.");
     }
 
     ptr_packet = av_packet_alloc();
     if (!ptr_packet) {
-        printf("failed to allocate memory for AVPacket");
-        return;
+        LOGE("Failed to allocate memory for AVPacket.");
+        throw std::runtime_error("Failed to allocate memory for AVPacket");
     }
 }
 
@@ -133,7 +145,7 @@ Frame VideoFile::getFrame(double curr_time) {
     if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
         decoded_frame = false;
     } else if (response < 0) {
-        printf("Error while receiving a frame from the decoder: %d", (response));
+        LOGW("Issue while receiving a frame from the decoder: %d", (response));
         return frame_data_;
     } else {
         decoded_frame = true;
@@ -144,24 +156,22 @@ Frame VideoFile::getFrame(double curr_time) {
 
         /* Only process selected Video Stream Packets. */
         if (ptr_packet->stream_index == video_stream_index) {
-            printf("AVPacket->pts %" PRId64 "\t", ptr_packet->pts);
+            // LOGI("AVPacket->pts %" PRId64 "\t", ptr_packet->pts);
 
             /* Send packet to decoder */
             response = avcodec_send_packet(ptr_codec_context, ptr_packet);
             if (response < 0) {
-                printf("Error while sending a packet to the decoder: %d", (response));
+                LOGW("Issue while sending a packet to the decoder: %d", (response));
                 return frame_data_;
             }
 
             /* Decode new frame */
             response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
             if (response != AVERROR(EAGAIN) && response != AVERROR_EOF && response < 0) {
-                printf("Error while receiving a frame from the decoder: %d", (response));
+                LOGW("Issue while receiving a frame from the decoder: %d", (response));
                 return frame_data_;
             } else if (response >= 0) {
                 decoded_frame = true;
-            } else {
-                printf("\n");
             }
         }
 
@@ -169,26 +179,25 @@ Frame VideoFile::getFrame(double curr_time) {
     }
 
     if (!decoded_frame) {
-        printf("\n");
         return frame_data_; 
     }
 
     play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
-    printf(
-        "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]\n",
-        ptr_codec_context->frame_number,
-        av_get_picture_type_char(ptr_frame->pict_type),
-        ptr_frame->pkt_size,
-        ptr_frame->format,
-        ptr_frame->pts,
-        ptr_frame->key_frame,
-        play_time_,
-        ptr_frame->coded_picture_number
-    );
+    // LOGI(
+    //     "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]",
+    //     ptr_codec_context->frame_number,
+    //     av_get_picture_type_char(ptr_frame->pict_type),
+    //     ptr_frame->pkt_size,
+    //     ptr_frame->format,
+    //     ptr_frame->pts,
+    //     ptr_frame->key_frame,
+    //     play_time_,
+    //     ptr_frame->coded_picture_number
+    // );
 
     /* Process Frame. */
     if (ptr_frame->format != AV_PIX_FMT_YUV420P) {
-        printf("Warning: the generated file may not be a grayscale image, but could e.g. be just the R component if the video format is RGB");
+        LOGW("The returned frame may not be a grayscale image, but could e.g. be just the R component if the video format is RGB");
     }
 
     frame_data_.width = ptr_frame->width;

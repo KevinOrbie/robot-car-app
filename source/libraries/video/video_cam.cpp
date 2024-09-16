@@ -9,6 +9,9 @@
 #include <assert.h>  // assert()
 #include <string.h>  // strerror(), memcpy()
 
+/* Standard C++ Libraries */
+#include <stdexcept>
+
 /* OS provided C extentions. */
 #include <sys/stat.h>     // Data returned by the stat() function 
 #include <sys/mman.h>     // Memory management declarations
@@ -17,17 +20,15 @@
 /* Thirdparty includes. */
 #include <linux/videodev2.h>
 
+/* Custom C++ Libraries */
+#include "common/logger.h"
+
 
 /* ============================ Defines ============================ */
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 
 /* =========================== Functions =========================== */
-static void errno_exit(const char *s) {
-    fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
-    exit(EXIT_FAILURE);
-}
-
 /**
  * @note: The ioctl(int fd, int op, ...) system call manipulates the 
  * underlying device parameters of special files:
@@ -54,51 +55,52 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
     struct stat st;
 
     if (stat(device_name_.c_str(), &st) == -1) {
-        fprintf(stderr, "Cannot identify '%s': %d, %s\n", device_name_.c_str(), errno, strerror(errno));
-        exit(EXIT_FAILURE);
+        LOGE("Cannot identify '%s' (error %d: %s)", device_name_.c_str(), errno, strerror(errno));
+        throw std::runtime_error("Failed to read device file");
     }
 
     if (!S_ISCHR(st.st_mode)) {
-        fprintf(stderr, "%s is no device\n", device_name_.c_str());
-        exit(EXIT_FAILURE);
+        LOGE("%s is not a device!", device_name_.c_str());
+        throw std::runtime_error("File is not a device");
     }
 
     // Mode: O_RDWR = read/write
     // Mode: O_NONBLOCK = None of the I/O operations on the fd will cause the calling process to wait.
-    fd_ = open(device_name_.c_str(), O_RDWR /* required */ | O_NONBLOCK, 0);
+    fd_ = open(device_name_.c_str(), O_RDWR | O_NONBLOCK, 0);
 
     if (fd_ == -1) {
-        fprintf(stderr, "Cannot open '%s': %d, %s\n", device_name_.c_str(), errno, strerror(errno));
-        exit(EXIT_FAILURE);
+        LOGE("Cannot open '%s' (error %d: %s)", device_name_.c_str(), errno, strerror(errno));
+        throw std::runtime_error("Cannot open device file");
     }
 
-    fprintf(stderr, "Opened Camera Device\n");
+    LOGI("Opened Camera Device.");
 
     /* ------------ Setup & Verify Capabilities ------------ */
     struct v4l2_capability cap;
 
     /* Query device capabilities. */
     if (xioctl(fd_, VIDIOC_QUERYCAP, &cap) == -1) {
-        if (EINVAL == errno) {
-            fprintf(stderr, "%s is no V4L2 device\n", device_name_.c_str());
-            exit(EXIT_FAILURE);
+        if (errno == EINVAL) {
+            LOGE("%s is not a V4L2 device.", device_name_.c_str());
+            throw std::runtime_error("Not a V4L2 device file.");
         } else {
-            errno_exit("VIDIOC_QUERYCAP");
+            LOGE("VIDIOC_QUERYCAP issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_QUERYCAP failed");
         }
     }
 
     /* Check if the device supports the single-planar API. */
     if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
-        fprintf(stderr, "%s is no video capture device\n", device_name_.c_str());
-        exit(EXIT_FAILURE);
+        LOGE("%s is not a video capture device.", device_name_.c_str());
+        throw std::runtime_error("Not a video capture device");
     }
 
     switch (io_method) {
         case IO_Method::READ:
             /* Does the device support the read() and/or write() I/O methods? */
             if (!(cap.capabilities & V4L2_CAP_READWRITE)) {
-                fprintf(stderr, "%s does not support read i/o\n", device_name_.c_str());
-                exit(EXIT_FAILURE);
+                LOGE("%s does not support read i/o!", device_name_.c_str());
+                throw std::runtime_error("Device does not support read i/o");
             }
             break;
 
@@ -106,13 +108,13 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
         case IO_Method::USERPTR:
             /* Does the device support the streaming I/O method? */
             if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-                fprintf(stderr, "%s does not support streaming i/o\n", device_name_.c_str());
-                exit(EXIT_FAILURE);
+                LOGE("%s does not support read i/o!", device_name_.c_str());
+                throw std::runtime_error("Device does not support read i/o");
             }
             break;
     }
 
-    fprintf(stderr, "Setup & Verified Capabilities\n");
+    LOGI("Setup & Verified Capabilities.");
 
     /* ------- Setup & Verify Cropping / Scaling ------- */
     struct v4l2_cropcap cropcap;
@@ -140,7 +142,7 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
         /* Errors ignored. */
     }
 
-    fprintf(stderr, "Setup & Verified Cropping / Scaling\n");
+    LOGI("Setup & Verified Cropping / Scaling.");
 
     /* ---------- Setup & Verify Video Format ---------- */
     struct v4l2_format fmt;
@@ -176,13 +178,16 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
             break;
         
         default:
-            errno_exit("Unsupported Camera Type Used.");
+            LOGE("Unsupported Camera Type used (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("Unsupported Camera Type used");
             break;
     }
 
     /* Set format info. */
-    if (xioctl(fd_, VIDIOC_S_FMT, &fmt) == -1)
-        errno_exit("VIDIOC_S_FMT");
+    if (xioctl(fd_, VIDIOC_S_FMT, &fmt) == -1) {
+        LOGE("VIDIOC_S_FMT issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_S_FMT failed");
+    }
 
     frame_bytes_per_line_ = fmt.fmt.pix.bytesperline;  /* Distance in bytes between the leftmost pixels in two adjacent lines. */
     frame_data_.height = fmt.fmt.pix.height;
@@ -198,7 +203,7 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
     if (fmt.fmt.pix.sizeimage < min)
         fmt.fmt.pix.sizeimage = min;
 
-    fprintf(stderr, "Setup & Verified Video Format\n");
+    LOGI("Setup & Verified Video Format.");
     
     /* -------------- Set Camera Controls -------------- */
     /* Enable Manual Exposure Control */
@@ -228,7 +233,7 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
             break;
     }
 
-    fprintf(stderr, "Initialized IO Memory\n");
+    LOGI("Initialized IO Memory.");
 
     // Initialize Frame
     int size = frame_data_.width * frame_data_.height * frame_data_.channels;
@@ -248,13 +253,13 @@ void VideoCam::setCamControl(unsigned int control_id, int value) {
     /* Verify that control is supported & enabled. */
     if (xioctl(fd_, VIDIOC_QUERYCTRL, &queryctrl) == -1) {
         if (errno != EINVAL) {
-            errno_exit("VIDIOC_QUERYCTRL");
-            exit(EXIT_FAILURE);
+            LOGE("VIDIOC_QUERYCTRL issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_QUERYCTRL failed");
         } else {
-            printf("Camera control is not supported: id=%d\n", control_id);
+            LOGW("Camera control is not supported: id=%d.", control_id);
         }
     } else if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
-        printf("Camera control is not supported: id=%d\n", control_id);
+        LOGW("Camera control is not supported: id=%d.", control_id);
     } else {
         /* Update Control. */
         CLEAR(control);
@@ -263,8 +268,8 @@ void VideoCam::setCamControl(unsigned int control_id, int value) {
 
         /* Set a specifc control value. */
         if (xioctl(fd_, VIDIOC_S_CTRL, &control) == -1) {
-            errno_exit("VIDIOC_S_CTRL");
-            exit(EXIT_FAILURE);
+            LOGE("VIDIOC_S_CTRL issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_S_CTRL failed");
         }
     }
 }
@@ -274,16 +279,16 @@ void VideoCam::init_IO_READ(unsigned int size){
     buffers_.push_back(buffer());
 
     if (buffers_.empty()) {
-        fprintf(stderr, "Out of memory\n");
-        exit(EXIT_FAILURE);
+        LOGE("Out of memory!");
+        throw std::runtime_error("Out of memory");
     }
 
     buffers_[0].length = size;
     buffers_[0].start = (uint8_t*) malloc(size);
 
     if (!buffers_[0].start) {
-        fprintf(stderr, "Out of memory\n");
-        exit(EXIT_FAILURE);
+        LOGE("Out of memory!");
+        throw std::runtime_error("Out of memory");
     }
 }
 
@@ -304,17 +309,18 @@ void VideoCam::init_IO_MMAP(){
     /* Initiate Memory Mapping */
     if (xioctl(fd_, VIDIOC_REQBUFS, &req) == -1) {
         if (EINVAL == errno) {
-            fprintf(stderr, "%s does not support memory mapping\n", device_name_.c_str());
-            exit(EXIT_FAILURE);
+            LOGE("%s does not support memory mapping.", device_name_.c_str());
+            throw std::runtime_error("Memory Mapping not supported");
         } else {
-            errno_exit("VIDIOC_REQBUFS");
+            LOGE("VIDIOC_REQBUFS issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_REQBUFS failed");
         }
     }
 
     /* Verify granted number of Buffers */
     if (req.count < 2) {
-        fprintf(stderr, "Insufficient buffer memory on %s\n", device_name_.c_str());
-        exit(EXIT_FAILURE);
+        LOGE("Insufficient buffer memory on %s.", device_name_.c_str());
+        throw std::runtime_error("Insufficient buffer memory");
     }
 
     // buffers_ = (VideoCam::buffer*) calloc(req.count, sizeof(*buffers_));
@@ -322,9 +328,8 @@ void VideoCam::init_IO_MMAP(){
     /* Initialize count buffers. */
     buffers_.resize(req.count);
     if (buffers_.empty()) {
-        // TODO: is not needed ?
-        fprintf(stderr, "Out of memory\n");
-        exit(EXIT_FAILURE);
+        LOGE("Out of memory!");
+        throw std::runtime_error("Out of memory");
     }
 
     for (int buff_idx = 0; buff_idx < req.count; ++buff_idx) {
@@ -335,9 +340,11 @@ void VideoCam::init_IO_MMAP(){
         buf.memory      = V4L2_MEMORY_MMAP;
         buf.index       = buff_idx;
 
-        /* Query the status of a buffer */
-        if (xioctl(fd_, VIDIOC_QUERYBUF, &buf) == -1)
-            errno_exit("VIDIOC_QUERYBUF");
+        /* Query the status of a buffer. */
+        if (xioctl(fd_, VIDIOC_QUERYBUF, &buf) == -1) {
+            LOGE("VIDIOC_QUERYBUF issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_QUERYBUF failed");
+        }
 
         buffers_[buff_idx].length = buf.length;
         buffers_[buff_idx].start = (uint8_t*)
@@ -349,8 +356,10 @@ void VideoCam::init_IO_MMAP(){
                 buf.m.offset            /* offset: file content initialization starts from offset of the file beginning. */
             );
 
-        if (buffers_[buff_idx].start == MAP_FAILED)
-            errno_exit("mmap");
+        if (buffers_[buff_idx].start == MAP_FAILED) {
+            LOGE("mmap issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("mmap failed");
+        }
     }
 }
 
@@ -369,19 +378,19 @@ void VideoCam::init_IO_USRP(unsigned int size){
     /* Switches the driver into user pointer I/O mode and setup some internal structures. */
     if (xioctl(fd_, VIDIOC_REQBUFS, &req) == -1) {
         if (EINVAL == errno) {
-            fprintf(stderr, "%s does not support user pointer i/o \n", device_name_.c_str());
-            exit(EXIT_FAILURE);
+            LOGE("%s does not support user pointer i/o!", device_name_.c_str());
+            throw std::runtime_error("user pointer i/o not supported");
         } else {
-            errno_exit("VIDIOC_REQBUFS");
+            LOGE("VIDIOC_REQBUFS issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_REQBUFS failed");
         }
     }
 
     /* Initialize count buffers. */
     buffers_.resize(req.count);
     if (buffers_.empty()) {
-        // TODO: is not needed ?
-        fprintf(stderr, "Out of memory\n");
-        exit(EXIT_FAILURE);
+        LOGE("Out of memory!");
+        throw std::runtime_error("Out of memory");
     }
 
     for (int buff_idx = 0; buff_idx < req.count; ++buff_idx) {
@@ -389,8 +398,8 @@ void VideoCam::init_IO_USRP(unsigned int size){
         buffers_[buff_idx].start = (uint8_t*) malloc(size);
 
         if (!buffers_[buff_idx].start) {
-            fprintf(stderr, "Out of memory\n");
-            exit(EXIT_FAILURE);
+            LOGE("Out of memory!");
+            throw std::runtime_error("Out of memory");
         }
     }
 }
@@ -433,19 +442,23 @@ void VideoCam::start_IO_MMAP() {
         buf.index = i;
 
         /* Exchange a buffer with the driver */
-        if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
-            errno_exit("VIDIOC_QBUF");
+        if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1) {
+            LOGE("VIDIOC_QBUF issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_QBUF failed");
+        }
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     /* Start streaming I/O */
-    if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1)
-        errno_exit("VIDIOC_STREAMON");
+    if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1) {
+        LOGE("VIDIOC_STREAMON issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_STREAMON failed");
+    }
 
     capturing = true;
 
-    fprintf(stderr, "Started Capturing Frames\n");
+    LOGI("Started Capturing Frames.");
     return;
 }
 
@@ -464,15 +477,21 @@ void VideoCam::start_IO_USRP() {
         buf.length = buffers_[i].length;
 
         /* Exchange a buffer with the driver. */
-        if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
-            errno_exit("VIDIOC_QBUF");
+        if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1) {
+            LOGE("VIDIOC_QBUF issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("VIDIOC_QBUF failed");
+        }
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     /* Start streaming I/O. */
-    if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1)
-            errno_exit("VIDIOC_STREAMON");
+    if (xioctl(fd_, VIDIOC_STREAMON, &type) == -1) {
+        LOGE("VIDIOC_STREAMON issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_STREAMON failed");
+    }
+
+    LOGI("Started Capturing Frames.");
 }
 
 /* ########################### Destructor ########################## */
@@ -499,11 +518,12 @@ VideoCam::~VideoCam(){
     }
 
     /* Close Camera Device */
-    if (close(fd_) == -1)
-        errno_exit("close");
+    if (close(fd_) == -1) {
+        LOGE("close issue (error %d: %s)", errno, strerror(errno));
+    }
 
     fd_ = -1;
-    fprintf(stderr, "Destructed VideoCam\n");
+    LOGI("Destructed VideoCam.");
 }
 
 /* ############################## STOP ############################# */
@@ -520,7 +540,7 @@ void VideoCam::stop() {
             break;
     }
     
-    fprintf(stderr, "Stopped Capturing Frames\n");
+    LOGI("Stopped Capturing Frames.");
     return;
 }
 
@@ -534,8 +554,10 @@ void VideoCam::stop_IO_STREAM() {
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     /* Stop streaming I/O. */
-    if (xioctl(fd_, VIDIOC_STREAMOFF, &type) == -1)
-        errno_exit("VIDIOC_STREAMOFF");
+    if (xioctl(fd_, VIDIOC_STREAMOFF, &type) == -1) {
+        LOGE("VIDIOC_STREAMOFF issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_STREAMOFF failed");
+    }
 
     capturing = false;
     return;
@@ -551,8 +573,10 @@ void VideoCam::uinit_IO_READ() {
 void VideoCam::uinit_IO_MMAP() {
     unsigned int i;
     for (i = 0; i < buffers_.size(); ++i)
-        if (munmap(buffers_[i].start, buffers_[i].length) == -1)
-            errno_exit("munmap");
+        if (munmap(buffers_[i].start, buffers_[i].length) == -1) {
+            LOGE("munmap issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("munmap failed");
+        }
     return;
 }
 
@@ -580,27 +604,28 @@ Frame VideoCam::getFrame(double curr_time){
 
         /* Poll() returned errors. */
         if (poll_result == -1) {
-            if (EINTR == errno)
+            if (errno == EINTR)
                 continue;
-            errno_exit("poll");
+            LOGE("Poll issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("poll failed");
         }
 
         /* Poll() timed outed. */
         if (poll_result == 0) {
-            fprintf(stderr, "Poll timeout\n");
-            exit(EXIT_FAILURE);  // Currently Limits GUI to camera framerate
-            // return &frame_data_;
+            LOGE("Poll timeout.");
+            throw std::runtime_error("Poll timeout");  // Currently Limits GUI to camera framerate
         }
 
         /* Check for ERROR. */
         if (poll_fds.revents & POLLERR) { 
-            errno_exit("poll");
+            LOGE("Poll issue (error %d: %s). Make sure camera is started / running.", errno, strerror(errno));
+            throw std::runtime_error("poll failed");
         }
 
         /* Check for closed stream. */
         if (poll_fds.revents & POLLHUP) { 
-            fprintf(stderr, "Poll: Stream has been closed.\n");
-            exit(EXIT_FAILURE);
+            LOGE("Device stream has been closed!");
+            throw std::runtime_error("Device stream has been closed");
         }
         
         /* Try to read frame. */
@@ -632,7 +657,7 @@ Frame VideoCam::getFrame(double curr_time){
         break; // Uncomment if you need a new frame for every call.
     }
 
-    fprintf(stderr, "Broke out of get frame loop.\n"); // Never reached.
+    LOGE("Broke out of getFrame loop."); // Never reached.
     return frame_data_;
 }
 
@@ -666,8 +691,8 @@ void VideoCam::readFrame(unsigned int buffer_index){
             break;
         
         default:
-            errno_exit("Unsupported Camera Type Used.");
-            break;
+            LOGE("Unsupported Camera Type used (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("Unsupported Camera Type used");
     }
 
     return;
@@ -684,7 +709,8 @@ bool VideoCam::getFrame_IO_READ() {
                 /* fall through */
 
             default:
-                errno_exit("read");
+                LOGE("read issue (error %d: %s)", errno, strerror(errno));
+                throw std::runtime_error("read failed");
         }
     }
 
@@ -713,7 +739,8 @@ bool VideoCam::getFrame_IO_MMAP() {
                 /* fall through */
 
             default:
-                errno_exit("VIDIOC_DQBUF");
+                LOGE("VIDIOC_DQBUF issue (error %d: %s)", errno, strerror(errno));
+                throw std::runtime_error("VIDIOC_DQBUF failed");
         }
     }
 
@@ -722,8 +749,10 @@ bool VideoCam::getFrame_IO_MMAP() {
     readFrame(buf.index);
 
     /* Enqueue an empty buffer in the driver’s incoming queue. */
-    if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
-        errno_exit("VIDIOC_QBUF");
+    if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1) {
+        LOGE("VIDIOC_QBUF issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_QBUF failed");
+    }
 
     return true;
 }
@@ -748,7 +777,8 @@ bool VideoCam::getFrame_IO_USRP() {
                 /* fall through */
 
             default:
-                errno_exit("VIDIOC_DQBUF");
+                LOGE("VIDIOC_DQBUF issue (error %d: %s)", errno, strerror(errno));
+                throw std::runtime_error("VIDIOC_DQBUF failed");
         }
     }
 
@@ -762,8 +792,10 @@ bool VideoCam::getFrame_IO_USRP() {
     readFrame(buf.index);
 
     /* Enqueue an empty buffer in the driver’s incoming queue. */
-    if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1)
-            errno_exit("VIDIOC_QBUF");
+    if (xioctl(fd_, VIDIOC_QBUF, &buf) == -1) {
+        LOGE("VIDIOC_QBUF issue (error %d: %s)", errno, strerror(errno));
+        throw std::runtime_error("VIDIOC_QBUF failed");
+    }
 
     return true;
 }
