@@ -21,7 +21,7 @@
 
 /* Custom C++ Project Code */
 #include "platform/window.h"
-#include "logic/timer.h"
+#include "common/timer.h"
 #include "logic/logic.h"
 
 

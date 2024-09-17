@@ -12,12 +12,13 @@
 // None
 
 /* Custom C++ Libraries */
-// None
+#include "common/input.h"
 
 
 /* ========================== Classes ========================== */
-class Input;
-
+/**
+ * @brief The interface a class should implement if it accepts user Input.
+ */
 class InputSink {
    public:
     virtual void sink(Input input) = 0;

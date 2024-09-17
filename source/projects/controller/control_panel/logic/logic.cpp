@@ -1,6 +1,8 @@
 /**
- * @brief Defines all gamelogic.
+ * @file logic.cpp
  * @author Kevin Orbie
+ * 
+ * @brief Defines all game logic.
  */
 
 /* ========================== Include ========================== */
@@ -26,7 +28,8 @@
 
 
 /* ========================== Classes ========================== */
-Application::Application(FrameProvider* frame_provider): frame_provider_(frame_provider) {
+Application::Application(FrameProvider* frame_provider, InputSink *input_sink): 
+        frame_provider_(frame_provider), input_sink_(input_sink) {
     /* Initialize Application State. */
     state = std::make_unique<AppState>();
 
@@ -72,19 +75,19 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     /* Process Input */
     if (input.keys[Button::W].held) {
         state->camera->ProcessKeyboard(FORWARD, timedelta); 
-        LOGI("W held!");
+        // LOGI("Key Updated: %s", (input.keysUpdated()) ? "true": "false");
     }
     if (input.keys[Button::A].held) {
         state->camera->ProcessKeyboard(LEFT, timedelta); 
-        LOGI("A held!");
+        // LOGI("A held!");
     }
     if (input.keys[Button::S].held) {
         state->camera->ProcessKeyboard(BACKWARD, timedelta); 
-        LOGI("S held!");
+        // LOGI("S held!");
     }
     if (input.keys[Button::D].held) {
         state->camera->ProcessKeyboard(RIGHT, timedelta); 
-        LOGI("D held!");
+        // LOGI("D held!");
     }
     if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f)
         state->camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
@@ -94,6 +97,11 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     //     grass->num_blades += 100000;
     //     std::cout << "Number of Blades: " << grass->num_blades << "\n";
     // }
+
+    /* Forward Input to sink (optional). */
+    if (input_sink_ && input.keysUpdated()) {
+        input_sink_->sink(input);
+    }
 
     /* Transformations */
     // glm::mat4 view = state->camera->GetViewMatrix();

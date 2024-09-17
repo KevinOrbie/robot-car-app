@@ -13,6 +13,7 @@
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
+#include "robot/arduino_driver.h"
 #include "video/video_file.h"
 #include "video/video_cam.h"
 
@@ -24,15 +25,18 @@ int main() {
     VideoCam frame_provider = VideoCam();
     frame_provider.start();
 
+    /* Create Input Sink. */
+    ArduinoDriver input_sink = ArduinoDriver();
+    input_sink.thread();
+
     /* Create GUI. */
-    ControlPanel ctrlpanel = ControlPanel(&frame_provider);
+    ControlPanel ctrlpanel = ControlPanel(&frame_provider, &input_sink);
     ctrlpanel.thread();  // Run in seperate thread
     // ctrlpanel.start();  // Run in main thread.
 
-    // TODO: Create ArduinoDriver (as an InputSink).
-    // TODO: Think through what a command for the ArduinoDriver is (what Input / Control to pass around).
-    // TODO: Make ControlPanel work, given an an InputSink.
-
-    while (true) {__asm("");};
+    while (true) {
+        // input_sink.iteration();
+        __asm("");  // Avoid optimizing out.
+    };
 }
 

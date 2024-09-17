@@ -85,7 +85,7 @@ class Looper {
      */
     virtual void cleanup() { return; }
 
-   private:
+   protected:
     std::thread thread_;
 
     bool running_ = false;

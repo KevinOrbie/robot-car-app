@@ -16,7 +16,8 @@
 
 /* Custom C++ Libraries */
 #include "video/frame_provider.h"
-#include "platform/input.h"
+#include "common/input.h"
+#include "common/input_sink.h"
 #include "quad_screen.h"
 #include "camera.h"
 
@@ -44,7 +45,7 @@ struct AppState {
 
 class Application {
    public:
-    Application(FrameProvider *frame_provider=nullptr);
+    Application(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr);
 
     void glsetup();
     void glcleanup();
@@ -52,6 +53,7 @@ class Application {
     bool processFrame(float timedelta, int width, int height, Input& input);
 
    private:
-    FrameProvider *frame_provider_ = nullptr;
     std::unique_ptr<AppState> state = nullptr;
+    FrameProvider *frame_provider_  = nullptr;
+    InputSink *input_sink_          = nullptr;
 };

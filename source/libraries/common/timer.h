@@ -1,22 +1,27 @@
 /**
- * @brief Timing Class.
+ * @file timer.h
  * @author Kevin Orbie
+ * 
+ * @brief Defines a timer class with a stopwatch functionality.
  */
 
 #ifndef TIMER_H
 #define TIMER_H
 
 /* ========================== Include ========================== */
-/* C/C++ Libraries */
+/* Standard C Libraries */
+// None
+
+/* Standard C++ Libraries */
 #include <chrono>
+
+/* Custom C++ Libraries */
+// None
 
 
 /* =========================== Class =========================== */
-class Timer 
-{
+class Timer {
    public:
-    Timer() = default;
-
     /**
      * @brief Set a start time.
      */

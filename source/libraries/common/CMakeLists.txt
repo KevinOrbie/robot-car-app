@@ -17,6 +17,7 @@ list(APPEND SOURCE_FILES server_handler.cpp)
 ## Define Headers
 list(APPEND HEADER_FILES message_transciever.h)
 list(APPEND HEADER_FILES drive_controller.h)
+list(APPEND HEADER_FILES input_sink.h)
 list(APPEND HEADER_FILES connection.h)
 list(APPEND HEADER_FILES data_type.h)
 list(APPEND HEADER_FILES messages.h)
@@ -26,6 +27,8 @@ list(APPEND HEADER_FILES client.h)
 list(APPEND HEADER_FILES server.h)
 list(APPEND HEADER_FILES logger.h)
 list(APPEND HEADER_FILES robot.h)
+list(APPEND HEADER_FILES input.h)
+list(APPEND HEADER_FILES timer.h)
 
 
 ## --------------------------- Config ----------------------------

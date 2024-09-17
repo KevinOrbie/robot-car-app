@@ -7,9 +7,13 @@ set(SOURCE_FILES "")
 
 ## Define Sources
 list(APPEND SOURCE_FILES system.cpp)
+list(APPEND SOURCE_FILES arduino_socket.cpp)
+list(APPEND SOURCE_FILES arduino_driver.cpp)
 
 ## Define Headers
 list(APPEND HEADER_FILES system.h)
+list(APPEND HEADER_FILES arduino_socket.h)
+list(APPEND HEADER_FILES arduino_driver.h)
 
 
 ## --------------------------- Config ----------------------------

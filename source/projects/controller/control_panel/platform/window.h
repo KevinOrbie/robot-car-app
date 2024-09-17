@@ -15,8 +15,8 @@
 #include <glad/glad.h>  // Provides OpenGL header (needs to be included first)
 #include <GLFW/glfw3.h>  // Windowing library
 
-/* Custom Headers */
-#include "input.h"
+/* Custom C++ Libraries */
+#include "common/input.h"
 
 
 /* ========================= Constants ========================= */
