@@ -23,7 +23,7 @@
 #include <cstring>
 
 /* Custom C++ Libraries */
-#include "logger.h"
+#include "common/logger.h"
 
 
 namespace client {
@@ -94,5 +94,9 @@ void Client::connect() {
     connection_ = socket.link(); // Wait for server response.
 }
 
+void Client::iteration() {
+    send();
+    recieve();
+};
 
 } // namespace client

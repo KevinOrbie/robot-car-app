@@ -34,8 +34,8 @@ class VideoFile: public FrameProvider {
     VideoFile(std::string const& filepath);
     ~VideoFile();
     Frame getFrame(double curr_time) override;
-    void start() override {return;};
-    void stop() override {return;};
+    void startStream() override {return;};
+    void stopStream() override {return;};
 
    private:
     std::string filepath_;

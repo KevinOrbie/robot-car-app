@@ -50,6 +50,8 @@ void ArduinoDriver::iteration() {
 };
 
 void ArduinoDriver::sink(Input input) {
+    // TODO: Make thread-safe
+
     /* Throttle Control. */
     if (input.keys[Button::W].held && input.keys[Button::S].held) {
         throttle_ = Throttle::BRAKE;

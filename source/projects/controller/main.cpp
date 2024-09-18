@@ -12,30 +12,21 @@
 #include <thread>
 
 /* Custom C++ Libraries */
-#include "control_panel/control_panel.h"
-#include "robot/arduino_driver.h"
-#include "video/video_file.h"
-#include "video/video_cam.h"
+#include "remote/robot.h"
 
 
 /* ======================== Entry Point ======================== */
 int main() {
-    /* Create FrameProvider. */
-    // VideoFile frame_provider = VideoFile("/home/kevin/Videos/normal-1080p.mp4");
-    VideoCam frame_provider = VideoCam();
-    frame_provider.start();
-
-    /* Create Input Sink. */
-    ArduinoDriver input_sink = ArduinoDriver();
-    input_sink.thread();
-
-    /* Create GUI. */
-    ControlPanel ctrlpanel = ControlPanel(&frame_provider, &input_sink);
-    ctrlpanel.thread();  // Run in seperate thread
-    // ctrlpanel.start();  // Run in main thread.
+    /* Setup Robot Communication. */
+    remote::Robot robot = {"localhost", 2556};
+    robot.thread();
 
     while (true) {
-        // input_sink.iteration();
+        int value = 0;
+        std::cout << "INPUT: ";
+        std::cin >> value;
+
+        robot.sink({});
         __asm("");  // Avoid optimizing out.
     };
 }

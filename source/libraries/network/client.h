@@ -42,29 +42,15 @@ class Client : public message::Transciever {
      */
     void connect();
 
-   protected:
-    /**
-     * @brief When a message is recieved, this function calls 
-     * the appropriate Message Handler. 
-     */
-    void pipeMessage(message::MessageID id) override;
+    void iteration();
 
-    /**
-     * @brief Recieve message payload & take relevant actions.
-     */
-    template<message::MessageID ID> void handleMessage();
+   protected:
 
    private:
     std::string server_address_ = "localhost";
     int port_                   = 2556;
     bool blocking_              = false;
 };
-
-
-/* ====================== Message Handlers ===================== */
-/* NOTE: Declarations with template specialization are best done in the same header file. */
-
-template<> void Client::handleMessage<message::MessageID::CMD_DRIVE>();
 
 
 } // namespace client

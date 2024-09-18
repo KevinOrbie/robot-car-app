@@ -44,12 +44,9 @@ class Server: public message::Transciever {
      */
     void connect();
 
+    void iteration();
+
    protected:
-    /**
-     * @brief When a message is recieved, this function calls 
-     * the appropriate Message Handler. 
-     */
-    void pipeMessage(message::MessageID id) override;
 
     /**
      * @brief Recieve message payload & take relevant actions.

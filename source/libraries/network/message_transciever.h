@@ -11,6 +11,8 @@
 /* Standard C++ Libraries */
 #include <string>
 #include <memory>
+#include <deque>
+#include <mutex>
 
 /* Custom C++ Libraries */
 #include "connection.h"
@@ -23,27 +25,31 @@ namespace message {
 class Transciever {
    public:
     /**
-     * @brief Send a specifc message.
+     * @brief Send a single message.
      */
-    template<MessageID ID>
-    void send(Message<ID> msg);
+    void send(std::unique_ptr<message::MessageBase> msg=nullptr);
 
     /**
      * @brief Recieve a single message.
      */
     void recieve();
 
+    void pushSendQueue(std::unique_ptr<message::MessageBase> msg);
+    std::unique_ptr<message::MessageBase> popRecieveQueue();
+
    protected:
     void sendMessageID(MessageID id);
     MessageID recieveMessageID();
 
-    /**
-     * @brief When a message is recieved, this function calls 
-     * the appropriate Message Handler. 
-     */
-    virtual void pipeMessage(MessageID id) = 0;
+    std::unique_ptr<message::MessageBase> popSendQueue();
+    void pushRecieveQueue(std::unique_ptr<message::MessageBase> msg);
 
    protected:
+    std::deque<std::unique_ptr<message::MessageBase>> send_queue_;
+    std::mutex send_queue_mutex_;
+    std::deque<std::unique_ptr<message::MessageBase>> recieved_queue_;
+    std::mutex recieved_queue_mutex_;
+
     Connection connection_;
 };
 

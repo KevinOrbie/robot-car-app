@@ -25,6 +25,6 @@ class FrameProvider {
    public:
     FrameProvider() {};
     virtual Frame getFrame(double curr_time) = 0;
-    virtual void start() = 0;
-    virtual void stop() = 0;
+    virtual void startStream() = 0;
+    virtual void stopStream() = 0;
 };

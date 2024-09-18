@@ -406,7 +406,7 @@ void VideoCam::init_IO_USRP(unsigned int size){
 
 /* ############################## START ############################## */
 
-void VideoCam::start() {
+void VideoCam::startStream() {
     switch (io_method_) {
         case IO_Method::READ:
             start_IO_READ();
@@ -499,7 +499,7 @@ void VideoCam::start_IO_USRP() {
 VideoCam::~VideoCam(){
     /* Stop Capturing Frames */
     if (capturing) {
-        stop();
+        stopStream();
     }
 
     /* Unitinitalize Device */
@@ -528,7 +528,7 @@ VideoCam::~VideoCam(){
 
 /* ############################## STOP ############################# */
 
-void VideoCam::stop() {
+void VideoCam::stopStream() {
     switch (io_method_) {
         case IO_Method::READ:
             stop_IO_READ();

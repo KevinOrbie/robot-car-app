@@ -9,12 +9,14 @@
 // None
 
 /* Standard C++ Libraries */
-// None
+#include <functional>
+#include <stdexcept>
+#include <memory>
+#include <map>
 
 /* Custom C++ Libraries */
+#include "common/logger.h"
 #include "connection.h"
-#include "data_type.h"
-#include "logger.h"
 
 
 namespace message {
@@ -23,18 +25,39 @@ namespace message {
 enum class MessageID;
 
 /**
+ * @brief Base class for all Messages, which defines a common interface.
+ */
+class MessageBase {
+    typedef std::map<MessageID, std::unique_ptr<MessageBase>(*)(Connection&)> des_mapping_t;
+    static des_mapping_t deserializers_;
+
+   public:
+    virtual void serialize(Connection &connection) = 0;
+    virtual MessageID getID() = 0;
+
+    static std::unique_ptr<MessageBase> deserialize(MessageID id, Connection &connection) {
+        try {
+            return deserializers_.at(id)(connection);
+        } catch(const std::out_of_range& oor) {
+            LOGW("Recieved message with ID %d has no derserializer: %s", static_cast<int>(id), oor.what());
+        }
+
+        return nullptr;
+    };
+};
+
+/**
  * @brief A template class that implements the functionality to sending a 
  * Objects of different types over a connection.
  * 
  * @tparam T: The payload-type of this message.
  * 
- * @warning Only payload-types with a corresponding template specialization 
- * defined below are supported.
+ * @note We can make use of template specialization if needed.
  */
 template<class T>
-class MessageBase {
+class Payload {
    public:
-    MessageBase(T &payload): payload_(payload) {};
+    Payload(T &payload): payload_(payload) {};
 
     void serialize(Connection& connection) {
         LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
@@ -49,38 +72,15 @@ class MessageBase {
     };
 
    private:
-    T &payload_;
+    T payload_;
 };
-
-/* Custom Class for Bool Message Payloads. */
-// ERROR: Is not used when a baseclass is provided !!!
-// template<>
-// class MessageBase<Serializable> {
-//    public:
-//     MessageBase(Serializable &payload): payload_(payload) {};
-
-//     void serialize(Connection& connection) {
-//         payload_.serialize(connection);
-//     };
-
-//     static void deserialize(Connection& connection, Serializable& recipient) {
-//         recipient.deserialize(connection);
-//     };
-
-//    private:
-//     Serializable &payload_;
-// };
-
-/* Custom Class for Serializable Message Payloads. */
-// TODO: Implement
-
 
 /**
  * @brief The Message template class, with wich we create a template 
  * specialization for every defined message type in messages.h. 
  */
 template<MessageID ID>
-class Message : public MessageBase<int> {
+class Message : public MessageBase, public Payload<int> {
     static_assert(false);  // ERROR: Message corresponding with MessageID not yet created with CREATE_MESSAGE()!
 };
 
