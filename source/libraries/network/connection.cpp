@@ -66,6 +66,12 @@ Connection& Connection::operator=(Connection&& other) {
 bool Connection::recieve(char* buffer, int bytes) const {
     int chars_read = -1;
 
+    /* Check socket Validity. */
+    if (!valid()) {
+        LOGE("Socket fd with value '%d' is invalid!", connection_fd_);
+        throw std::runtime_error("Socket fd is invalid");
+    }
+
     /* Read socket data to the given buffer. */
     chars_read = read(connection_fd_, buffer, bytes);
 
@@ -89,6 +95,12 @@ bool Connection::recieve(char* buffer, int bytes) const {
 bool Connection::send(char* buffer, int bytes) const {
     LOGI("Sending Bytes: %d bytes, buffer @ %p ", bytes, buffer);
     int chars_written = -1;
+
+    /* Check socket Validity. */
+    if (!valid()) {
+        LOGE("Socket fd with value '%d' is invalid!", connection_fd_);
+        throw std::runtime_error("Socket fd is invalid");
+    }
 
     /* Send socket data. */
     chars_written = write(connection_fd_, buffer, bytes); 

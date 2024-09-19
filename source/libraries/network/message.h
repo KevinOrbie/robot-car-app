@@ -71,6 +71,8 @@ class Payload {
         return payload;
     };
 
+    T value() {return payload_;};
+
    private:
     T payload_;
 };
@@ -80,7 +82,7 @@ class Payload {
  * specialization for every defined message type in messages.h. 
  */
 template<MessageID ID>
-class Message : public MessageBase, public Payload<int> {
+class Message : public MessageBase {
     static_assert(false);  // ERROR: Message corresponding with MessageID not yet created with CREATE_MESSAGE()!
 };
 

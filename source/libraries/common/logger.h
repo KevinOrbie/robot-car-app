@@ -33,6 +33,6 @@
     #define LOGE(message, ...) _LOG_FULL(" ERR  ", message, ## __VA_ARGS__)
 #else
     #define LOGI(message, ...) _LOG_COLOR(" INFO ", "\e[1m", "\e[0m", message, ## __VA_ARGS__)
-    #define LOGW(message, ...) _LOG_COLOR(" WARN ", "\e[1;38;2;245;197;24m", "\e[0;38;2;220;184;48m", message, ## __VA_ARGS__)
+    #define LOGW(message, ...) _LOG_COLOR_FULL(" WARN ", "\e[1;38;2;245;197;24m", "\e[0;38;2;220;184;48m", message, ## __VA_ARGS__)
     #define LOGE(message, ...) _LOG_COLOR_FULL(" ERR  ", "\e[1;38;2;245;43;24m", "\e[0;38;2;220;79;89m", message, ## __VA_ARGS__)
 #endif

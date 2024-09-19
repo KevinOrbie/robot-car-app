@@ -4,6 +4,9 @@
  */
 
 /* ========================== Include ========================== */
+/* Standard C Libraries */
+// None
+
 /* Standard C++ Libraries */
 #include <iostream>
 #include <thread>
@@ -19,9 +22,16 @@
 int main() {
     /* Setup LAN connection. */
     robot::Remote remote = {2556};
+    remote.connect();
     remote.thread();
 
     while (true) { __asm(""); }; // Avoid optimizing out.
     return 0;
 }
 
+// TODO: Test sending messages (with bool)
+// TODO: Test sending Default Input object
+// TODO: Test sending messages with controller
+
+// TODO: Compile on Jetson
+// TODO: Test Sending messages between Jetson & Desktop.

@@ -22,7 +22,7 @@
 namespace robot {
 /* ========================== Classes ========================== */
 void MessageHandler::on(Message<MessageID::CMD_DRIVE> *msg) {
-    LOGI("Command Drive message recieved!");
+    LOGI("Command Drive message recieved: value = '%s'", msg->value() ? "true" : "false");
 };
 
 } // namespace remote

@@ -75,6 +75,13 @@
         "list": "cpp",
         "set": "cpp",
         "unordered_set": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "buffer": "cpp",
+        "executor": "cpp",
+        "internet": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp",
+        "socket": "cpp",
+        "timer": "cpp"
     }
 }

@@ -20,6 +20,10 @@
 
 namespace robot {
 /* ========================== Classes ========================== */
+void Remote::connect() {
+    server_.connect();
+}
+
 void Remote::iteration() {
     server_.iteration();
     handler_.iteration();

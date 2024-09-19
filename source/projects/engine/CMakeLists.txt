@@ -1,4 +1,4 @@
-set(TARGET_NAME main_robot)
+set(TARGET_NAME engine)
 
 ## --------------------------- Sources ---------------------------
 set(INSTALL_TARGETS "")

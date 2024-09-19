@@ -32,6 +32,8 @@ class Robot: public Looper, public InputSink, public FrameProvider {
    public:
     Robot(std::string server_address, int port): client_(server_address, port, false), handler_(client_){};
 
+    void connect();
+
     /* Looper. */
     void iteration() override;
 

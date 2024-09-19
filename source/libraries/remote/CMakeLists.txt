@@ -21,7 +21,7 @@ list(APPEND HEADER_FILES message_handler.h)
 add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 ## Link External Libraries
-target_link_libraries(${LIB_NAME} PRIVATE glad glfw stb_image glm ffmpeg v4l2 rca_common rca_network)
+target_link_libraries(${LIB_NAME} PRIVATE rca_common rca_network)
 
 ## Specify the root from which headers are defined
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)

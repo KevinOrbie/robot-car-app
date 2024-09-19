@@ -22,6 +22,9 @@
 #include <stdexcept>
 #include <cstring>
 
+#include <chrono>       // Time duration
+#include <thread>       // Sleep thread
+
 /* Custom C++ Libraries */
 #include "common/logger.h"
 
@@ -96,6 +99,7 @@ void Client::connect() {
 
 void Client::iteration() {
     send();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
     recieve();
 };
 

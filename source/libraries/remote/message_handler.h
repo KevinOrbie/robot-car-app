@@ -15,7 +15,7 @@
 
 /* Custom C++ Libraries */
 #include "network/message_handler.h"
-#include "network/server.h"
+#include "network/client.h"
 
 
 namespace remote {
@@ -30,11 +30,15 @@ case msg_id: \
 
 /* ========================== Classes ========================== */
 class MessageHandler: public client::MessageHandler {
-    public:
+   public:
     MessageHandler(client::Client &client): client_(client) {};
 
     void iteration() {
         std::unique_ptr<MessageBase> message_base = client_.popRecieveQueue();
+        if (!message_base) {
+            /* No message to process. */
+            return;
+        }
         MessageID id = message_base->getID();
 
         switch (id) {

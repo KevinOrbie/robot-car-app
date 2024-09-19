@@ -58,7 +58,7 @@ void Transciever::recieve() {
     if (id != MessageID::EMPTY) { 
         /* Recieve Message. */
         std::unique_ptr<message::MessageBase> msg = MessageBase::deserialize(id, connection_);
-        pushRecieveQueue(msg);
+        pushRecieveQueue(std::move(msg));
     }
 };
 
@@ -90,13 +90,13 @@ MessageID Transciever::recieveMessageID() {
 void Transciever::pushSendQueue(std::unique_ptr<message::MessageBase> msg) {
     if (!msg) { LOGW("Don't push nullpointers to the send queue."); return; }
     std::lock_guard lock(send_queue_mutex_);
-    send_queue_.push_back(msg);
+    send_queue_.push_back(std::move(msg));
 };
 
 void Transciever::pushRecieveQueue(std::unique_ptr<message::MessageBase> msg) {
     if (!msg) { LOGW("Don't push nullpointers to the recieve queue."); return; }
     std::lock_guard lock(recieved_queue_mutex_);
-    recieved_queue_.push_back(msg);
+    recieved_queue_.push_back(std::move(msg));
 };
 
 std::unique_ptr<message::MessageBase> Transciever::popSendQueue() {

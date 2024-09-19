@@ -18,19 +18,22 @@
 namespace message {
 /* =========================== Macros ========================== */
 #define ADD_MESSAGE(name) name
-#define MAP_MESSAGE(msg_id) {msg_id, &Message<msg_id>::deserialize}
 
 #define CREATE_MESSAGE(msg_id, payload_t) \
-template<> class Message<msg_id>: public MessageBase, public Payload<payload_t> {       \
+template<> class Message<msg_id>: public MessageBase {       \
    public:                                                                              \
-    Message(payload_t payload): Payload<payload_t>(payload) {};                         \
-    MessageID getID() { return msg_id; };                                               \
+    Message(payload_t payload): payload_(payload) {};                                   \
+    MessageID getID() override { return msg_id; };                                      \
+    void serialize(Connection &connection) override {payload_.serialize(connection);};  \
     static std::unique_ptr<MessageBase> deserialize(Connection& connection) {           \
         payload_t payload = Payload<payload_t>::deserialize(connection);                \
         std::unique_ptr<MessageBase> msg = std::make_unique<Message<msg_id>>(payload);  \
         return msg;                                                                     \
     }                                                                                   \
-};                                                                                      
+    payload_t value() {return payload_.value();}                                        \
+   private:                                                                             \
+    Payload<payload_t> payload_;                                                        \
+};
 
 
 /* ==================== Message Declarations =================== */
@@ -54,16 +57,10 @@ ADD_MESSAGE(CMD_DRIVE)   // Command the robot to update it's Drive Control State
 CREATE_MESSAGE(MessageID::CMD_DRIVE, bool);
 
 
-/* ====================== Message Mappings ===================== */
 /**
- * @brief Adds this message to the deserialization mapping, to direct 
- * messages with a specifc ID to their specified deserializer.
+ * @note New messages should also add code in messages.cpp & the 
+ * corresponding message handlers.
  */
-MessageBase::des_mapping_t MessageBase::deserializers_ { 
-
-MAP_MESSAGE(MessageID::CMD_DRIVE)
-
-};
 
 
 } // namespace message

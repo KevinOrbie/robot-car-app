@@ -1,4 +1,4 @@
-set(LIB_NAME rca_video)
+set(LIB_NAME rca_robot)
 
 ## --------------------------- Sources ---------------------------
 set(INSTALL_TARGETS "")
@@ -23,7 +23,10 @@ list(APPEND HEADER_FILES message_handler.h)
 
 ## --------------------------- Config ----------------------------
 ## Define the common library
-add_library(rca_robot ${HEADER_FILES} ${SOURCE_FILES})
+add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+
+## Link External Libraries
+target_link_libraries(${LIB_NAME} PRIVATE rca_common rca_network)
 
 ## Specify the root from which headers are defined
-target_include_directories(rca_robot PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)

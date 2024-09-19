@@ -27,6 +27,7 @@ class Remote: public Looper {
    public:
     Remote(int port, InputSink *input_sink=nullptr): server_(port, false), handler_(server_) {};
 
+    void connect();
     void iteration() override;
 
    private:

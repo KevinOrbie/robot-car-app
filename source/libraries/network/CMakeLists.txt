@@ -8,6 +8,7 @@ set(SOURCE_FILES "")
 ## Define Sources
 list(APPEND SOURCE_FILES client.cpp)
 list(APPEND SOURCE_FILES server.cpp)
+list(APPEND SOURCE_FILES messages.cpp)
 list(APPEND SOURCE_FILES connection.cpp)
 list(APPEND SOURCE_FILES message_transciever.cpp)
 

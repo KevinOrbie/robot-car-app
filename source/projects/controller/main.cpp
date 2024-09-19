@@ -19,6 +19,7 @@
 int main() {
     /* Setup Robot Communication. */
     remote::Robot robot = {"localhost", 2556};
+    robot.connect();
     robot.thread();
 
     while (true) {

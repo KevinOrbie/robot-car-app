@@ -22,10 +22,11 @@ namespace robot {
 using namespace message;
 /* =========================== Macros ========================== */
 #define PIPE_MESSAGE(msg_id) \
-case msg_id: \
+case msg_id: { \
     Message<msg_id> *message = dynamic_cast<Message<msg_id>*>(message_base.get()); \
     on(message);    \
-    break           \
+    break;          \
+}
 
 
 /* ========================== Classes ========================== */
@@ -35,6 +36,10 @@ class MessageHandler: public server::MessageHandler {
 
     void iteration() {
         std::unique_ptr<MessageBase> message_base = server_.popRecieveQueue();
+        if (!message_base) {
+            /* No message to process. */
+            return;
+        }
         MessageID id = message_base->getID();
 
         switch (id) {

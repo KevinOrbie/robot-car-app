@@ -2,6 +2,8 @@
  * @brief Header for C++ Client POSIX socket interface.
  */
 
+#pragma once
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 #include <netinet/in.h>  // Internet domain address support (sockaddr_in)
