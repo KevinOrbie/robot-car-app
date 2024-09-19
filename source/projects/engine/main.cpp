@@ -15,17 +15,24 @@
 // None
 
 /* Custom C++ Includes */
+#include "robot/arduino_driver.h"
 #include "robot/remote.h"
 
 
 /* ======================== Entry Point ======================== */
 int main() {
+    /* Setup Arduino Driver. */
+    ArduinoDriver arduino = {};
+
     /* Setup LAN connection. */
-    robot::Remote remote = {2556};
+    robot::Remote remote = {2556, &arduino};
     remote.connect();
     remote.thread();
 
-    while (true) { __asm(""); }; // Avoid optimizing out.
+    /* Start Arduino Driver. */
+    arduino.start();  // Run in this thread
+
+    // while (true) { __asm(""); }; // Avoid optimizing out.
     return 0;
 }
 

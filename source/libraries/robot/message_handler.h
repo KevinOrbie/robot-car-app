@@ -14,6 +14,7 @@
 // None
 
 /* Custom C++ Libraries */
+#include "common/input_sink.h"
 #include "network/message_handler.h"
 #include "network/server.h"
 
@@ -32,7 +33,7 @@ case msg_id: { \
 /* ========================== Classes ========================== */
 class MessageHandler: public server::MessageHandler {
    public:
-    MessageHandler(server::Server &server): server_(server) {};
+    MessageHandler(server::Server &server, InputSink *input_sink=nullptr): server_(server), input_sink_(input_sink) {};
 
     void iteration() {
         std::unique_ptr<MessageBase> message_base = server_.popRecieveQueue();
@@ -55,6 +56,7 @@ class MessageHandler: public server::MessageHandler {
 
    private:
     server::Server &server_;
+    InputSink *input_sink_ = nullptr;
 };
 
 } // namespace remote

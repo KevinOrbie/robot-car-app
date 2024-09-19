@@ -25,7 +25,7 @@ namespace robot {
 /* ========================== Classes ========================== */
 class Remote: public Looper {
    public:
-    Remote(int port, InputSink *input_sink=nullptr): server_(port, false), handler_(server_) {};
+    Remote(int port, InputSink *input_sink=nullptr): server_(port, false), handler_(server_, input_sink) {};
 
     void connect();
     void iteration() override;

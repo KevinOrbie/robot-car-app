@@ -23,6 +23,9 @@ namespace robot {
 /* ========================== Classes ========================== */
 void MessageHandler::on(Message<MessageID::CMD_DRIVE> *msg) {
     LOGI("Command Drive message recieved: value = '%s'", msg->value().keys[Button::SPACE].held ? "true": "false");
+    if (input_sink_) {
+        input_sink_->sink(msg->value());
+    }
 };
 
 } // namespace remote
