@@ -29,9 +29,5 @@ int main() {
     return 0;
 }
 
-// TODO: Test sending messages (with bool)
-// TODO: Test sending Default Input object
-// TODO: Test sending messages with controller
-
 // TODO: Compile on Jetson
 // TODO: Test Sending messages between Jetson & Desktop.

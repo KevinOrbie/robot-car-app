@@ -12,6 +12,7 @@
 #include <thread>
 
 /* Custom C++ Libraries */
+#include "control_panel/control_panel.h"
 #include "remote/robot.h"
 
 
@@ -22,13 +23,17 @@ int main() {
     robot.connect();
     robot.thread();
 
-    while (true) {
-        int value = 0;
-        std::cout << "INPUT: ";
-        std::cin >> value;
+    /* Setup Controller. */
+    ControlPanel panel = {nullptr, &robot};
+    panel.start();
 
-        robot.sink({});
-        __asm("");  // Avoid optimizing out.
-    };
+    // while (true) {
+    //     int value = 0;
+    //     std::cout << "INPUT: ";
+    //     std::cin >> value;
+
+    //     robot.sink({});
+    //     __asm("");  // Avoid optimizing out.
+    // };
 }
 
