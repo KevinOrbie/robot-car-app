@@ -12,6 +12,7 @@
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 #include <stdint.h>
+#include <stddef.h>
 
 /* Standard C++ Libraries */
 // None

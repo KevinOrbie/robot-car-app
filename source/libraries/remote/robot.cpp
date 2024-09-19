@@ -31,7 +31,7 @@ void Robot::iteration() {
 
 void Robot::sink(Input input) {
     /* Forward over channel. */
-    std::unique_ptr<message::MessageBase> msg = std::make_unique<message::Message<message::MessageID::CMD_DRIVE>>(true);
+    std::unique_ptr<message::MessageBase> msg = std::make_unique<message::Message<message::MessageID::CMD_DRIVE>>(input);
     client_.pushSendQueue(std::move(msg));
 };
 

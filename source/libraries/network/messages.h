@@ -12,6 +12,7 @@
 // None
 
 /* Custom C++ Libraries */
+#include "common/input.h"
 #include "message.h"
 
 
@@ -54,7 +55,7 @@ ADD_MESSAGE(CMD_DRIVE)   // Command the robot to update it's Drive Control State
  * @brief Creates a template specialization of the Message<ID> class 
  * for every message type, for the associated payload type.
  */
-CREATE_MESSAGE(MessageID::CMD_DRIVE, bool);
+CREATE_MESSAGE(MessageID::CMD_DRIVE, Input);
 
 
 /**
