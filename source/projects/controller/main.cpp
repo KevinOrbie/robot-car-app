@@ -19,7 +19,8 @@
 /* ======================== Entry Point ======================== */
 int main() {
     /* Setup Robot Communication. */
-    remote::Robot robot = {"192.168.0.231", 2556};
+    // remote::Robot robot = {"192.168.0.231", 2556};
+    remote::Robot robot = {"localhost", 2556};
     robot.connect();
     robot.thread();
 

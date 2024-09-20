@@ -10,7 +10,6 @@
  */
 
 // TODO: Add the time to logs
-// TODO: support multi thread logging
 
 #pragma once
 

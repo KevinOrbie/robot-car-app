@@ -61,12 +61,22 @@ class Payload {
     Payload(T &payload): payload_(payload) {};
 
     void serialize(Connection& connection) {
-        LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+        static bool printed = false;
+        if (!printed) {
+            LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+            printed = true;
+        }
+
         connection.send(reinterpret_cast<char*>(&payload_), sizeof(T));
     };
 
     static T deserialize(Connection& connection) {
-        LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+        static bool printed = false;
+        if (!printed) {
+            LOGW("Payload Type not explicitly implemented, assuming matching memory layout!");
+            printed = true;
+        }
+
         T payload;
         connection.recieve(reinterpret_cast<char*>(&payload), sizeof(T));
         return payload;
