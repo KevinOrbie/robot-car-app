@@ -25,26 +25,35 @@
 /* ========================== Macros =========================== */
 #define COLORED  // Uncomment to log wihtout color
 
-// #define _LOG(lvl, message, ...) fprintf(stderr, "[" lvl "] " message " (%s: %d)\n", ## __VA_ARGS__,  __func__, __LINE__)
-// #define _LOG_FULL(lvl, message, ...) fprintf(stderr, "[" lvl "] " message " ( %s:%d , %s() )\n", ## __VA_ARGS__,  __FILE__, __LINE__, __func__)
-// #define _LOG_COLOR(lvl, hcolor, mcolor, message, ...) fprintf(stderr, mcolor "[" hcolor lvl mcolor "] " message "  \e[0;38;2;140;140;140m (%s: %d) \e[0m\n", ## __VA_ARGS__,  __func__, __LINE__)
-// #define _LOG_COLOR_FULL(lvl, hcolor, mcolor, message, ...) fprintf(stderr, mcolor "[" hcolor lvl mcolor "] " message "  \e[0;38;2;140;140;140m ( %s:%d , %s() ) \e[0m\n", ## __VA_ARGS__, __FILE__, __LINE__, __func__)
-
-#define _LOG(lvl, message, ...) _logger_printf("[" lvl "] " message " (%s: %d)\n", ## __VA_ARGS__,  __func__, __LINE__)
-#define _LOG_FULL(lvl, message, ...) _logger_printf("[" lvl "] " message " ( %s:%d , %s() )\n", ## __VA_ARGS__,  __FILE__, __LINE__, __func__)
-#define _LOG_COLOR(lvl, hcolor, mcolor, message, ...) _logger_printf(mcolor "[" hcolor lvl mcolor "] " message "  \e[0;38;2;140;140;140m (%s: %d) \e[0m\n", ## __VA_ARGS__,  __func__, __LINE__)
-#define _LOG_COLOR_FULL(lvl, hcolor, mcolor, message, ...) _logger_printf(mcolor "[" hcolor lvl mcolor "] " message "  \e[0;38;2;140;140;140m ( %s:%d , %s() ) \e[0m\n", ## __VA_ARGS__, __FILE__, __LINE__, __func__)
-
-#ifndef COLORED
-    #define LOGI(message, ...) _LOG(" INFO  ", message, ## __VA_ARGS__)
-    #define LOGW(message, ...) _LOG(" WARN  ", message, ## __VA_ARGS__)
-    #define LOGE(message, ...) _LOG_FULL(" ERR  ", message, ## __VA_ARGS__)
+/* Color Definitions */
+#ifdef COLORED
+    #define _LOG_COLOR_BOLD         "\e[1m"
+    #define _LOG_COLOR_BOLD_YELLOW  "\e[1;38;2;245;197;24m"
+    #define _LOG_COLOR_YELLOW       "\e[0;38;2;220;184;48m"
+    #define _LOG_COLOR_BOLD_RED     "\e[1;38;2;245;43;24m"
+    #define _LOG_COLOR_RED          "\e[0;38;2;220;79;89m"
+    #define _LOG_COLOR_GREY         "\e[0;38;2;140;140;140m"
+    #define _LOG_COLOR_CLEAR        "\e[0m"
 #else
-    #define LOGI(message, ...) _LOG_COLOR(" INFO ", "\e[1m", "\e[0m", message, ## __VA_ARGS__)
-    #define LOGW(message, ...) _LOG_COLOR_FULL(" WARN ", "\e[1;38;2;245;197;24m", "\e[0;38;2;220;184;48m", message, ## __VA_ARGS__)
-    #define LOGE(message, ...) _LOG_COLOR_FULL(" ERR  ", "\e[1;38;2;245;43;24m", "\e[0;38;2;220;79;89m", message, ## __VA_ARGS__)
+    #define _LOG_COLOR_BOLD         ""
+    #define _LOG_COLOR_BOLD_YELLOW  ""
+    #define _LOG_COLOR_YELLOW       ""
+    #define _LOG_COLOR_BOLD_RED     ""
+    #define _LOG_COLOR_RED          ""
+    #define _LOG_COLOR_GREY         ""
+    #define _LOG_COLOR_CLEAR        ""
 #endif
+
+/* Create Message with arguments */
+#define _LOG_ARGS_SHRT(lvl, hcolor, mcolor, message, ...) mcolor "[" hcolor lvl mcolor "] " message _LOG_COLOR_GREY "  (%s: %d)" _LOG_COLOR_CLEAR "\n", ## __VA_ARGS__,  __func__, __LINE__
+#define _LOG_ARGS_LONG(lvl, hcolor, mcolor, message, ...) mcolor "[" hcolor lvl mcolor "] " message _LOG_COLOR_GREY "  ( %s:%d , %s() )" _LOG_COLOR_CLEAR "\n", ## __VA_ARGS__, __FILE__, __LINE__, __func__
+
+/* Logging Definitions */
+#define LOGI(message, ...) _logger_printf(_LOG_ARGS_SHRT(" INFO ", _LOG_COLOR_BOLD       , _LOG_COLOR_CLEAR , message, ## __VA_ARGS__))
+#define LOGW(message, ...) _logger_printf(_LOG_ARGS_LONG(" WARN ", _LOG_COLOR_BOLD_YELLOW, _LOG_COLOR_YELLOW, message, ## __VA_ARGS__))
+#define LOGE(message, ...) _logger_printf(_LOG_ARGS_LONG(" ERR  ", _LOG_COLOR_BOLD_RED   , _LOG_COLOR_RED   , message, ## __VA_ARGS__))
 
 
 /* ========================= Functions ========================= */
 void _logger_printf(const char* format, ...);
+

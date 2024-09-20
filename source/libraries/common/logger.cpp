@@ -3,9 +3,6 @@
  * @author Kevin Orbie
  */
 
-// TODO: Add the time to logs
-// TODO: support multi thread logging
-
 /* ========================== Include ========================== */
 #include "logger.h"
 
