@@ -78,7 +78,8 @@ class Payload {
         }
 
         T payload;
-        connection.recieve(reinterpret_cast<char*>(&payload), sizeof(T));
+        /* TODO: possbily make not busy waiting*/
+        while(!connection.recieve(reinterpret_cast<char*>(&payload), sizeof(T))) {};
         return payload;
     };
 

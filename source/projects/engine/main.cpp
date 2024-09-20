@@ -30,13 +30,8 @@ int main() {
     remote.thread();
 
     /* Start Arduino Driver. */
-    // arduino.start();  // Run in this thread
+    arduino.start();  // Run in this thread
 
-    while (true) { 
-        __asm(""); 
-    }; // Avoid optimizing out.
+    // while (true) { __asm(""); }; // Avoid optimizing out.
     return 0;
 }
-
-// TODO: Compile on Jetson
-// TODO: Test Sending messages between Jetson & Desktop.
