@@ -83,7 +83,7 @@ class Payload {
  */
 template<MessageID ID>
 class Message : public MessageBase {
-    static_assert(false);  // ERROR: Message corresponding with MessageID not yet created with CREATE_MESSAGE()!
+    // static_assert(false);  // ERROR: Message corresponding with MessageID not yet created with CREATE_MESSAGE()!
 };
 
 

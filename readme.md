@@ -10,7 +10,26 @@ git clone https://github.com/KevinOrbie/robot-car-app ./RCA
 
 2. Download and setup the required thirparty packages, as described [here](./thirdparty/readme.md).
 
-3. (optional) Source the `aliases.sh` file your `.bashrc`: adds a bunch of ease of use development aliases starting with "`rca-`".
+3. (optional) Source the `aliases.sh` file your `.bashrc`: adds a bunch of ease of use development aliases starting with "`rca-`". 
+
+Desktop `.bashrc` addition example:
+```bash
+############# CUSTOM #############
+HOST=desktop
+if [ -f <CORRECT_PATH>/RCA/aliases.sh ]; then
+    source <CORRECT_PATH>/RCA/aliases.sh
+fi
+```
+
+Robot `.bashrc` addition example:
+```bash
+############# CUSTOM #############
+HOST=robot
+APP_ROOT=~/RCA
+if [ -f ~/RCA/aliases.sh ]; then
+    source ~/RCA/aliases.sh
+fi
+```
 
 ## Build Instructions (Ubuntu)
 

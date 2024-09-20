@@ -29,6 +29,8 @@ add_subdirectory(thirdparty/ffmpeg)
 # [v4l2] realtime video capture on Linux systems
 add_subdirectory(thirdparty/v4l2)
 
+# [Threads] Default C++ Threads library
+find_package(Threads REQUIRED)
 
 ## ---------------- Include Project Code ------------------
 # Include pilot projects

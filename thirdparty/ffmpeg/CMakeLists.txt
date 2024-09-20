@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.9)
 
 # Define library target
 # - INTERFACE: Does not reference any library or object files.
