@@ -74,6 +74,8 @@ rca-top() {
 }
 
 # ------------------ Robot ------------------
+# To connect to the robot: ssh kevin@vehicle0.local
+
 rca-sync-to-robot() {
     echo ">>> Updating source code on the robot..."
     # Rsync to Robot:

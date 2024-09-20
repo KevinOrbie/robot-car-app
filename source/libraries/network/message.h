@@ -11,6 +11,7 @@
 /* Standard C++ Libraries */
 #include <functional>
 #include <stdexcept>
+#include <typeinfo>
 #include <memory>
 #include <map>
 

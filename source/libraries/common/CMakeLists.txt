@@ -6,7 +6,7 @@ set(HEADER_FILES "")
 set(SOURCE_FILES "")
 
 ## Define Sources
-# list(APPEND SOURCE_FILES client.cpp)
+list(APPEND SOURCE_FILES logger.cpp)
 
 ## Define Headers
 list(APPEND HEADER_FILES drive_controller.h)
