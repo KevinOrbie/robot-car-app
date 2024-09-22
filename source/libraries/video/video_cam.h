@@ -51,6 +51,7 @@ class VideoCam: public FrameProvider {
     VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP);
     ~VideoCam();
     Frame getFrame(double curr_time) override;
+    FrameView getFrameView(double curr_time) override;
     void startStream();
     void stopStream();
 

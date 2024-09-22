@@ -167,12 +167,20 @@ VideoTransmitter::~VideoTransmitter() {
 }
 
 void VideoTransmitter::iteration() {
-    Frame frame = {2560, 720, 3, {}};
-    send(frame);
+    if (frame_provider_) {
+        /* Assumed to be a blocking call. */
+        FrameView frame_view = frame_provider_->getFrameView(-1.0);
+        send(frame_view);
+    } else {
+        /* Send dummy frame. */
+        Frame frame = {PixelFormat::YUV422P, 2560, 720};
+        FrameView frame_view = frame.view();
+        send(frame_view);
 
-    /* Fix to 30 FPS. */
-    std::this_thread::sleep_until(start_time_ + std::chrono::milliseconds(33));
-    start_time_ = std::chrono::steady_clock::now();
+        /* Fix to 30 FPS. */
+        std::this_thread::sleep_until(start_time_ + std::chrono::milliseconds(33));
+        start_time_ = std::chrono::steady_clock::now();
+    }
 }
 
 /**
@@ -182,32 +190,17 @@ void VideoTransmitter::iteration() {
  * function will directly send the output.
  * @link https://www.ffmpeg.org/doxygen/trunk/remux_8c-example.html#a48
  */
-void VideoTransmitter::send(Frame &frame) {
+void VideoTransmitter::send(FrameView &frame) {
     /* Add data to frame. */
     ptr_frame->pts = frame_pts;
-    for (int yidx = 0; yidx < frame.height; yidx++) {
-        for (int xidx = 0; xidx < frame.width; xidx++) {
-            int idx = (yidx * frame.width + xidx) * frame.channels;
+    
+    FrameView frame_buffer_view = FrameView(
+        ptr_frame->data[0], PixelFormat::YUV422P, 
+        ptr_frame->width, ptr_frame->height, 
+        {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]}
+    );
 
-            // NOTE: linesize is the width of the image in memory (>= width)
-            // NOTE: YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block
-
-            // *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = frame_data_.data[idx + 0];  // Y
-            // *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = frame_data_.data[idx + 1];  // U (use for even / uneven pixel)
-            // *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = frame_data_.data[idx + 2];  // V (use for even / uneven pixel)
-
-            if ((yidx > 10 && yidx < 110) && (xidx > (frame_pts % frame.width) && xidx < ((frame_pts + 100) % frame.width))) {
-                /* Draw Box. */
-                *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = 250; // Y
-                *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = 0;   // U (use for even / uneven pixel)
-                *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = 0;   // V (use for even / uneven pixel)
-            } else {
-                *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = 0;  // Y
-                *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = 0;  // U (use for even / uneven pixel)
-                *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = 0;  // V (use for even / uneven pixel)
-            }
-        }
-    }
+    frame.copyCastTo(frame_buffer_view);
 
     /* Send a frame to the encoder. */
     if (avcodec_send_frame(ptr_codec_context, ptr_frame) < 0) {

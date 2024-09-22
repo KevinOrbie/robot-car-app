@@ -7,6 +7,7 @@ set(SOURCE_FILES "")
 
 ## Define Sources
 list(APPEND SOURCE_FILES video_transmitter.cpp)
+list(APPEND SOURCE_FILES frame_converter.cpp)
 list(APPEND SOURCE_FILES video_file.cpp)
 list(APPEND SOURCE_FILES video_cam.cpp)
 

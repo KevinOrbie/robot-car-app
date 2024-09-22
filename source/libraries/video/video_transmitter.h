@@ -37,7 +37,7 @@ class VideoTransmitter: public Looper {
     ~VideoTransmitter();
 
     void iteration() override;
-    void send(Frame &frame);
+    void send(FrameView &view);
 
    private:
     std::string address_;
