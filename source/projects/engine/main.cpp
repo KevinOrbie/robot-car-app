@@ -15,6 +15,7 @@
 // None
 
 /* Custom C++ Includes */
+#include "video/video_transmitter.h"
 #include "robot/arduino_driver.h"
 #include "robot/remote.h"
 
@@ -22,16 +23,19 @@
 /* ======================== Entry Point ======================== */
 int main() {
     /* Setup Arduino Driver. */
-    ArduinoDriver arduino = {};
+    // ArduinoDriver arduino = {};
 
     /* Setup LAN connection. */
-    robot::Remote remote = {2556, &arduino};
-    remote.connect();
-    remote.thread();
+    // robot::Remote remote = {2556, &arduino};
+    // remote.connect();
+    // remote.thread();
 
     /* Start Arduino Driver. */
-    arduino.start();  // Run in this thread
+    // arduino.start();  // Run in this thread
 
     // while (true) { __asm(""); }; // Avoid optimizing out.
+    VideoTransmitter transmitter = {"udp://127.0.0.1:8999"};
+    transmitter.start();
+
     return 0;
 }

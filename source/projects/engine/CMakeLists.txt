@@ -19,7 +19,7 @@ list(APPEND INSTALL_TARGETS ${TARGET_NAME})
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Link External Libraries
-target_link_libraries(${TARGET_NAME} PRIVATE rca_common rca_robot)
+target_link_libraries(${TARGET_NAME} PRIVATE rca_common rca_robot rca_video)
 
 
 ## ------------------------- Installation -------------------------
