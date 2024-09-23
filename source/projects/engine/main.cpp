@@ -16,6 +16,8 @@
 
 /* Custom C++ Includes */
 #include "video/video_transmitter.h"
+#include "video/video_file.h"
+
 #include "robot/arduino_driver.h"
 #include "robot/remote.h"
 
@@ -32,6 +34,9 @@ int main() {
 
     /* Start Arduino Driver. */
     // arduino.start();  // Run in this thread
+
+    VideoFile video_file = VideoFile("/home/kevin/Videos/normal-1080p.mp4");
+    video_file.startStream();
 
     // while (true) { __asm(""); }; // Avoid optimizing out.
     VideoTransmitter transmitter = {"udp://127.0.0.1:8999"};

@@ -30,11 +30,13 @@ enum class PixelFormat {
  */
 struct FrameView {
    public:
-    FrameView(uint8_t *fdata, PixelFormat fmt, int fwidth, int fheight, std::vector<int> flinesize): 
+    FrameView() = default;
+    FrameView(std::vector<uint8_t*> fdata, PixelFormat fmt, int fwidth, int fheight, std::vector<int> flinesize): 
         data(fdata), format(fmt), width(fwidth), height(fheight), linesize(flinesize) {};
 
     int size() {
         switch (format) {
+            case PixelFormat::YUV    : return height * linesize[0]; 
             case PixelFormat::YUV422 : return height * linesize[0];
             case PixelFormat::YUV422P: return height * linesize[0] + height * linesize[1] + height * linesize[2]; break;
             default: break;
@@ -53,10 +55,12 @@ struct FrameView {
 
    private:
     /* Conversion Functions. */
+    static void YUV422_to_YUV(FrameView &src_view, FrameView &dst_view);
     static void YUV422_to_YUV422P(FrameView &src_view, FrameView &dst_view);
+    static void YUV420P_to_YUV(FrameView &src_view, FrameView &dst_view);
 
    public:
-    uint8_t *data;
+    std::vector<uint8_t*> data;
     PixelFormat format;
 
     int width;
@@ -70,6 +74,9 @@ struct FrameView {
  */
 class Frame {
    public:
+    /**
+     * @brief Frame with no image data.
+     */
     Frame() = default;
 
     /**
@@ -83,18 +90,21 @@ class Frame {
      * @brief Create a frame for the data pointed to by the FrameView, 
      * in the specified pixel format.
      */
-    Frame(FrameView new_view, PixelFormat fmt): width(new_view.width), height(new_view.height), pxl_fmt(new_view.format) {
+    Frame(FrameView new_view, PixelFormat fmt=PixelFormat::EMPTY): width(new_view.width), height(new_view.height){
+        pxl_fmt = (fmt == PixelFormat::EMPTY) ? new_view.format: fmt;
         data.resize(size());
+
         FrameView current_view = view();
         new_view.copyCastTo(current_view);
     }
 
     /**
-     * @brief Empty test initialization.
+     * @brief Fully black image.
      */
     Frame(PixelFormat fmt, int width, int height): width(width), height(height) {
         int size = 0;
         switch (fmt) {
+            case PixelFormat::YUV: size = width * height * 3; break;
             case PixelFormat::YUV422: size = width * height * 2; break;
             case PixelFormat::YUV422P: size = width * height * 2; break;
             default: size = width * height * 3; break;
@@ -112,7 +122,14 @@ class Frame {
     }
 
     FrameView view() {
-        return FrameView(data.data(), pxl_fmt, width, height, {width, width, width});
+        switch (pxl_fmt) {
+            case PixelFormat::YUV    : return FrameView({data.data()}, pxl_fmt, width, height, {width});
+            case PixelFormat::YUV420P: return FrameView({&data[0], &data[width*height], &data[(width*height*3)>>1]}, pxl_fmt, width, height, {width, width>>1, width>>1});
+            case PixelFormat::YUV422 : return FrameView({data.data()}, pxl_fmt, width, height, {width});
+            case PixelFormat::YUV422P: return FrameView({&data[0], &data[width*height], &data[(width*height*3)>>1]}, pxl_fmt, width, height, {width, width>>1, width>>1});
+            default: break;
+        }
+        return FrameView({data.data()}, pxl_fmt, width, height, {width, width, width});
     }
 
    public:
@@ -125,12 +142,14 @@ class Frame {
 
 /**
  * @brief An abstract interface to be implemented by classes that provide frames.
+ * 
+ * @note If we make getFrame a templated operation, then we can specify the pixelformat to avoid unnecessary operations.
  */
 class FrameProvider {
    public:
     FrameProvider() {};
     virtual Frame getFrame(double curr_time) = 0;  // Should be non-blocking?
-    virtual FrameView getFrameView(double curr_time) = 0;  // Should be blocking?
+    virtual FrameView getFrameView(double curr_time) { return {}; };  // Should be blocking?
     virtual void startStream() = 0;
     virtual void stopStream() = 0;
 };

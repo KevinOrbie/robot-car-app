@@ -51,7 +51,7 @@ class VideoCam: public FrameProvider {
     VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP);
     ~VideoCam();
     Frame getFrame(double curr_time) override;
-    FrameView getFrameView(double curr_time) override;
+    // FrameView getFrameView(double curr_time) override;
     void startStream();
     void stopStream();
 
@@ -76,7 +76,14 @@ class VideoCam: public FrameProvider {
     bool getFrame_IO_READ();
     bool getFrame_IO_MMAP();
     bool getFrame_IO_USRP();
+
+    // NOTE: readFrame is used in a sandwish mode in the getFrame Functions, 
+    // this makes it more diffcult to implement a getFrameView function.
+    // HOWEVER: it might be possible to switch VIDIOC_QBUF and VIDIOC_DQBUF to have access to the data in between.
+    // https://stackoverflow.com/questions/59723314/vidioc-qbuf-device-or-resource-busy-v4l2-memory-userptr
     void readFrame(unsigned int buffer_index);
+
+    // TODO: Fix all uses of Frame (to new functionality, possibly with FrameView).
 
     /* -------------- Variable Declarations -------------- */
    private:

@@ -18,7 +18,7 @@
 
 
 /* ============================ Classes ============================ */
-VideoTransmitter::VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr): 
+VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *frame_provider): 
     address_(address), frame_provider_(frame_provider) {
     avformat_network_init();
     // av_log_set_level(AV_LOG_DEBUG);
@@ -169,7 +169,8 @@ VideoTransmitter::~VideoTransmitter() {
 void VideoTransmitter::iteration() {
     if (frame_provider_) {
         /* Assumed to be a blocking call. */
-        FrameView frame_view = frame_provider_->getFrameView(-1.0);
+        Frame frame = frame_provider_->getFrame(5000);
+        FrameView frame_view = frame.view();
         send(frame_view);
     } else {
         /* Send dummy frame. */
@@ -195,7 +196,7 @@ void VideoTransmitter::send(FrameView &frame) {
     ptr_frame->pts = frame_pts;
     
     FrameView frame_buffer_view = FrameView(
-        ptr_frame->data[0], PixelFormat::YUV422P, 
+        {ptr_frame->data[0]}, PixelFormat::YUV422P, 
         ptr_frame->width, ptr_frame->height, 
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]}
     );
