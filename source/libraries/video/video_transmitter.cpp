@@ -173,23 +173,24 @@ void VideoTransmitter::iteration() {
         /* Video from frame provider (YUV422). */
         Frame frame = frame_provider_->getFrame(INFINITY); // Always get the latest frame.
         send(frame);
+
     } else {
         /* Testing video. */
         // NOTE: YUV (0,0,0) is roughly RGB (0, 136, 0)
-        Frame frame = {1280, 720, 2, {}}; // YUV422P
+        Frame frame = {2560, 720, 2, {}}; // YUV422
         frame.data.resize(frame.width * frame.height * 2, 0);
 
         static int counter = 0;
         /* Fill in a box. */
         for (int yidx = 0; yidx < frame.height; yidx++) {
             for (int xidx = (counter % frame.width); xidx < (counter + 100) % frame.width; xidx++) {
-                int idx = (yidx * frame.width + xidx);
+                int idx = (yidx * frame.width * 2 + xidx * 2);
 
                 /* Only fill the y plane. */
                 frame.data[idx] = 255;
             }
         }
-        counter++;
+        counter += 20;
 
         send(frame);
 
@@ -212,7 +213,7 @@ void VideoTransmitter::send(Frame &frame) {
 
     /* Copy YUV422 to YUV422P. */
     YUV422_to_YUV422P(
-        frame.data.data(), frame.width, 
+        frame.data.data(), frame.width * 2, 
         {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
         frame.width, frame.height
