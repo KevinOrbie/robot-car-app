@@ -64,6 +64,24 @@ void YUV422_to_YUV422P(uint8_t* src_data, int src_linesize,
     }
 };
 
+void YUV422P_to_YUV(std::array<uint8_t*, 3> src_data, std::array<int, 3> src_linesizes,
+                    uint8_t* dst_data, int dst_linesize,
+                    int width, int height) {
+    /* Setup Plane Variables. */
+    uint8_t* src_planar_y_base = src_data[0];
+    uint8_t* src_planar_u_base = src_data[1];
+    uint8_t* src_planar_v_base = src_data[2];
+
+    /* Process 1 pixel / iteration. */
+    for (int yidx = 0; yidx < height; yidx++) { /* Pixel Height Coordinate. */
+        for (int xidx = 0; xidx < width; xidx++) { /* Pixel Width Coordinate. */
+            *(dst_data + yidx * dst_linesize + xidx * 3 + 0) = *(src_planar_y_base + yidx * src_linesizes[0] + xidx + 0);     // Y
+            *(dst_data + yidx * dst_linesize + xidx * 3 + 1) = *(src_planar_u_base + yidx * src_linesizes[1] + (xidx >> 1));  // U (use same U for even / uneven pixel)
+            *(dst_data + yidx * dst_linesize + xidx * 3 + 2) = *(src_planar_v_base + yidx * src_linesizes[2] + (xidx >> 1));  // V (use same V for even / uneven pixel)
+        }
+    }
+};
+
 // void YUV420P_to_YUV(FrameView &src_view, FrameView &dst_view) {
 //     /**
 //      * @note YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block

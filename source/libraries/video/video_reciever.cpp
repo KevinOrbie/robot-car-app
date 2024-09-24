@@ -12,6 +12,7 @@
 /* Standard C++ Libraries */
 #include <stdexcept>
 #include <string>
+#include <mutex>
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
@@ -141,6 +142,12 @@ VideoReciever::VideoReciever(std::string const& address): address_(address){
     }
     av_frame_make_writable(ptr_frame);
 
+    /* Setup Custom Frame. */
+    frame_data_.width = ptr_frame->width;
+    frame_data_.height = ptr_frame->height;
+    frame_data_.channels = 3;
+    frame_data_.data.resize(frame_data_.width * frame_data_.height * frame_data_.channels, 0);
+
     /* Allocate Packet */
     ptr_packet = av_packet_alloc();
     if (!ptr_packet) {
@@ -159,13 +166,14 @@ VideoReciever::~VideoReciever() {
 }
 
 void VideoReciever::iteration() {
-    getFrame(INFINITY);
+    // TODO: Verify FPS not > 60/30FPS.
+    recieve(); // Blocking
 }
 
 /**
  * @brief Recieve a frame over the network.
  */
-Frame VideoReciever::getFrame(double curr_time) {
+void VideoReciever::recieve() {
     int response = 0;
     bool found_packet = false;
     bool decoded_frame = false;
@@ -176,12 +184,12 @@ Frame VideoReciever::getFrame(double curr_time) {
         decoded_frame = false;
     } else if (response < 0) {
         LOGW("Issue while receiving a frame from the decoder: %d", (response));
-        return frame_data_;
+        return;
     } else {
         decoded_frame = true;
     }
 
-    /* Retrieve Video Stream Packets until we can decode the next frame. */
+    /* Retrieve Video Stream Packets until we can decode the next frame (BLOCKING). */
     while (!decoded_frame && av_read_frame(ptr_format_context, ptr_packet) >= 0) {
 
         /* Only process selected Video Stream Packets. */
@@ -192,14 +200,14 @@ Frame VideoReciever::getFrame(double curr_time) {
             response = avcodec_send_packet(ptr_codec_context, ptr_packet);
             if (response < 0) {
                 LOGW("Issue while sending a packet to the decoder: %d", (response));
-                return frame_data_;
+                return;
             }
 
             /* Decode new frame */
             response = avcodec_receive_frame(ptr_codec_context, ptr_frame);
             if (response != AVERROR(EAGAIN) && response != AVERROR_EOF && response < 0) {
                 LOGW("Issue while receiving a frame from the decoder: %d", (response));
-                return frame_data_;
+                return;
             } else if (response >= 0) {
                 decoded_frame = true;
             }
@@ -209,10 +217,10 @@ Frame VideoReciever::getFrame(double curr_time) {
     }
 
     if (!decoded_frame) {
-        return frame_data_; 
+        return; 
     }
 
-    play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
+    double play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
     LOGI(
         "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]",
         ptr_codec_context->frame_number,
@@ -225,30 +233,26 @@ Frame VideoReciever::getFrame(double curr_time) {
         ptr_frame->coded_picture_number
     );
 
-    /* Process Frame. */
+    /* Process New Frame. */
     if (ptr_frame->format != AV_PIX_FMT_YUV422P) {
         LOGW("Currnelty only YUV422P is supported.");
     }
 
-    frame_data_.width = ptr_frame->width;
-    frame_data_.height = ptr_frame->height;
-    frame_data_.channels = 3;
+    std::lock_guard lock(frame_data_mutex_);
+    YUV422P_to_YUV(
+        {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
+        {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
+        frame_data_.data.data(), frame_data_.width * 3,
+        frame_data_.width, frame_data_.height
+    );
 
-    // int size = frame_data_.width * frame_data_.height * frame_data_.channels;
-    // frame_data_.data.resize(size);
+    return;
+}
 
-    // for (int yidx = 0; yidx < frame_data_.height; yidx++) {
-    //     for (int xidx = 0; xidx < frame_data_.width; xidx++) {
-    //         int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
-
-    //         // NOTE: linesize is the width of the image in memory (>= width)
-    //         // NOTE: YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block
-
-    //         frame_data_.data[idx + 0] = *(ptr_frame->data[0] + yidx * ptr_frame->linesize[0] + xidx);        // Y
-    //         frame_data_.data[idx + 1] = *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2);  // U (use for even / uneven pixel)
-    //         frame_data_.data[idx + 2] = *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2);  // V (use for even / uneven pixel)
-    //     }
-    // }
-
+/**
+ * @brief Get the last frame.
+ */
+Frame VideoReciever::getFrame(double curr_time) {
+    std::lock_guard lock(frame_data_mutex_);
     return frame_data_;
 }

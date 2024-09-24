@@ -27,11 +27,11 @@ int main() {
 
     /* Setup VideoReciever. */
     VideoReciever reciever = VideoReciever("udp://127.0.0.1:8999");
-    reciever.start();
+    reciever.thread();
 
     /* Setup Controller. */
-    // ControlPanel panel = {nullptr, &robot};
-    // panel.start();
+    ControlPanel panel = {&reciever, nullptr};
+    panel.start();
 
     // while (true) {
     //     int value = 0;

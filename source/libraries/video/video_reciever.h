@@ -14,6 +14,7 @@
 /* Standard C++ Libraries */
 #include <vector>
 #include <string>
+#include <mutex>
 
 /* Third Party C++ Libraries */
 extern "C" { // ffmpeg
@@ -37,7 +38,7 @@ class VideoReciever: public Looper, public FrameProvider {
     ~VideoReciever();
 
     void iteration() override;
-    void recieve() {}; // Blocking
+    void recieve(); // Blocking
 
     Frame getFrame(double curr_time) override;
     void startStream() override {};
@@ -63,6 +64,6 @@ class VideoReciever: public Looper, public FrameProvider {
 
     /* Frame Data */
     Frame  frame_data_ = {};
-    double play_time_  = -1.0;
     int    frame_pts   = 0;
+    std::mutex frame_data_mutex_;
 };
