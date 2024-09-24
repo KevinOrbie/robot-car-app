@@ -220,18 +220,18 @@ void VideoReciever::recieve() {
         return; 
     }
 
-    double play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
-    LOGI(
-        "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]",
-        ptr_codec_context->frame_number,
-        av_get_picture_type_char(ptr_frame->pict_type),
-        ptr_frame->pkt_size,
-        ptr_frame->format,
-        ptr_frame->pts,
-        ptr_frame->key_frame,
-        play_time_,
-        ptr_frame->coded_picture_number
-    );
+    // double play_time_ = static_cast<double>(ptr_frame->pts) * static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.num) / static_cast<double>(ptr_format_context->streams[video_stream_index]->time_base.den);
+    // LOGI(
+    //     "Frame %d (type=%c, size=%d bytes, format=%d) pts %ld key_frame %d time %fs [DTS %d]",
+    //     ptr_codec_context->frame_number,
+    //     av_get_picture_type_char(ptr_frame->pict_type),
+    //     ptr_frame->pkt_size,
+    //     ptr_frame->format,
+    //     ptr_frame->pts,
+    //     ptr_frame->key_frame,
+    //     play_time_,
+    //     ptr_frame->coded_picture_number
+    // );
 
     /* Process New Frame. */
     if (ptr_frame->format != AV_PIX_FMT_YUV422P) {

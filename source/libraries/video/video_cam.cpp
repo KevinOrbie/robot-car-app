@@ -693,7 +693,7 @@ void VideoCam::readFrame(unsigned int buffer_index){
             /* Directly copy YUV422 to YUV422. */
             for (int yidx = 0; yidx < frame_data_.height; yidx++) { /* Image pixel coordinate system. */
                 for (int xidx = 0; xidx < frame_data_.width * 2; xidx++) { /* Byte coordinate system. */
-                    int dst_idx = (yidx * frame_data_.width + xidx);
+                    int dst_idx = (yidx * frame_data_.width * 2 + xidx);
                     int src_offset = (yidx * frame_bytes_per_line_ + xidx);
                     frame_data_.data[dst_idx] = *(buffers_[buffer_index].start + src_offset);
                 }
