@@ -94,7 +94,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
 
     /* Open / initialize the output container file (if needed). */
     if (!(ptr_format_context->oformat->flags & AVFMT_NOFILE)) {
-        av_dict_set(&ptr_open_container_opts, "pkt_size", "1200", 0); // Set packet size to 1200 bytes
+        // av_dict_set(&ptr_open_container_opts, "pkt_size", "1200", 0); // Set packet size to 1200 bytes
         av_dict_set(&ptr_open_container_opts, "buffer_size", "1048576", 0);  // Optional but might help
         av_dict_set(&ptr_open_container_opts, "max_delay", "0", 0);
         av_dict_set(&ptr_open_container_opts, "flags", "low_delay", 0);
@@ -116,7 +116,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     if (ptr_codec_context->codec_id == AV_CODEC_ID_H264) {
         // av_dict_set(&ptr_codec_opts, "profile", "high", 0);  // Only supported with YUV420P
         av_dict_set(&ptr_codec_opts, "profile", "high422", 0);
-        av_dict_set(&ptr_codec_opts, "preset", "fast", 0);
+        av_dict_set(&ptr_codec_opts, "preset", "veryfast", 0);
         av_dict_set(&ptr_codec_opts, "tune", "zerolatency", 0);
         av_dict_set(&ptr_codec_opts, "x264-params", "keyint=30", 0);
     }

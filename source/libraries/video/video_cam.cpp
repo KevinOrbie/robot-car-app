@@ -668,6 +668,7 @@ void VideoCam::readFrame(unsigned int buffer_index){
     switch (cam_type_) {
         case CamType::MYNT_EYE_STEREO:
         case CamType::ARKMICRO_WEBCAM:
+            /* Conversion from YUV422 to YUV. */
             // for (int yidx = 0; yidx < frame_data_.height; yidx++) {
             //     for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {
             //         int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
@@ -689,8 +690,7 @@ void VideoCam::readFrame(unsigned int buffer_index){
             //     }
             // }
 
-            // memcpy(&frame_data_.data[0], buffers_[buffer_index].start, frame_data_.data.size());
-
+            /* Directly copy YUV422 to YUV422. */
             for (int yidx = 0; yidx < frame_data_.height; yidx++) { /* Image pixel coordinate system. */
                 for (int xidx = 0; xidx < frame_data_.width * 2; xidx++) { /* Byte coordinate system. */
                     int dst_idx = (yidx * frame_data_.width + xidx);
