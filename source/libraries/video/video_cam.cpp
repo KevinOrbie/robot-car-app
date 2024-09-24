@@ -688,7 +688,16 @@ void VideoCam::readFrame(unsigned int buffer_index){
             //         frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
             //     }
             // }
-            memcpy(&frame_data_.data[0], buffers_[buffer_index].start, frame_data_.data.size());
+
+            // memcpy(&frame_data_.data[0], buffers_[buffer_index].start, frame_data_.data.size());
+
+            for (int yidx = 0; yidx < frame_data_.height; yidx++) { /* Image pixel coordinate system. */
+                for (int xidx = 0; xidx < frame_data_.width * 2; xidx++) { /* Byte coordinate system. */
+                    int dst_idx = (yidx * frame_data_.width + xidx);
+                    int src_offset = (yidx * frame_bytes_per_line_ + xidx);
+                    frame_data_.data[dst_idx] = *(buffers_[buffer_index].start + src_offset);
+                }
+            }
             break;
         
         default:
