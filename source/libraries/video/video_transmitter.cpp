@@ -15,6 +15,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "video/frame_conversion.h"
 
 
 /* ============================ Classes ============================ */
@@ -58,7 +59,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     /* Fill the CODEC context. */
     ptr_codec_context->codec_id = AV_CODEC_ID_H264;
     ptr_codec_context->bit_rate = 1000000;  // 1 Mbps
-    ptr_codec_context->width = 1280; //2560;
+    ptr_codec_context->width = 2560;
     ptr_codec_context->height = 720;
     ptr_codec_context->time_base = AVRational{1, 30};
     ptr_codec_context->framerate = AVRational{30, 1};
@@ -168,27 +169,34 @@ VideoTransmitter::~VideoTransmitter() {
 }
 
 void VideoTransmitter::iteration() {
-    // YUV422P format for now
-    Frame frame = {1280, 720, 2, {}};
-    frame.data.resize(frame.width * frame.height * 2, 0);
+    if (frame_provider_) {
+        /* Video from frame provider (YUV422). */
+        Frame frame = frame_provider_->getFrame(INFINITY); // Always get the latest frame.
+        send(frame);
+    } else {
+        /* Testing video. */
+        // NOTE: YUV (0,0,0) is roughly RGB (0, 136, 0)
+        Frame frame = {1280, 720, 2, {}}; // YUV422P
+        frame.data.resize(frame.width * frame.height * 2, 0);
 
-    static int counter = 0;
-    /* Fill in a box. */
-    for (int yidx = 0; yidx < frame.height; yidx++) {
-        for (int xidx = (counter % frame.width); xidx < (counter + 100) % frame.width; xidx++) {
-            int idx = (yidx * frame.width + xidx);
+        static int counter = 0;
+        /* Fill in a box. */
+        for (int yidx = 0; yidx < frame.height; yidx++) {
+            for (int xidx = (counter % frame.width); xidx < (counter + 100) % frame.width; xidx++) {
+                int idx = (yidx * frame.width + xidx);
 
-            /* Only fill the y plane. */
-            frame.data[idx] = 255;
+                /* Only fill the y plane. */
+                frame.data[idx] = 255;
+            }
         }
+        counter++;
+
+        send(frame);
+
+        /* Fix to 30 FPS. */
+        std::this_thread::sleep_until(start_time_ + std::chrono::milliseconds(33));
+        start_time_ = std::chrono::steady_clock::now();
     }
-    counter++;
-
-    send(frame);
-
-    /* Fix to 30 FPS. */
-    std::this_thread::sleep_until(start_time_ + std::chrono::milliseconds(33));
-    start_time_ = std::chrono::steady_clock::now();
 }
 
 /**
@@ -202,29 +210,37 @@ void VideoTransmitter::send(Frame &frame) {
     /* Add data to frame. */
     ptr_frame->pts = frame_pts;
 
+    /* Copy YUV422 to YUV422P. */
+    YUV422_to_YUV422P(
+        frame.data.data(), frame.width, 
+        {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
+        {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
+        frame.width, frame.height
+    );
+
     /* Copy data from custom Frame to Libav frame (both YUV422P). */
-    int base_u_idx = frame.height * frame.width;
-    int base_v_idx = (frame.height * frame.width * 3) >> 1;
+    // int base_u_idx = frame.height * frame.width;
+    // int base_v_idx = (frame.height * frame.width * 3) >> 1;
 
-    for (int yidx = 0; yidx < frame.height; yidx++) {
-        for (int xidx = 0; xidx < frame.width; xidx++) {
-            /* Copy Y value. */
-            int src_y_idx = yidx * frame.width + xidx;
-            int dst_y_offset = yidx * ptr_frame->linesize[0] + xidx;
-            *(ptr_frame->data[0] + dst_y_offset) = frame.data[src_y_idx];
+    // for (int yidx = 0; yidx < frame.height; yidx++) {
+    //     for (int xidx = 0; xidx < frame.width; xidx++) {
+    //         /* Copy Y value. */
+    //         int src_y_idx = yidx * frame.width + xidx;
+    //         int dst_y_offset = yidx * ptr_frame->linesize[0] + xidx;
+    //         *(ptr_frame->data[0] + dst_y_offset) = frame.data[src_y_idx];
 
-            /* Copy U value. */
-            int src_u_idx = (yidx * frame.width + xidx) >> 1;
-            int dst_u_offset = yidx * ptr_frame->linesize[1] + (xidx >> 1);
-            *(ptr_frame->data[1] + dst_u_offset) = frame.data[base_u_idx + src_u_idx];
+    //         /* Copy U value. */
+    //         int src_u_idx = (yidx * frame.width + xidx) >> 1;
+    //         int dst_u_offset = yidx * ptr_frame->linesize[1] + (xidx >> 1);
+    //         *(ptr_frame->data[1] + dst_u_offset) = frame.data[base_u_idx + src_u_idx];
 
-            /* Copy V value. */
-            int src_v_idx = (yidx * frame.width + xidx) >> 1;
-            int dst_v_offset = yidx * ptr_frame->linesize[2] + (xidx >> 1);
-            uint8_t value = frame.data[base_v_idx + src_v_idx];
-            *(ptr_frame->data[2] + dst_v_offset) = value;  // Segfault here.
-        }
-    }
+    //         /* Copy V value. */
+    //         int src_v_idx = (yidx * frame.width + xidx) >> 1;
+    //         int dst_v_offset = yidx * ptr_frame->linesize[2] + (xidx >> 1);
+    //         uint8_t value = frame.data[base_v_idx + src_v_idx];
+    //         *(ptr_frame->data[2] + dst_v_offset) = value;  // Segfault here.
+    //     }
+    // }
 
     /* Send a frame to the encoder. */
     if (avcodec_send_frame(ptr_codec_context, ptr_frame) < 0) {

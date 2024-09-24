@@ -668,26 +668,27 @@ void VideoCam::readFrame(unsigned int buffer_index){
     switch (cam_type_) {
         case CamType::MYNT_EYE_STEREO:
         case CamType::ARKMICRO_WEBCAM:
-            for (int yidx = 0; yidx < frame_data_.height; yidx++) {
-                for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {
-                    int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
+            // for (int yidx = 0; yidx < frame_data_.height; yidx++) {
+            //     for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {
+            //         int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
 
-                    // NOTE: Here, YUV values are interleaved, not in planar order.
-                    // NOTE: frame_bytes_per_line_ is the width of the image in memory (>= width)
-                    // NOTE: YUV 422 has 1 Cr & 1 Cb value per 2 Y values (YUYV = 2 pixels, using same U,V)
+            //         // NOTE: Here, YUV values are interleaved, not in planar order.
+            //         // NOTE: frame_bytes_per_line_ is the width of the image in memory (>= width)
+            //         // NOTE: YUV 422 has 1 Cr & 1 Cb value per 2 Y values (YUYV = 2 pixels, using same U,V)
 
-                    /* Read even pixel. */
-                    frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 0);  // Y1
-                    frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-                    frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
-                    idx += 3;
+            //         /* Read even pixel. */
+            //         frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 0);  // Y1
+            //         frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
+            //         frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
+            //         idx += 3;
 
-                    /* Read uneven pixel. */
-                    frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 2);  // Y2
-                    frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-                    frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
-                }
-            }
+            //         /* Read uneven pixel. */
+            //         frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 2);  // Y2
+            //         frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
+            //         frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
+            //     }
+            // }
+            memcpy(&frame_data_.data[0], buffers_[buffer_index].start, frame_data_.data.size());
             break;
         
         default:

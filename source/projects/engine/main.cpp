@@ -16,6 +16,7 @@
 
 /* Custom C++ Includes */
 #include "video/video_transmitter.h"
+#include "video/video_cam.h"
 #include "robot/arduino_driver.h"
 #include "robot/remote.h"
 
@@ -34,7 +35,10 @@ int main() {
     // arduino.start();  // Run in this thread
 
     // while (true) { __asm(""); }; // Avoid optimizing out.
-    VideoTransmitter transmitter = {"udp://127.0.0.1:8999"};
+    VideoCam camera = VideoCam();
+    camera.startStream();
+
+    VideoTransmitter transmitter = {"udp://127.0.0.1:8999", &camera};
     transmitter.start();
 
     return 0;
