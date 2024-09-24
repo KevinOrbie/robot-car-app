@@ -13,6 +13,7 @@
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
+#include "video/video_reciever.h"
 #include "remote/robot.h"
 
 
@@ -20,13 +21,17 @@
 int main() {
     /* Setup Robot Communication. */
     // remote::Robot robot = {"192.168.0.231", 2556};
-    remote::Robot robot = {"localhost", 2556};
-    robot.connect();
-    robot.thread();
+    // remote::Robot robot = {"localhost", 2556};
+    // robot.connect();
+    // robot.thread();
+
+    /* Setup VideoReciever. */
+    VideoReciever reciever = VideoReciever("udp://127.0.0.1:8999");
+    reciever.start();
 
     /* Setup Controller. */
-    ControlPanel panel = {nullptr, &robot};
-    panel.start();
+    // ControlPanel panel = {nullptr, &robot};
+    // panel.start();
 
     // while (true) {
     //     int value = 0;

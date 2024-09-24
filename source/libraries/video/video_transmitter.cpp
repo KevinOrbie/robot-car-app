@@ -1,5 +1,5 @@
 /**
- * @file video_file.cpp
+ * @file video_transmitter.cpp
  * @author Kevin Orbie
  * 
  * @brief C++ wrapper around ffmpeg streaming functionality.

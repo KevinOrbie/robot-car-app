@@ -1,5 +1,5 @@
 /**
- * @file video_transmitter.h
+ * @file video_reciever.h
  * @author Kevin Orbie
  * 
  * @brief C++ wrapper around ffmpeg functionality.
@@ -31,29 +31,31 @@ extern "C" { // ffmpeg
 /**
  * @brief Class to obtain frames from a file.
  */
-class VideoTransmitter: public Looper {
+class VideoReciever: public Looper, public FrameProvider {
    public:
-    VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr);
-    ~VideoTransmitter();
+    VideoReciever(std::string const& address=std::string("udp://127.0.0.1:8999"));
+    ~VideoReciever();
 
     void iteration() override;
-    void send(Frame &frame);
+    void recieve() {}; // Blocking
+
+    Frame getFrame(double curr_time) override;
+    void startStream() override {};
+    void stopStream() override {};
 
    private:
     std::string address_;
     FrameProvider *frame_provider_ = nullptr;
 
     /* Container Variables (for muxing) */
-    AVFormatContext *ptr_format_context = nullptr;  // Header information
     AVDictionary    *ptr_open_container_opts = nullptr;
+    AVFormatContext *ptr_format_context      = nullptr;  // Header information
+    int              video_stream_index      = -1;
 
     /* Codec Variables (for encoding) */
-    AVCodecContext *ptr_codec_context   = nullptr;
-    AVDictionary   *ptr_codec_opts      = nullptr;
-    AVCodec const  *ptr_codec           = nullptr;
-
-    /* Stream */
-    AVStream *ptr_stream;
+    AVCodecParameters *ptr_codec_parameters = nullptr;
+    AVCodecContext    *ptr_codec_context    = nullptr;
+    AVCodec const     *ptr_codec            = nullptr;
 
     /* Stream Slice Variables */
     AVPacket *ptr_packet = nullptr;  // Encoded
@@ -63,7 +65,4 @@ class VideoTransmitter: public Looper {
     Frame  frame_data_ = {};
     double play_time_  = -1.0;
     int    frame_pts   = 0;
-
-    /* Timing */
-    std::chrono::_V2::steady_clock::time_point start_time_;
 };
