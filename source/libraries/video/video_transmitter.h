@@ -33,7 +33,7 @@ extern "C" { // ffmpeg
  */
 class VideoTransmitter: public Looper {
    public:
-    VideoTransmitter(std::string const& address, FrameProvider *frame_provider);
+    VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr);
     ~VideoTransmitter();
 
     void iteration() override;

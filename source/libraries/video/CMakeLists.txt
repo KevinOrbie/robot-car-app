@@ -7,11 +7,13 @@ set(SOURCE_FILES "")
 
 ## Define Sources
 list(APPEND SOURCE_FILES video_transmitter.cpp)
+list(APPEND HEADER_FILES frame_conversion.cpp)
 list(APPEND SOURCE_FILES video_file.cpp)
 list(APPEND SOURCE_FILES video_cam.cpp)
 
 ## Define Headers
 list(APPEND HEADER_FILES video_transmitter.h)
+list(APPEND HEADER_FILES frame_conversion.h)
 list(APPEND HEADER_FILES frame_provider.h)
 list(APPEND HEADER_FILES video_file.h)
 list(APPEND HEADER_FILES video_cam.h)

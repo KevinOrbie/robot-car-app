@@ -18,7 +18,7 @@
 
 
 /* ============================ Classes ============================ */
-VideoTransmitter::VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr): 
+VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *frame_provider): 
     address_(address), frame_provider_(frame_provider) {
     avformat_network_init();
     // av_log_set_level(AV_LOG_DEBUG);
@@ -63,7 +63,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address=std::string("udp:/
     ptr_codec_context->time_base = AVRational{1, 30};
     ptr_codec_context->framerate = AVRational{30, 1};
     ptr_codec_context->gop_size = 12;                   // How many frames between full frames sent.
-    ptr_codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
+    ptr_codec_context->pix_fmt = AV_PIX_FMT_YUV422P; // AV_PIX_FMT_YUV420P;
 
     /* Setup Options. */
     if (ptr_format_context->flags & AVFMT_GLOBALHEADER) {
@@ -113,7 +113,8 @@ VideoTransmitter::VideoTransmitter(std::string const& address=std::string("udp:/
 
     /* ----------------------- Open CODEC ----------------------- */
     if (ptr_codec_context->codec_id == AV_CODEC_ID_H264) {
-        av_dict_set(&ptr_codec_opts, "profile", "high", 0);
+        // av_dict_set(&ptr_codec_opts, "profile", "high", 0);  // Only supported with YUV420P
+        av_dict_set(&ptr_codec_opts, "profile", "high422", 0);
         av_dict_set(&ptr_codec_opts, "preset", "fast", 0);
         av_dict_set(&ptr_codec_opts, "tune", "zerolatency", 0);
         av_dict_set(&ptr_codec_opts, "x264-params", "keyint=30", 0);
@@ -167,7 +168,22 @@ VideoTransmitter::~VideoTransmitter() {
 }
 
 void VideoTransmitter::iteration() {
-    Frame frame = {2560, 720, 3, {}};
+    // YUV422P format for now
+    Frame frame = {1280, 720, 2, {}};
+    frame.data.resize(frame.width * frame.height * 2, 0);
+
+    static int counter = 0;
+    /* Fill in a box. */
+    for (int yidx = 0; yidx < frame.height; yidx++) {
+        for (int xidx = (counter % frame.width); xidx < (counter + 100) % frame.width; xidx++) {
+            int idx = (yidx * frame.width + xidx);
+
+            /* Only fill the y plane. */
+            frame.data[idx] = 255;
+        }
+    }
+    counter++;
+
     send(frame);
 
     /* Fix to 30 FPS. */
@@ -185,27 +201,28 @@ void VideoTransmitter::iteration() {
 void VideoTransmitter::send(Frame &frame) {
     /* Add data to frame. */
     ptr_frame->pts = frame_pts;
+
+    /* Copy data from custom Frame to Libav frame (both YUV422P). */
+    int base_u_idx = frame.height * frame.width;
+    int base_v_idx = (frame.height * frame.width * 3) >> 1;
+
     for (int yidx = 0; yidx < frame.height; yidx++) {
         for (int xidx = 0; xidx < frame.width; xidx++) {
-            int idx = (yidx * frame.width + xidx) * frame.channels;
+            /* Copy Y value. */
+            int src_y_idx = yidx * frame.width + xidx;
+            int dst_y_offset = yidx * ptr_frame->linesize[0] + xidx;
+            *(ptr_frame->data[0] + dst_y_offset) = frame.data[src_y_idx];
 
-            // NOTE: linesize is the width of the image in memory (>= width)
-            // NOTE: YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block
+            /* Copy U value. */
+            int src_u_idx = (yidx * frame.width + xidx) >> 1;
+            int dst_u_offset = yidx * ptr_frame->linesize[1] + (xidx >> 1);
+            *(ptr_frame->data[1] + dst_u_offset) = frame.data[base_u_idx + src_u_idx];
 
-            // *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = frame_data_.data[idx + 0];  // Y
-            // *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = frame_data_.data[idx + 1];  // U (use for even / uneven pixel)
-            // *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = frame_data_.data[idx + 2];  // V (use for even / uneven pixel)
-
-            if ((yidx > 10 && yidx < 110) && (xidx > (frame_pts % frame.width) && xidx < ((frame_pts + 100) % frame.width))) {
-                /* Draw Box. */
-                *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = 250; // Y
-                *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = 0;   // U (use for even / uneven pixel)
-                *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = 0;   // V (use for even / uneven pixel)
-            } else {
-                *(ptr_frame->data[0] + yidx     * ptr_frame->linesize[0] + xidx  ) = 0;  // Y
-                *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2) = 0;  // U (use for even / uneven pixel)
-                *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2) = 0;  // V (use for even / uneven pixel)
-            }
+            /* Copy V value. */
+            int src_v_idx = (yidx * frame.width + xidx) >> 1;
+            int dst_v_offset = yidx * ptr_frame->linesize[2] + (xidx >> 1);
+            uint8_t value = frame.data[base_v_idx + src_v_idx];
+            *(ptr_frame->data[2] + dst_v_offset) = value;  // Segfault here.
         }
     }
 
