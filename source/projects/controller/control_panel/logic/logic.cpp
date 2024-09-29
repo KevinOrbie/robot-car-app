@@ -66,7 +66,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     state->fps_time += timedelta;
     state->fps_counter++;
     if (state->fps_time > 1.0f) {
-        std::cout << "FPS: " << state->fps_counter << "\n";
+        LOGI("FPS: %d", state->fps_counter);
         state->fps = state->fps_counter;
         state->fps_counter = 0;
         state->fps_time -= 1.0f;

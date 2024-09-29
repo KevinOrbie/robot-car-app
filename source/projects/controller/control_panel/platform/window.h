@@ -17,6 +17,7 @@
 
 /* Custom C++ Libraries */
 #include "common/input.h"
+#include "common/logger.h"
 
 
 /* ========================= Constants ========================= */
@@ -99,7 +100,7 @@ class Window
         window_ = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Simple Cube", NULL, NULL);
         if (window_ == NULL)
         {
-            std::cout << "Failed to create GLFW window" << std::endl;
+            LOGE("Failed to create GLFW window.");
             glfwTerminate();
             return;
         }

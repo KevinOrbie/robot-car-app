@@ -48,9 +48,3 @@ int main() {
 
     return 0;
 }
-
-// TODO: Redesign total system (how to access data in handleMessage function)
-//     > Don't try to mess with the memory, a full stereo image is ~ 5MB, thus having 2 or 3 copies between different threads should be no issue (we can swap different frames).
-// TODO: Setup main system with new messaging.
-// TODO: Make system robust to message payload not directly arriving?
-// TODO: Add Segfault Catch: https://stackoverflow.com/questions/77005/how-to-automatically-generate-a-stacktrace-when-my-program-crashes

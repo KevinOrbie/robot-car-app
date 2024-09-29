@@ -36,6 +36,7 @@ class VideoTransmitter: public Looper {
     VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr);
     ~VideoTransmitter();
 
+    void start() override;
     void iteration() override;
     void send(Frame &frame);
 

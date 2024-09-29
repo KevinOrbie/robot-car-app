@@ -169,6 +169,11 @@ VideoTransmitter::~VideoTransmitter() {
     av_dict_free(&ptr_open_container_opts);
 }
 
+void VideoTransmitter::start() {
+    LOGI("Started streaming video to: '%s'", address_.c_str());
+    Looper::start();
+}
+
 void VideoTransmitter::iteration() {
     if (frame_provider_) {
         /* Video from frame provider (YUV422). */

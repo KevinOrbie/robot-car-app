@@ -19,6 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>          // GLSL Linear Algebra Library
 
 /* Custom c++ Libraries */
+#include "common/logger.h"
 #include "shader.h"
 
 
@@ -76,7 +77,7 @@ class QuadScreen {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         } else {
-            std::cout << "Failed to load texture!" << std::endl;
+            LOGW("Failed to load texture!");
         }
     }
 
