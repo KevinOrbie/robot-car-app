@@ -19,13 +19,14 @@
 
 /* ============= Tests Declaration ============= */
 
-// Demonstrate some basic assertions.
+/* Verify it works without any argument given. */
 TEST(TestLogger, LogsWithNoArgs) {
   EXPECT_NO_THROW(LOGI("Test Info"));
   EXPECT_NO_THROW(LOGW("Test Warning"));
   EXPECT_NO_THROW(LOGE("Test Error"));
 }
 
+/* Verify it works without one argument given. */
 TEST(TestLogger, LogsWithOneArg) {
   /* Strings */
   EXPECT_NO_THROW(LOGI("Test %s", "Info"));
@@ -48,6 +49,7 @@ TEST(TestLogger, LogsWithOneArg) {
   EXPECT_NO_THROW(LOGE("Test %f", 0.0));
 }
 
+/* Verify it works without multiple arguments given. */
 TEST(TestLogger, LogsWithMultipleArgs) {
   /* Three Arguments. */
   EXPECT_NO_THROW(LOGI("Test %s, %d, %f", "Info", 0, 0.0f));

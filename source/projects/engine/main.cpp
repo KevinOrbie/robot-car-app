@@ -27,19 +27,20 @@ int main() {
     // ArduinoDriver arduino = {};
 
     /* Setup LAN connection. */
-    // robot::Remote remote = {2556, &arduino};
-    // remote.connect();
-    // remote.thread();
+    robot::Remote remote = {2556, nullptr};
+    remote.connect();
+    remote.thread();
 
     /* Start Arduino Driver. */
     // arduino.start();  // Run in this thread
 
-    // while (true) { __asm(""); }; // Avoid optimizing out.
     VideoCam camera = VideoCam();
     camera.startStream();
 
     VideoTransmitter transmitter = {"udp://127.0.0.1:8999", &camera};
     transmitter.start();
 
+    /* Command threads to finnish. */
+    remote.stop();
     return 0;
 }

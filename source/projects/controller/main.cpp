@@ -21,27 +21,21 @@
 int main() {
     /* Setup Robot Communication. */
     // remote::Robot robot = {"192.168.0.231", 2556};
-    // remote::Robot robot = {"localhost", 2556};
-    // robot.connect();
-    // robot.thread();
+    remote::Robot robot = {"localhost", 2556};
+    robot.connect();
+    robot.thread();
 
     /* Setup VideoReciever. */
     VideoReciever reciever = VideoReciever("udp://127.0.0.1:8999");
     reciever.thread();
 
     /* Setup Controller. */
-    ControlPanel panel = {&reciever, nullptr};
+    ControlPanel panel = {&reciever, &robot};
     panel.start();
 
-    // while (true) {
-    //     int value = 0;
-    //     std::cout << "INPUT: ";
-    //     std::cin >> value;
-
-    //     robot.sink({});
-    //     __asm("");  // Avoid optimizing out.
-    // };
+    /* Command threads to finnish. */
     reciever.stop();
+    robot.stop();
     return 0;
 }
 

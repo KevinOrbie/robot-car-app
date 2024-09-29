@@ -5,6 +5,11 @@ add_subdirectory(libraries/remote)
 add_subdirectory(libraries/robot)
 add_subdirectory(libraries/video)
 
+if((NOT DEFINED ENV{HOST}) OR (NOT $ENV{HOST} STREQUAL "robot"))
+    # Requires extra libraries
+    add_subdirectory(libraries/control_panel)
+endif()
+
 ## Include Projects
 add_subdirectory(projects/engine)
 
@@ -12,4 +17,5 @@ add_subdirectory(projects/engine)
 if((NOT DEFINED ENV{HOST}) OR (NOT $ENV{HOST} STREQUAL "robot"))
     # Requires extra libraries
     add_subdirectory(projects/controller)
+    # add_subdirectory(projects/hybrid)
 endif()
