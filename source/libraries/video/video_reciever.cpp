@@ -23,10 +23,11 @@
 VideoReciever::VideoReciever(std::string const& address): address_(address){
     avformat_network_init();
     // av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_level(AV_LOG_QUIET);
 
     /* ---------------- Read Container Context ----------------- */
     /* This context is used during the muxing operation. */
-    LOGI("Trying to reach the given container...");
+    LOGI("Waiting for video data from: '%s'", address.c_str());
 
     ptr_format_context = avformat_alloc_context();
     if (!ptr_format_context) {

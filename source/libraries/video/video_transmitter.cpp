@@ -23,6 +23,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     address_(address), frame_provider_(frame_provider) {
     avformat_network_init();
     // av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_level(AV_LOG_QUIET);
 
     /* ---------------- Setup Container Context ----------------- */
     /* This context is used during the muxing operation. */

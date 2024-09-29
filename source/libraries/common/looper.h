@@ -42,8 +42,13 @@ class Looper {
      * @brief Breaks out of the infinite loop.
      */
     virtual void stop() {
-        std::lock_guard<std::mutex> lock(running_mutex_);
-        running_ = false;
+        {
+            std::lock_guard<std::mutex> lock(running_mutex_);
+            running_ = false;
+        }
+        if (thread_.joinable()){ /* Only valid if running in seperate thread. */
+            thread_.join();
+        }
     };
 
     /**

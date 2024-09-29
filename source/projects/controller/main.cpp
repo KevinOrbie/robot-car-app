@@ -41,5 +41,7 @@ int main() {
     //     robot.sink({});
     //     __asm("");  // Avoid optimizing out.
     // };
+    reciever.stop();
+    return 0;
 }
 
