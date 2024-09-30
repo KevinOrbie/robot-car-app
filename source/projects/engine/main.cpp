@@ -23,16 +23,14 @@
 
 /* ======================== Entry Point ======================== */
 int main() {
-    /* Setup Arduino Driver. */
-    // ArduinoDriver arduino = {};
+    /* Setup & Start Arduino Driver. */
+    ArduinoDriver arduino = {};
+    arduino.thread();
 
     /* Setup LAN connection. */
-    robot::Remote remote = {2556, nullptr};
+    robot::Remote remote = {2556, &arduino};
     remote.connect();
     remote.thread();
-
-    /* Start Arduino Driver. */
-    // arduino.start();  // Run in this thread
 
     VideoCam camera = VideoCam();
     camera.startStream();

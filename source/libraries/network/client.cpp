@@ -71,9 +71,16 @@ Socket::~Socket() {
 
 Connection Socket::link() {
     /* Establish a connection with the server. */
-    LOGI("Connecting to the Server.");
-    if (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        LOGE("Connecting: %s", std::strerror(errno));
+    while (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        if (errno == ECONNREFUSED) {
+            /* No one listening on the remote address. */
+            LOGW("Server not listening for connections, trying again in 15 seconds.");
+            std::this_thread::sleep_for(std::chrono::seconds(15));
+            continue;
+        }
+        
+        /* Error encountered while connecting. */
+        LOGE("Error %d while connecting: %s", errno ,std::strerror(errno));
         throw std::system_error(errno, std::generic_category(), "Connecting");
     }
 
@@ -94,6 +101,7 @@ Client::Client(std::string server_address, int port, bool blocking):
 
 void Client::connect() {
     Socket socket = Socket(server_address_, port_, blocking_);
+    LOGI("Connecting to a server on: '%s'", server_address_.c_str());
     connection_ = socket.link(); // Wait for server response.
 }
 
