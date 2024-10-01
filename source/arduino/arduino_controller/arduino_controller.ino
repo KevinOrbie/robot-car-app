@@ -14,10 +14,10 @@
 
 /* Hardware Configuration. */
 #define BAUD_RATE 9600
-#define PIN_F 6   // PWM
-#define PIN_B 5   // PWM
-#define PIN_R 8
-#define PIN_L 7
+#define PIN_SPEED_R 5   // PWM
+#define PIN_SPEED_L 6   // PWM
+#define PIN_DIRECTION_R 4
+#define PIN_DIRECTION_L 7
 
 /* Command Variables. */
 bool timedout                = true;    // Only timeout once.
@@ -47,10 +47,10 @@ void setup() {
   Serial.setTimeout(0);  // Don't wait for input (by default 1000 ms)
 
   /* Configure pins. */
-  pinMode(PIN_F, OUTPUT);
-  pinMode(PIN_B, OUTPUT);
-  pinMode(PIN_R, OUTPUT);
-  pinMode(PIN_L, OUTPUT);
+  pinMode(PIN_SPEED_R, OUTPUT);
+  pinMode(PIN_SPEED_L, OUTPUT);
+  pinMode(PIN_DIRECTION_R, OUTPUT);
+  pinMode(PIN_DIRECTION_L, OUTPUT);
 }
 
 
@@ -135,48 +135,64 @@ void loop() {
 
   /* ----------------- Command Motors ----------------- */
   if (updated) {
-    /* Control Direction Motor Driver. */
+    /* Control Direction. */
     switch(state.direction) {
-      case Direction::STRAIGHT:
-        digitalWrite(PIN_R, LOW);
-        digitalWrite(PIN_L, LOW);
-        break;
-      case Direction::LEFT:
-        digitalWrite(PIN_R, LOW);
-        digitalWrite(PIN_L, HIGH);
-        break;
-      case Direction::RIGHT:
-        digitalWrite(PIN_R, HIGH);
-        digitalWrite(PIN_L, LOW);
-        break;
-      default: // Normally not reached
-        digitalWrite(PIN_R, LOW);
-        digitalWrite(PIN_L, LOW);
-        break;
-    }
 
-    /* Control Throttle Motor Driver. */
-    switch(state.throttle) {
-      case Throttle::STANDBY:
-        digitalWrite(PIN_F, LOW);
-        digitalWrite(PIN_B, LOW);
+      /* NOTE: Always turn at full speed and in place for now. */
+      case Direction::LEFT: {
+        analogWrite (PIN_SPEED_R, 255);
+        digitalWrite(PIN_DIRECTION_R, HIGH);
+        analogWrite (PIN_SPEED_L, 255);
+        digitalWrite(PIN_DIRECTION_L, HIGH);
         break;
-      case Throttle::FORWARD:
-        analogWrite (PIN_F, state.pwm);
-        digitalWrite(PIN_B, LOW);
+      }
+      case Direction::RIGHT: {
+        analogWrite (PIN_SPEED_R, 255);
+        digitalWrite(PIN_DIRECTION_R, LOW);
+        analogWrite (PIN_SPEED_L, 255);
+        digitalWrite(PIN_DIRECTION_L, LOW);
         break;
-      case Throttle::REVERSE:
-        digitalWrite(PIN_F, LOW);
-        analogWrite (PIN_B, state.pwm);
+      }
+
+      /* Control Throttle. */
+      case Direction::STRAIGHT: {
+        switch(state.throttle) {
+          case Throttle::FORWARD: {
+            analogWrite (PIN_SPEED_R, state.pwm);
+            digitalWrite(PIN_DIRECTION_R, HIGH);
+            analogWrite (PIN_SPEED_L, state.pwm);
+            digitalWrite(PIN_DIRECTION_L, LOW);
+            break;
+          }
+          case Throttle::REVERSE: {
+            analogWrite (PIN_SPEED_R, state.pwm);
+            digitalWrite(PIN_DIRECTION_R, LOW);
+            analogWrite (PIN_SPEED_L, state.pwm);
+            digitalWrite(PIN_DIRECTION_L, HIGH);
+            break;
+          }
+          case Throttle::STANDBY:
+          case Throttle::BRAKE:
+          default: {// Normally not reached
+            Serial.println("Throttle Default");
+            analogWrite (PIN_SPEED_R, 0);
+            digitalWrite(PIN_DIRECTION_R, HIGH);
+            analogWrite (PIN_SPEED_L, 0);
+            digitalWrite(PIN_DIRECTION_L, LOW);
+            break;
+          }
+        }
         break;
-      case Throttle::BRAKE:
-        digitalWrite(PIN_F, HIGH);
-        digitalWrite(PIN_B, HIGH);
+      }
+
+      default: { // Normally not reached 
+        Serial.println("Direction Default");
+        analogWrite (PIN_SPEED_R, 0);
+        digitalWrite(PIN_DIRECTION_R, HIGH);
+        analogWrite (PIN_SPEED_L, 0);
+        digitalWrite(PIN_DIRECTION_L, LOW);
         break;
-      default: // Normally not reached
-        digitalWrite(PIN_F, LOW);
-        digitalWrite(PIN_B, LOW);
-        break;
+      }
     }
 
     /* ########### DEBUG ########### */

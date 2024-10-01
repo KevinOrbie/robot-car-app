@@ -74,8 +74,8 @@ Connection Socket::link() {
     while (connect(socket_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         if (errno == ECONNREFUSED) {
             /* No one listening on the remote address. */
-            LOGW("Server not listening for connections, trying again in 15 seconds.");
-            std::this_thread::sleep_for(std::chrono::seconds(15));
+            LOGW("Server not listening for connections, trying again in 5 seconds.");
+            std::this_thread::sleep_for(std::chrono::seconds(5));
             continue;
         }
         
