@@ -109,6 +109,7 @@ bool ArduinoSocket:: recieve(std::string& recieved_msg) {
 
 bool ArduinoSocket::send(const std::vector<uint8_t> msg) {
     /* Write bites over serial port. */
+    LOGI("Socket Send: fd_ = %d, msg.size() = %ld", fd_, msg.size());
     int num_bytes = write(fd_, msg.data(), msg.size());
 
     if (num_bytes < 0) {

@@ -22,7 +22,11 @@
 namespace robot {
 /* ========================== Classes ========================== */
 void MessageHandler::on(Message<MessageID::CMD_DRIVE> *msg) {
-    LOGI("Command Drive message recieved: value = '%s'", msg->value().keys[Button::SPACE].held ? "true": "false");
+    LOGI("Command Drive message recieved: W held = '%s', W pressed = '%s', W released = '%s'", 
+          msg->value().keys[Button::W].held ? "true ": "false", 
+          msg->value().keys[Button::W].pressed ? "true ": "false", 
+          msg->value().keys[Button::W].released ? "true ": "false"
+    );
     if (input_sink_) {
         input_sink_->sink(msg->value());
     }

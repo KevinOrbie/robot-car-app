@@ -21,9 +21,14 @@
 /* ============================ Classes ============================ */
 VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *frame_provider): 
     address_(address), frame_provider_(frame_provider) {
+    LOGI("Using libav-format version %d.%d.%d", LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+    LOGI("Using libav-codec version %d.%d.%d", LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+    #if LIBAVCODEC_VERSION_MAJOR < 60
+        av_register_all();
+    #endif
     avformat_network_init();
-    // av_log_set_level(AV_LOG_DEBUG);
-    av_log_set_level(AV_LOG_QUIET);
+    av_log_set_level(AV_LOG_DEBUG);
+    // av_log_set_level(AV_LOG_QUIET);
 
     /* ---------------- Setup Container Context ----------------- */
     /* This context is used during the muxing operation. */

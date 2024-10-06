@@ -174,7 +174,6 @@ void loop() {
           case Throttle::STANDBY:
           case Throttle::BRAKE:
           default: {// Normally not reached
-            Serial.println("Throttle Default");
             analogWrite (PIN_SPEED_R, 0);
             digitalWrite(PIN_DIRECTION_R, HIGH);
             analogWrite (PIN_SPEED_L, 0);
@@ -186,7 +185,6 @@ void loop() {
       }
 
       default: { // Normally not reached 
-        Serial.println("Direction Default");
         analogWrite (PIN_SPEED_R, 0);
         digitalWrite(PIN_DIRECTION_R, HIGH);
         analogWrite (PIN_SPEED_L, 0);
@@ -196,46 +194,46 @@ void loop() {
     }
 
     /* ########### DEBUG ########### */
-    Serial.print("STATE: ");
+    // Serial.print("STATE: ");
 
-    switch(state.direction) {
-      case Direction::STRAIGHT:
-        Serial.print("straight");
-        break;
-      case Direction::LEFT:
-        Serial.print("left    ");
-        break;
-      case Direction::RIGHT:
-        Serial.print("right   ");
-        break;
-      default: // Normally not reached
-        Serial.print("other   ");
-        break;
-    }
+    // switch(state.direction) {
+    //   case Direction::STRAIGHT:
+    //     Serial.print("straight");
+    //     break;
+    //   case Direction::LEFT:
+    //     Serial.print("left    ");
+    //     break;
+    //   case Direction::RIGHT:
+    //     Serial.print("right   ");
+    //     break;
+    //   default: // Normally not reached
+    //     Serial.print("other   ");
+    //     break;
+    // }
 
-    Serial.print(", ");
-    switch(state.throttle) {
-      case Throttle::STANDBY:
-        Serial.print("standby");
-        break;
-      case Throttle::FORWARD:
-        Serial.print("forward");
-        break;
-      case Throttle::REVERSE:
-        Serial.print("reverse");
-        break;
-      case Throttle::BRAKE:
-        Serial.print("brake  ");
-        break;
-      default: // Normally not reached
-        Serial.print("other  ");
-        break;
-    }
+    // Serial.print(", ");
+    // switch(state.throttle) {
+    //   case Throttle::STANDBY:
+    //     Serial.print("standby");
+    //     break;
+    //   case Throttle::FORWARD:
+    //     Serial.print("forward");
+    //     break;
+    //   case Throttle::REVERSE:
+    //     Serial.print("reverse");
+    //     break;
+    //   case Throttle::BRAKE:
+    //     Serial.print("brake  ");
+    //     break;
+    //   default: // Normally not reached
+    //     Serial.print("other  ");
+    //     break;
+    // }
 
-    Serial.print(", ");
-    Serial.print(state.pwm);
+    // Serial.print(", ");
+    // Serial.print(state.pwm);
 
-    Serial.println("");
+    // Serial.println("");
     /* ############################# */
   }
 
