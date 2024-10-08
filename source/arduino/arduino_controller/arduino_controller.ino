@@ -140,16 +140,16 @@ void loop() {
 
       /* NOTE: Always turn at full speed and in place for now. */
       case Direction::LEFT: {
-        analogWrite (PIN_SPEED_R, 255);
+        analogWrite (PIN_SPEED_R, 185);
         digitalWrite(PIN_DIRECTION_R, HIGH);
-        analogWrite (PIN_SPEED_L, 255);
+        analogWrite (PIN_SPEED_L, 185);
         digitalWrite(PIN_DIRECTION_L, HIGH);
         break;
       }
       case Direction::RIGHT: {
-        analogWrite (PIN_SPEED_R, 255);
+        analogWrite (PIN_SPEED_R, 185);
         digitalWrite(PIN_DIRECTION_R, LOW);
-        analogWrite (PIN_SPEED_L, 255);
+        analogWrite (PIN_SPEED_L, 185);
         digitalWrite(PIN_DIRECTION_L, LOW);
         break;
       }
