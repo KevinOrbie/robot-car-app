@@ -16,7 +16,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
-#include "video/frame_conversion.h"
+#include "video/image.h"
 
 
 /* ============================ Classes ============================ */
@@ -240,12 +240,17 @@ void VideoReciever::recieve() {
     }
 
     std::lock_guard lock(frame_data_mutex_);
-    YUV422P_to_YUV(
+    ImageView image_view = ImageView(
         {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
-        frame_data_.data.data(), frame_data_.width * 3,
-        frame_data_.width, frame_data_.height
+        frame_data_.width, frame_data_.height, PixelFormat::YUV422P
     );
+
+    ImageView buffer_view = ImageView( /* TODO: remplace by Image.view() */
+        {frame_data_.data.data()}, {frame_data_.width * 3}, frame_data_.width, frame_data_.height, PixelFormat::YUV
+    );
+
+    buffer_view.copyFrom(image_view);
 
     return;
 }

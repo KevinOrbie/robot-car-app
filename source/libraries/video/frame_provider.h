@@ -11,6 +11,10 @@
 /* Standard C++ Libraries */
 #include <vector>
 #include <string>
+#include <stdexcept>
+
+/* Custom C++ Libraries */
+#include "common/logger.h"
 
 
 /* ========================== Classes ========================== */

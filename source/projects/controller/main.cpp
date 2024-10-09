@@ -20,14 +20,14 @@
 /* ======================== Entry Point ======================== */
 int main() {
     /* Setup Robot Communication. */
-    remote::Robot robot = {"192.168.0.212", 2556};
-    // remote::Robot robot = {"localhost", 2556};
+    // remote::Robot robot = {"192.168.0.212", 2556};
+    remote::Robot robot = {"localhost", 2556};
     robot.connect();
     robot.thread();
 
     /* Setup VideoReciever. */
-    // VideoReciever reciever = VideoReciever("udp://127.0.0.1:8999");
-    VideoReciever reciever = VideoReciever("udp://192.168.0.212:8999");  // To the Server
+    VideoReciever reciever = VideoReciever("udp://127.0.0.1:8999");
+    // VideoReciever reciever = VideoReciever("udp://192.168.0.212:8999");  // To the Server
     reciever.thread();
 
     /* Setup Controller. */

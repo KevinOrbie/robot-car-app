@@ -15,7 +15,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
-#include "video/frame_conversion.h"
+#include "video/image.h"
 
 
 /* ============================ Classes ============================ */
@@ -223,12 +223,18 @@ void VideoTransmitter::send(Frame &frame) {
     ptr_frame->pts = frame_pts;
 
     /* Copy YUV422 to YUV422P. */
-    YUV422_to_YUV422P(
-        frame.data.data(), frame.width * 2, 
+    ImageView image_view = ImageView( /* TODO: remplace by Image.view() */
+        {frame.data.data()}, {frame.width * 2},
+        frame.width, frame.height, PixelFormat::YUV422
+    );
+
+    ImageView buffer_view = ImageView( 
         {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
-        frame.width, frame.height
+        frame.width, frame.height, PixelFormat::YUV422P
     );
+
+    buffer_view.copyFrom(image_view);
 
     /* Copy data from custom Frame to Libav frame (both YUV422P). */
     // int base_u_idx = frame.height * frame.width;

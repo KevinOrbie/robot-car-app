@@ -22,6 +22,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "video/image.h"
 
 
 /* ============================ Defines ============================ */
@@ -667,7 +668,7 @@ void VideoCam::readFrame(unsigned int buffer_index){
 
     switch (cam_type_) {
         case CamType::MYNT_EYE_STEREO:
-        case CamType::ARKMICRO_WEBCAM:
+        case CamType::ARKMICRO_WEBCAM: {
             /* Conversion from YUV422 to YUV. */
             // for (int yidx = 0; yidx < frame_data_.height; yidx++) {
             //     for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {
@@ -691,14 +692,18 @@ void VideoCam::readFrame(unsigned int buffer_index){
             // }
 
             /* Directly copy YUV422 to YUV422. */
-            for (int yidx = 0; yidx < frame_data_.height; yidx++) { /* Image pixel coordinate system. */
-                for (int xidx = 0; xidx < frame_data_.width * 2; xidx++) { /* Byte coordinate system. */
-                    int dst_idx = (yidx * frame_data_.width * 2 + xidx);
-                    int src_offset = (yidx * frame_bytes_per_line_ + xidx);
-                    frame_data_.data[dst_idx] = *(buffers_[buffer_index].start + src_offset);
-                }
-            }
+            ImageView image_view = ImageView(
+                {buffers_[buffer_index].start}, {frame_bytes_per_line_},
+                frame_data_.width, frame_data_.height, PixelFormat::YUV422
+            );
+
+            ImageView buffer_view = ImageView( /* TODO: remplace by Image.view() */
+                {frame_data_.data.data()}, {frame_data_.width * 2}, frame_data_.width, frame_data_.height, PixelFormat::YUV422
+            );
+
+            buffer_view.copyFrom(image_view);
             break;
+        }
         
         default:
             LOGE("Unsupported Camera Type used (error %d: %s)", errno, strerror(errno));
