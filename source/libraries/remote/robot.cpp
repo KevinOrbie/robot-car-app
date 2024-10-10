@@ -35,7 +35,7 @@ void Robot::sink(Input input) {
     client_.pushSendQueue(std::move(msg));
 };
 
-Frame Robot::getFrame(double curr_time) {
+Frame Robot::getFrame(double curr_time, PixelFormat fmt) {
     return {};
 };
 

@@ -182,23 +182,24 @@ void VideoTransmitter::start() {
 void VideoTransmitter::iteration() {
     if (frame_provider_) {
         /* Video from frame provider (YUV422). */
-        Frame frame = frame_provider_->getFrame(INFINITY); // Always get the latest frame.
+        Frame frame = frame_provider_->getFrame(INFINITY, PixelFormat::YUV422); // Always get the latest frame.
         send(frame);
 
     } else {
         /* Testing video. */
         // NOTE: YUV (0,0,0) is roughly RGB (0, 136, 0)
-        Frame frame = {2560, 720, 2, {}}; // YUV422
-        frame.data.resize(frame.width * frame.height * 2, 0);
+        Frame frame = {};
+        frame.image = Image(2560, 720, PixelFormat::YUV422);
+        frame.image.zero();
 
         static int counter = 0;
         /* Fill in a box. */
-        for (int yidx = 0; yidx < frame.height; yidx++) {
-            for (int xidx = (counter % frame.width); xidx < (counter + 100) % frame.width; xidx++) {
-                int idx = (yidx * frame.width * 2 + xidx * 2);
+        for (int yidx = 0; yidx < frame.image.getHeight(); yidx++) {
+            for (int xidx = (counter % frame.image.getWidth()); xidx < (counter + 100) % frame.image.getWidth(); xidx++) {
+                int idx = (yidx * frame.image.getWidth() * 2 + xidx * 2);
 
                 /* Only fill the y plane. */
-                frame.data[idx] = 255;
+                *(frame.image.getData() + idx) = 255;
             }
         }
         counter += 20;
@@ -223,15 +224,12 @@ void VideoTransmitter::send(Frame &frame) {
     ptr_frame->pts = frame_pts;
 
     /* Copy YUV422 to YUV422P. */
-    ImageView image_view = ImageView( /* TODO: remplace by Image.view() */
-        {frame.data.data()}, {frame.width * 2},
-        frame.width, frame.height, PixelFormat::YUV422
-    );
+    ImageView image_view = frame.image.view();
 
     ImageView buffer_view = ImageView( 
         {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
-        frame.width, frame.height, PixelFormat::YUV422P
+        frame.image.getWidth(), frame.image.getHeight(), PixelFormat::YUV422P
     );
 
     buffer_view.copyFrom(image_view);

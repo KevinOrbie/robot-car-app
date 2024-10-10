@@ -70,7 +70,7 @@ class QuadScreen {
         glDeleteBuffers(1, &VBO_);
     }
 
-    void load_texture(uint8_t* data, int width, int height, int channels, GLenum format=GL_RGBA) {
+    void load_texture(uint8_t* data, int width, int height, GLenum format=GL_RGBA) {
         if (data) {   
             //std::cout << "Loading Texture: width, height, channels = " << width << ", " << height << ", " << channels << std::endl;
             glBindTexture(GL_TEXTURE_2D, texture_);

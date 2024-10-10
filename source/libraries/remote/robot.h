@@ -41,7 +41,7 @@ class Robot: public Looper, public InputSink, public FrameProvider {
     void sink(Input input) override;
 
     /* Frame Provider. */
-    Frame getFrame(double curr_time) ;
+    Frame getFrame(double curr_time, PixelFormat fmt) ;
     void startStream();
     void stopStream();
 

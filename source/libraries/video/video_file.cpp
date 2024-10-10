@@ -14,6 +14,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "image.h"
 
 
 /* ============================ Classes ============================ */
@@ -110,12 +111,29 @@ VideoFile::VideoFile(std::string const& filepath) {
     }
 
     /* ---------------- Allocate Packet / Frame ----------------- */
+    /* Allocate Frame. */
     ptr_frame = av_frame_alloc();
     if (!ptr_frame) {
         LOGE("Failed to allocate memory for AVFrame.");
         throw std::runtime_error("Failed to allocate memory for AVFrame.");
     }
 
+    ptr_frame->format = ptr_codec_context->pix_fmt;
+    ptr_frame->width  = ptr_codec_context->width;
+    ptr_frame->height = ptr_codec_context->height;
+
+    /* Allocate frame data (data buffer). */
+    if (av_frame_get_buffer(ptr_frame, 0) < 0) {
+        LOGE("Failed to allocate memory for AVFrame data.");
+        throw std::runtime_error("Failed to allocate memory for AVFrame data");
+    }
+    av_frame_make_writable(ptr_frame);
+
+    /* Create Userspace Frame Buffer. */
+    frame_data_ = {};
+    frame_data_.image = Image(ptr_frame->width, ptr_frame->height, PixelFormat::YUV420P);
+
+    /* Allocate Packet. */
     ptr_packet = av_packet_alloc();
     if (!ptr_packet) {
         LOGE("Failed to allocate memory for AVPacket.");
@@ -130,7 +148,9 @@ VideoFile:: ~VideoFile() {
     avcodec_free_context(&ptr_codec_context);
 }
 
-Frame VideoFile::getFrame(double curr_time) {
+Frame VideoFile::getFrame(double curr_time, PixelFormat fmt) {
+    frame_data_.image.to(fmt);
+
     int response = 0;
     bool found_packet = false;
     bool decoded_frame = false;
@@ -200,25 +220,14 @@ Frame VideoFile::getFrame(double curr_time) {
         LOGW("The returned frame may not be a grayscale image, but could e.g. be just the R component if the video format is RGB");
     }
 
-    frame_data_.width = ptr_frame->width;
-    frame_data_.height = ptr_frame->height;
-    frame_data_.channels = 3;
+    ImageView image_view = ImageView(
+        {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
+        {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
+        ptr_frame->width, ptr_frame->height, PixelFormat::YUV420P
+    );
 
-    int size = frame_data_.width * frame_data_.height * frame_data_.channels;
-    frame_data_.data.resize(size);
-
-    for (int yidx = 0; yidx < frame_data_.height; yidx++) {
-        for (int xidx = 0; xidx < frame_data_.width; xidx++) {
-            int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
-
-            // NOTE: linesize is the width of the image in memory (>= width)
-            // NOTE: YUV 420 has 1 Cr & 1 Cb value per 2x2 Y-block
-
-            frame_data_.data[idx + 0] = *(ptr_frame->data[0] + yidx * ptr_frame->linesize[0] + xidx);        // Y
-            frame_data_.data[idx + 1] = *(ptr_frame->data[1] + (yidx/2) * ptr_frame->linesize[1] + xidx/2);  // U (use for even / uneven pixel)
-            frame_data_.data[idx + 2] = *(ptr_frame->data[2] + (yidx/2) * ptr_frame->linesize[2] + xidx/2);  // V (use for even / uneven pixel)
-        }
-    }
-
+    ImageView buffer_view = frame_data_.image.view();
+    buffer_view.copyFrom(image_view);
+    
     return frame_data_;
 }

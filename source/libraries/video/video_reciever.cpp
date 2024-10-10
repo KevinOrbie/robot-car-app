@@ -143,11 +143,9 @@ VideoReciever::VideoReciever(std::string const& address): address_(address){
     }
     av_frame_make_writable(ptr_frame);
 
-    /* Setup Custom Frame. */
-    frame_data_.width = ptr_frame->width;
-    frame_data_.height = ptr_frame->height;
-    frame_data_.channels = 3;
-    frame_data_.data.resize(frame_data_.width * frame_data_.height * frame_data_.channels, 0);
+    /* Create Userspace Frame Buffer. */
+    frame_data_ = {};
+    frame_data_.image = Image(ptr_frame->width, ptr_frame->height, PixelFormat::YUV422P);
 
     /* Allocate Packet */
     ptr_packet = av_packet_alloc();
@@ -239,17 +237,13 @@ void VideoReciever::recieve() {
         LOGW("Currnelty only YUV422P is supported.");
     }
 
-    std::lock_guard lock(frame_data_mutex_);
     ImageView image_view = ImageView(
         {ptr_frame->data[0], ptr_frame->data[1], ptr_frame->data[2]},
         {ptr_frame->linesize[0], ptr_frame->linesize[1], ptr_frame->linesize[2]},
-        frame_data_.width, frame_data_.height, PixelFormat::YUV422P
+        frame_data_.image.getWidth(), frame_data_.image.getHeight(), PixelFormat::YUV422P
     );
-
-    ImageView buffer_view = ImageView( /* TODO: remplace by Image.view() */
-        {frame_data_.data.data()}, {frame_data_.width * 3}, frame_data_.width, frame_data_.height, PixelFormat::YUV
-    );
-
+    std::lock_guard lock(frame_data_mutex_);
+    ImageView buffer_view = frame_data_.image.view();
     buffer_view.copyFrom(image_view);
 
     return;
@@ -258,7 +252,8 @@ void VideoReciever::recieve() {
 /**
  * @brief Get the last frame.
  */
-Frame VideoReciever::getFrame(double curr_time) {
+Frame VideoReciever::getFrame(double curr_time, PixelFormat fmt) {
     std::lock_guard lock(frame_data_mutex_);
+    frame_data_.image.to(fmt);
     return frame_data_;
 }

@@ -113,12 +113,11 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
 
     /* Load Image (optional) */
     if (frame_provider_) {
-        Frame new_frame = frame_provider_->getFrame(state->time);
+        Frame new_frame = frame_provider_->getFrame(state->time, PixelFormat::YUV);
         state->screen->load_texture(
-            &new_frame.data[0], 
-            new_frame.width, 
-            new_frame.height, 
-            new_frame.channels, 
+            new_frame.image.getData(), 
+            new_frame.image.getWidth(), 
+            new_frame.image.getHeight(), 
             GL_RGB
         );
     }

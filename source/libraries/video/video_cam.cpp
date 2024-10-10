@@ -191,9 +191,11 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
     }
 
     frame_bytes_per_line_ = fmt.fmt.pix.bytesperline;  /* Distance in bytes between the leftmost pixels in two adjacent lines. */
-    frame_data_.height = fmt.fmt.pix.height;
-    frame_data_.width = fmt.fmt.pix.width;
-    frame_data_.channels = 3;
+
+    /* Create Userspace Frame Buffer. */
+    frame_data_ = {};
+    frame_data_.image = Image(fmt.fmt.pix.width, fmt.fmt.pix.height, PixelFormat::YUV422);
+    frame_data_.image.zero();
 
     /* Buggy driver paranoia. */
     min = fmt.fmt.pix.width * 2;
@@ -235,10 +237,6 @@ VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_metho
     }
 
     LOGI("Initialized IO Memory.");
-
-    // Initialize Frame
-    int size = frame_data_.width * frame_data_.height * frame_data_.channels;
-    frame_data_.data = std::vector<uint8_t>(size, 0);
 }
 
 void VideoCam::setCamControl(unsigned int control_id, int value) {
@@ -590,7 +588,9 @@ void VideoCam::uinit_IO_USRP() {
 
 /* ############################## GetFrame ############################ */
 
-Frame VideoCam::getFrame(double curr_time){
+Frame VideoCam::getFrame(double curr_time, PixelFormat fmt){
+    frame_data_.image.to(fmt);
+
     int poll_result = -1;
     int poll_timeout_ms = 5000;
     struct pollfd poll_fds;
@@ -663,53 +663,25 @@ Frame VideoCam::getFrame(double curr_time){
 }
 
 void VideoCam::readFrame(unsigned int buffer_index){
-    int size = frame_data_.width * frame_data_.height * frame_data_.channels;
-    frame_data_.data.resize(size);
-
     switch (cam_type_) {
         case CamType::MYNT_EYE_STEREO:
         case CamType::ARKMICRO_WEBCAM: {
-            /* Conversion from YUV422 to YUV. */
-            // for (int yidx = 0; yidx < frame_data_.height; yidx++) {
-            //     for (int xidx = 0; xidx < frame_data_.width; xidx += 2) {
-            //         int idx = (yidx * frame_data_.width + xidx) * frame_data_.channels;
-
-            //         // NOTE: Here, YUV values are interleaved, not in planar order.
-            //         // NOTE: frame_bytes_per_line_ is the width of the image in memory (>= width)
-            //         // NOTE: YUV 422 has 1 Cr & 1 Cb value per 2 Y values (YUYV = 2 pixels, using same U,V)
-
-            //         /* Read even pixel. */
-            //         frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 0);  // Y1
-            //         frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-            //         frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
-            //         idx += 3;
-
-            //         /* Read uneven pixel. */
-            //         frame_data_.data[idx + 0] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 2);  // Y2
-            //         frame_data_.data[idx + 1] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 1);  // U (use for even / uneven pixel)
-            //         frame_data_.data[idx + 2] = *(buffers_[buffer_index].start + yidx * frame_bytes_per_line_ + xidx * 2 + 3);  // V (use for even / uneven pixel)
-            //     }
-            // }
-
             /* Directly copy YUV422 to YUV422. */
             ImageView image_view = ImageView(
                 {buffers_[buffer_index].start}, {frame_bytes_per_line_},
-                frame_data_.width, frame_data_.height, PixelFormat::YUV422
+                frame_data_.image.getWidth(), frame_data_.image.getHeight(), PixelFormat::YUV422
             );
 
-            ImageView buffer_view = ImageView( /* TODO: remplace by Image.view() */
-                {frame_data_.data.data()}, {frame_data_.width * 2}, frame_data_.width, frame_data_.height, PixelFormat::YUV422
-            );
-
+            ImageView buffer_view = frame_data_.image.view();
             buffer_view.copyFrom(image_view);
             break;
         }
         
-        default:
+        default: {
             LOGE("Unsupported Camera Type used (error %d: %s)", errno, strerror(errno));
             throw std::runtime_error("Unsupported Camera Type used");
+        }
     }
-
     return;
 }
 

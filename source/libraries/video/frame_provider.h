@@ -15,20 +15,18 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "image.h"
 
 
 /* ========================== Classes ========================== */
 struct Frame {
-    int width = 0;
-    int height = 0;
-    int channels = 0;
-    std::vector<uint8_t> data;
+    Image image;
 };
 
 class FrameProvider {
    public:
     FrameProvider() {};
-    virtual Frame getFrame(double curr_time) = 0;
+    virtual Frame getFrame(double curr_time, PixelFormat requested_format) = 0;
     virtual void startStream() = 0;
     virtual void stopStream() = 0;
 };

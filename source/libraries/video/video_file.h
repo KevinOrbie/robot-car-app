@@ -33,7 +33,7 @@ class VideoFile: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
     ~VideoFile();
-    Frame getFrame(double curr_time) override;
+    Frame getFrame(double curr_time, PixelFormat fmt) override;
     void startStream() override {return;};
     void stopStream() override {return;};
 
