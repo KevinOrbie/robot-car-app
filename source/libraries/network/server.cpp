@@ -79,7 +79,7 @@ Connection Socket::link() {
 
     /* Establish a connection with a single client. */
     clilen = sizeof(cli_addr);
-    LOGI("Waiting for a client connection...");
+    LOGI("Waiting for a client connection on port '%d'...", port_number);
 
     /* Connect to socket. */
     int connection_fd = accept(socket_fd, (struct sockaddr *) &cli_addr, &clilen);  // Block until a client connects to the server

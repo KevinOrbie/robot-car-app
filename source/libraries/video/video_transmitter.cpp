@@ -38,6 +38,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     // rtp: rtp
     // rtmp: flv
     // rtsp: rtsp
+    LOGI("Trying to connect to a video stream at '%s'...", address.c_str());
     int res = avformat_alloc_output_context2(&ptr_format_context, NULL, "mpegts", address.c_str());
     if (res < 0) {
         LOGE("Issue while allocating memory for output Format Context: %d", res);
