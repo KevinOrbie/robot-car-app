@@ -70,6 +70,7 @@ class ImageView {
         switch (view.format_) {
             case PixelFormat::YUV422 : convertYUV422 (view, *this); break;
             case PixelFormat::YUV422P: convertYUV422P(view, *this); break;
+            case PixelFormat::YUV420P: convertYUV420P(view, *this); break;
 
             default: 
                 LOGW("No conversions supported from format '%d'!", static_cast<int>(view.format_));

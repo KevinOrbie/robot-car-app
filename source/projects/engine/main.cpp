@@ -33,10 +33,11 @@ int main() {
     remote.connect();
     remote.thread();
 
-    VideoCam camera = VideoCam();
-    camera.startStream();
+    // VideoCam camera = VideoCam();
+    // camera.startStream();
 
-    VideoTransmitter transmitter = {"udp://127.0.0.1:8999", &camera};
+    // VideoTransmitter transmitter = {"udp://127.0.0.1:8999", &camera};
+    VideoTransmitter transmitter = {"udp://127.0.0.1:8999", nullptr};
     // VideoTransmitter transmitter = {"udp://192.168.0.234:8999", &camera};  // To the Client
     transmitter.start();
 
