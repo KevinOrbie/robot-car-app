@@ -13,11 +13,12 @@
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
-#include "robot/arduino_driver.h"
 #include "video/video_reciever.h"
+#include "remote/robot.h"
+
+#include "robot/arduino_driver.h"
 #include "video/video_file.h"
 #include "video/video_cam.h"
-#include "remote/robot.h"
 
 
 /* ======================== Entry Point ======================== */
