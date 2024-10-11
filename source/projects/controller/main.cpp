@@ -5,7 +5,7 @@
 
 /* ========================== Include ========================== */
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // getopt
 
 /* Standard C++ Libraries */
 #include <iostream>
@@ -13,34 +13,154 @@
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
+#include "robot/arduino_driver.h"
 #include "video/video_reciever.h"
-#include "remote/robot.h"
-
 #include "video/video_file.h"
+#include "video/video_cam.h"
+#include "remote/robot.h"
 
 
 /* ======================== Entry Point ======================== */
-int main() {
-    /* Setup Robot Communication. */
-    // remote::Robot robot = {"192.168.0.212", 2556};
-    remote::Robot robot = {"localhost", 2556};
-    robot.connect();
-    robot.thread();
+static void help() {
+    std::string msg = "";
 
-    /* Setup VideoReciever. */
-    // VideoReciever frame_grabber = VideoReciever("udp://127.0.0.1:8999");
-    // VideoReciever frame_grabber = VideoReciever("udp://192.168.0.212:8999");  // To the Server
-    // frame_grabber.thread();
-    VideoFile frame_grabber = VideoFile("/home/kevin/Videos/normal-1080p.mp4");
-    frame_grabber.startStream();
+    /* Usage. */
+    msg += "usage: controller [options]\n";
 
-    /* Setup Controller. */
-    ControlPanel panel = {&frame_grabber, &robot};
-    panel.start();
+    /* Explanation. */
+    msg += "\nOptions:\n";
+    msg += "  -h              display this help message\n";
+    msg += "  -a              enable camera and arduino driver\n";
+    msg += "  -d              enable the arduino driver (don't require remote connection)\n";
+    msg += "  -c              stream from the camera\n";
+    msg += "  -v <path>       stream from the video file\n";
+    msg += "  -i <address>    ip address of the robot to connect to\n";
+    
+    msg += "\n";
+
+    fprintf(stderr, "%s", msg.c_str());
+};
+
+static void summary(std::string robot_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino) {
+    std::string frame_provider = "";
+    if (use_camera) {
+        frame_provider = "camera";
+    } else if (use_video_file) {
+        frame_provider = video_file;
+    } else {
+        frame_provider = "robot";
+    }
+
+    std::string input_sink = "";
+    if (enable_arduino) {
+        input_sink = "arduino";
+    } else {
+        input_sink = "robot";
+    }
+
+    LOGI("--------- Summary ---------");
+    LOGI("  > Frame Provider : %s", frame_provider.c_str());
+    LOGI("  > Input Sink     : %s", input_sink.c_str());
+    LOGI("  > Robot IP       : %s", robot_ip.c_str());
+    LOGI("---------------------------");
+};
+
+int main(int argc, char *argv[]) {
+    /* ------------------ Default Values ------------------ */
+    std::string robot_ip = "192.168.0.212";
+    std::string video_file;
+
+    bool use_camera     = false;
+    bool use_video_file = false;
+    bool enable_arduino = false;
+
+    /* ----------------- Parse User Input ----------------- */
+    int option;
+    while ((option = getopt(argc, argv, "acv:di:h")) != -1) {
+        switch (option) {
+            case 'a': {
+                use_camera = true;
+                enable_arduino = true;
+                robot_ip = "localhost";
+                break;
+            }
+            case 'c':
+                use_camera = true;
+                break;
+            case 'd':
+                enable_arduino = true;
+                break;
+            case 'i':
+                robot_ip = std::string(optarg);
+                break;
+            case 'v': {
+                use_video_file = true;
+                video_file = std::string(optarg);
+                break;
+            }
+            default: /* h */
+                help();
+                return EXIT_SUCCESS;
+        }
+    }
+
+    /* ---------------- Post Process Values --------------- */
+    if (robot_ip == "localhost") {
+        robot_ip = "127.0.0.1";
+    }
+    
+    if (use_camera && use_video_file) {
+        LOGE("Video Camera (-c) and Video File (-v) can't both be enabled.");
+        help();
+        return EXIT_SUCCESS;
+    }
+    
+    /* Notify user of used settings. */
+    summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino);
+
+    /* ---------------- Setup & Run System ---------------- */
+    std::unique_ptr<FrameProvider> frame_provider = nullptr;
+    std::unique_ptr<InputSink> input_sink         = nullptr;
+
+    /* Setup & Start Input Sink. */
+    if (enable_arduino) {
+        input_sink = std::make_unique<ArduinoDriver>();
+        dynamic_cast<ArduinoDriver*>(input_sink.get())->thread();
+    } else {
+        input_sink = std::make_unique<remote::Robot>(robot_ip, 2556);
+        dynamic_cast<remote::Robot*>(input_sink.get())->connect();
+        dynamic_cast<remote::Robot*>(input_sink.get())->thread();
+    }
+
+    /* Setup & Start Frame Provider. */
+    if (use_camera) {
+        frame_provider = std::make_unique<VideoCam>();
+        frame_provider->startStream();
+    } else if (use_video_file) {
+        frame_provider = std::make_unique<VideoFile>(video_file);
+        frame_provider->startStream();
+    } else {
+        frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
+        frame_provider->startStream();
+        dynamic_cast<VideoReciever*>(frame_provider.get())->thread();
+    }
+
+    /* Setup & Start Controller. */
+    ControlPanel panel = {frame_provider.get(), input_sink.get()};
+    panel.start();  // Run in main thread
 
     /* Command threads to finnish. */
-    // frame_grabber.stop();
-    robot.stop();
+    if (enable_arduino) {
+        dynamic_cast<ArduinoDriver*>(input_sink.get())->stop();
+    } else {
+        dynamic_cast<remote::Robot*>(input_sink.get())->stop();
+    }
+
+    if (!use_camera && !use_video_file) {
+        dynamic_cast<VideoReciever*>(frame_provider.get())->stop();
+    }
+    
+
     return 0;
 }
 

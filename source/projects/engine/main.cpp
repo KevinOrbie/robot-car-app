@@ -5,7 +5,7 @@
 
 /* ========================== Include ========================== */
 /* Standard C Libraries */
-#include <unistd.h>  // Getopt
+#include <unistd.h>  // getopt
 
 /* Standard C++ Libraries */
 #include <iostream>
@@ -44,7 +44,7 @@ static void help() {
     fprintf(stderr, "%s", msg.c_str());
 };
 
-static void summery(std::string remote_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino) {
+static void summary(std::string remote_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino) {
     std::string frame_provider = "";
     if (use_camera) {
         frame_provider = "camera";
@@ -54,10 +54,17 @@ static void summery(std::string remote_ip, std::string video_file, bool use_came
         frame_provider = "none";
     }
 
+    std::string input_sink = "";
+    if (enable_arduino) {
+        input_sink = "arduino";
+    } else {
+        input_sink = "none";
+    }
+
     LOGI("--------- Summary ---------");
-    LOGI("  > Arduino        : %s", (enable_arduino) ? "enabled":"disabled");
+    LOGI("  > Frame Provider : %s", frame_provider.c_str());
+    LOGI("  > Input Sink     : %s", input_sink.c_str());
     LOGI("  > Remote IP      : %s", remote_ip.c_str());
-    LOGI("  > FrameProvider  : %s", frame_provider.c_str());
     LOGI("---------------------------");
 };
 
@@ -77,6 +84,7 @@ int main(int argc, char *argv[]) {
             case 'a': {
                 use_camera = true;
                 enable_arduino = true;
+                remote_ip = "localhost";
                 break;
             }
             case 'c':
@@ -105,12 +113,13 @@ int main(int argc, char *argv[]) {
     }
     
     if (use_camera && use_video_file) {
-        LOGE("Video Camera and Video File can't both be enabled.");
+        LOGE("Video Camera (-c) and Video File (-v) can't both be enabled.");
         help();
         return EXIT_SUCCESS;
     }
     
-    summery(remote_ip, video_file, use_camera, use_video_file, enable_arduino);
+    /* Notify user of used settings. */
+    summary(remote_ip, video_file, use_camera, use_video_file, enable_arduino);
 
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<ArduinoDriver> arduino        = nullptr;

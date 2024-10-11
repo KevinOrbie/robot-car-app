@@ -47,6 +47,25 @@ void ImageView::convertYUV422(ImageView& src, ImageView& dst) {
             break;
         }
 
+        /* -------------------------- YUV422 to YUV -------------------------- */
+        case PixelFormat::YUV: {
+            /* Process 2 pixel / iteration. */
+            for (int yidx = 0; yidx < height; yidx++) { /* Pixel Height Coordinate. */
+                for (int xidx = 0; xidx < width; xidx+=2) { /* Pixel Width Coordinate. */
+                    /* Converting even pixel. */
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 0) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 0);  // Y1
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 1) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 1);  // U (use same U for even / uneven pixel)
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 2) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 3);  // V (use same V for even / uneven pixel)
+                
+                    /* Converting uneven pixel. */
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 3) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 2);  // Y2
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 4) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 1);  // U (use same U for even / uneven pixel)
+                    *(dst.data_[0] + yidx * dst.linesize_[0] + xidx * 3 + 5) = *(src.data_[0] + yidx * src.linesize_[0] + xidx * 2 + 3);  // V (use same V for even / uneven pixel)
+                }
+            }
+            break;
+        }
+
         /* ------------------------ YUV422 to YUV422P ------------------------ */
         case PixelFormat::YUV422P: {
             /* Setup Plane Variables. */
