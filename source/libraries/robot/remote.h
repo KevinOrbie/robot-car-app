@@ -28,7 +28,9 @@ class Remote: public Looper {
     Remote(int port, InputSink *input_sink=nullptr): server_(port, false), handler_(server_, input_sink) {};
 
     void connect();
+    
     void iteration() override;
+    void setup() override;
 
    private:
     server::Server server_;

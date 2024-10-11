@@ -21,5 +21,10 @@
  */
 class InputSink {
    public:
+    /**
+     * @note This virtual destructor is needed to allow derived classes to be polymophically destructed.
+     * @link https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
+     */
+    virtual ~InputSink(){}; 
     virtual void sink(Input input) = 0;
 };

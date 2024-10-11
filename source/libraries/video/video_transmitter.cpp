@@ -9,6 +9,9 @@
 /* ============================ Includes ============================ */
 #include "video_transmitter.h"
 
+/* Standard C Libraries */
+#include <unistd.h>  // gettid()
+
 /* Standard C++ Libraries */
 #include <stdexcept>
 #include <string>
@@ -27,8 +30,8 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
         av_register_all();
     #endif
     avformat_network_init();
-    av_log_set_level(AV_LOG_DEBUG);
-    // av_log_set_level(AV_LOG_QUIET);
+    // av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_level(AV_LOG_QUIET);
 
     /* ---------------- Setup Container Context ----------------- */
     /* This context is used during the muxing operation. */
@@ -213,6 +216,10 @@ void VideoTransmitter::iteration() {
     }
 }
 
+void VideoTransmitter::setup() {
+    LOGI("Running VideoTransmitter (TID = %d)", gettid());
+};
+
 /**
  * @brief Send the given frame over the network.
  * 
@@ -234,30 +241,6 @@ void VideoTransmitter::send(Frame &frame) {
     );
 
     buffer_view.copyFrom(image_view);
-
-    /* Copy data from custom Frame to Libav frame (both YUV422P). */
-    // int base_u_idx = frame.height * frame.width;
-    // int base_v_idx = (frame.height * frame.width * 3) >> 1;
-
-    // for (int yidx = 0; yidx < frame.height; yidx++) {
-    //     for (int xidx = 0; xidx < frame.width; xidx++) {
-    //         /* Copy Y value. */
-    //         int src_y_idx = yidx * frame.width + xidx;
-    //         int dst_y_offset = yidx * ptr_frame->linesize[0] + xidx;
-    //         *(ptr_frame->data[0] + dst_y_offset) = frame.data[src_y_idx];
-
-    //         /* Copy U value. */
-    //         int src_u_idx = (yidx * frame.width + xidx) >> 1;
-    //         int dst_u_offset = yidx * ptr_frame->linesize[1] + (xidx >> 1);
-    //         *(ptr_frame->data[1] + dst_u_offset) = frame.data[base_u_idx + src_u_idx];
-
-    //         /* Copy V value. */
-    //         int src_v_idx = (yidx * frame.width + xidx) >> 1;
-    //         int dst_v_offset = yidx * ptr_frame->linesize[2] + (xidx >> 1);
-    //         uint8_t value = frame.data[base_v_idx + src_v_idx];
-    //         *(ptr_frame->data[2] + dst_v_offset) = value;  // Segfault here.
-    //     }
-    // }
 
     /* Send a frame to the encoder. */
     if (avcodec_send_frame(ptr_codec_context, ptr_frame) < 0) {

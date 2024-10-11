@@ -9,7 +9,7 @@
 #include "robot.h"
 
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // gettid()
 
 /* Standard C++ Libraries */
 #include <memory>
@@ -25,8 +25,13 @@ void Robot::connect() {
 }
 
 void Robot::iteration() {
+    // Non-stop iteration, maybe make it wait?
     client_.iteration();
     handler_.iteration();
+};
+
+void Robot::setup() {
+    LOGI("Running Robot (TID = %d)", gettid());
 };
 
 void Robot::sink(Input input) {

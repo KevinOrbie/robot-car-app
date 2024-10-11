@@ -9,7 +9,7 @@
 #include "arduino_driver.h"
 
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // gettid()
 
 /* Standard C++ Libraries */
 #include <condition_variable>
@@ -47,6 +47,10 @@ void ArduinoDriver::iteration() {
         /* If notified before timout reached, again wait for command interval. */
         if (res == std::cv_status::timeout) { commandArduino(); }
     }
+};
+
+void ArduinoDriver::setup() {
+    LOGI("Running ArduinoDriver (TID = %d)", gettid());
 };
 
 void ArduinoDriver::sink(Input input) {

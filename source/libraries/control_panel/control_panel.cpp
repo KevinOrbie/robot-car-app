@@ -9,7 +9,7 @@
 #include "control_panel.h"
 
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // gettid()
 
 /* Standard C++ Libraries */
 #include <stdexcept>
@@ -32,7 +32,7 @@ ControlPanel::ControlPanel(FrameProvider *frame_provider, InputSink *input_sink)
  * @note All OpenGL functions need to be called from the same thread where the OpenGL context is created.
  */
 void ControlPanel::setup() {
-    LOGI("Starting Control Panel.");
+    LOGI("Running Control Panel (TID = %d)", gettid());
 
     /* Create window. */
     window_ = Window::instance();

@@ -9,7 +9,7 @@
 #include "remote.h"
 
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // gettid()
 
 /* Standard C++ Libraries */
 // None
@@ -29,5 +29,8 @@ void Remote::iteration() {
     handler_.iteration();
 };
 
+void Remote::setup() {
+    LOGI("Running Remote (TID = %d)", gettid());
+};
 
 } // namespace robot

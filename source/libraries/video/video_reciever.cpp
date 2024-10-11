@@ -9,6 +9,9 @@
 /* ============================ Includes ============================ */
 #include "video_reciever.h"
 
+/* Standard C Libraries */
+#include <unistd.h>  // gettid()
+
 /* Standard C++ Libraries */
 #include <stdexcept>
 #include <string>
@@ -168,6 +171,10 @@ void VideoReciever::iteration() {
     // TODO: Verify FPS not > 60/30FPS.
     recieve(); // Blocking
 }
+
+void VideoReciever::setup() {
+    LOGI("Running VideoReciever (TID = %d)", gettid());
+};
 
 /**
  * @brief Recieve a frame over the network.

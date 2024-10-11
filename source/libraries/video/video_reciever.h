@@ -38,6 +38,8 @@ class VideoReciever: public Looper, public FrameProvider {
     ~VideoReciever();
 
     void iteration() override;
+    void setup() override;
+    
     void recieve(); // Blocking
 
     Frame getFrame(double curr_time, PixelFormat fmt) override;

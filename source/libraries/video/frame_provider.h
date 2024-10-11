@@ -25,7 +25,12 @@ struct Frame {
 
 class FrameProvider {
    public:
-    FrameProvider() {};
+    /**
+     * @note This virtual destructor is needed to allow derived classes to be polymophically destructed.
+     * @link https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
+     */
+    virtual ~FrameProvider(){}; 
+
     virtual Frame getFrame(double curr_time, PixelFormat requested_format) = 0;
     virtual void startStream() = 0;
     virtual void stopStream() = 0;

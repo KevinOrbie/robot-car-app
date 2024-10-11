@@ -38,6 +38,8 @@ class VideoTransmitter: public Looper {
 
     void start() override;
     void iteration() override;
+    void setup() override;
+
     void send(Frame &frame);
 
    private:

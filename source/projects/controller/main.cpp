@@ -163,7 +163,6 @@ int main(int argc, char *argv[]) {
     if (!use_camera && !use_video_file) {
         dynamic_cast<VideoReciever*>(frame_provider.get())->stop();
     }
-    
 
     return 0;
 }

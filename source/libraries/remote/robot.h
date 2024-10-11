@@ -36,12 +36,13 @@ class Robot: public Looper, public InputSink, public FrameProvider {
 
     /* Looper. */
     void iteration() override;
+    void setup() override;
 
     /* Input Sink. */
     void sink(Input input) override;
 
     /* Frame Provider. */
-    Frame getFrame(double curr_time, PixelFormat fmt) ;
+    Frame getFrame(double curr_time, PixelFormat fmt);
     void startStream();
     void stopStream();
 

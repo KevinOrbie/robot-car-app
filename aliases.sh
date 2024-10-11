@@ -78,16 +78,16 @@ rca-perf-check() {
 }
 
 rca-top() {
-    local pid=$(pgrep -u $USER $PROJECT_NAME)
+    local pid=($(pgrep -x -u $USER 'engine|controller'))
 
     # Check if var is empty
     if [[ -z "$pid" ]]; then
-        echo "ERROR: No active '$PROJECT_NAME' process was found!"
+        echo "ERROR: No active 'engine' or 'controller' process was found!"
         return 1
     fi
 
     # Run top
-    top -p $pid
+    top "${pid[@]/#/-p }" -H
     return 0
 }
 

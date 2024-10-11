@@ -35,7 +35,10 @@ class ArduinoDriver: public InputSink, public Looper {
 
    public:
     void commandArduino();
+
     void iteration() override;
+    void setup() override;
+    
     void sink(Input input) override;
 
    private:

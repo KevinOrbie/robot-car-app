@@ -86,7 +86,6 @@ int main(int argc, char *argv[]) {
             case 'a': {
                 use_camera = true;
                 enable_arduino = true;
-                remote_ip = "localhost";
                 break;
             }
             case 'c':
