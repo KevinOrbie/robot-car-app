@@ -3,6 +3,8 @@
  * @author Kevin Orbie
  */
 
+#define CONTROLLER_VERSION 0
+
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 #include <unistd.h>  // getopt
@@ -117,6 +119,7 @@ int main(int argc, char *argv[]) {
     }
     
     /* Notify user of used settings. */
+    LOGI("CONTROLLER: Version %d", CONTROLLER_VERSION);
     summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino);
 
     /* ---------------- Setup & Run System ---------------- */

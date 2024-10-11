@@ -31,7 +31,11 @@ rca-install() {
 }
 
 alias rca-build-install="rca-build-only && rca-install"
-alias rca-run="(cd $APP_ROOT/_deploy/$PROJECT_NAME && ./$PROJECT_NAME)"
+
+rca-run() {
+    PROJECT=${1:-engine}
+    (cd $APP_ROOT/_deploy/$PROJECT && ./$PROJECT ${@:2})
+}
 
 # ----------------- Testing -----------------
 alias rca-test-setup-build="(cd $APP_ROOT/ && cmake -B./_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING='ON')"
@@ -50,14 +54,28 @@ rca-test-run() {
 }
 
 # ---------------- Profiling ----------------
-alias rca-perf-run="(cd $APP_ROOT/_deploy/$PROJECT_NAME && sudo perf record -g -F 999 ./$PROJECT_NAME)"
-alias rca-perf-check="(
-    cd $APP_ROOT/_deploy/$PROJECT_NAME && 
+rca-perf-run() {
+    PROJECT=${1:-engine}
+    echo "---------------- Running Perf ----------------"
+    echo "Executable: $APP_ROOT/_deploy/$PROJECT/$PROJECT"
+    echo "Arguments : ${@:2}"
+    echo "----------------------------------------------"
+
+    (cd $APP_ROOT/_deploy/$PROJECT && sudo perf record -g -F 999 -- ./$PROJECT ${@:2})
+}
+
+rca-perf-check() {
+    PROJECT=${1:-engine}
+    echo "---------------- Checking Perf ----------------"
+    echo "Perf Data: $APP_ROOT/_deploy/$PROJECT/perf.data"
+    echo "----------------------------------------------"
+
+    (cd $APP_ROOT/_deploy/$PROJECT && 
     sudo chown $USER:$USER ./perf.data && 
-    perf script -F +pid > ./test.perf &&
+    perf script -F +pid > ./DRAG_ME.perf &&
     firefox -new-tab "https://profiler.firefox.com/" &&
-    nautilus .
-)"
+    nautilus .)
+}
 
 rca-top() {
     local pid=$(pgrep -u $USER $PROJECT_NAME)
