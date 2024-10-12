@@ -9,7 +9,7 @@
 #include "robot.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 #include <memory>
@@ -21,23 +21,31 @@
 namespace remote {
 /* ========================== Classes ========================== */
 void Robot::connect() {
-    client_.connect();
-}
-
-void Robot::iteration() {
-    // Non-stop iteration, maybe make it wait?
-    client_.iteration();
-    handler_.iteration();
+    client::Client::connect();
+    message_handler_ = std::make_unique<MessageHandler>(message_reciever_.get());
 };
 
-void Robot::setup() {
-    LOGI("Running Robot (TID = %d)", gettid());
+void Robot::iteration() {
+    client::Client::iteration();
+    message_handler_->iteration();
+};
+
+void Robot::thread() {
+    client::Client::thread();
+    message_handler_->thread();
+};
+
+void Robot::stop() {
+    LOGI("Stopping Robot!");
+    client::Client::stop();
+    LOGI("Stopping Message Handler!");
+    message_handler_->stop();
 };
 
 void Robot::sink(Input input) {
     /* Forward over channel. */
     std::unique_ptr<message::MessageBase> msg = std::make_unique<message::Message<message::MessageID::CMD_DRIVE>>(input);
-    client_.pushSendQueue(std::move(msg));
+    message_transmitter_->pushSendQueue(std::move(msg));
 };
 
 Frame Robot::getFrame(double curr_time, PixelFormat fmt) {

@@ -7,7 +7,7 @@
 #include "connection.h"
 
 /* Standard C Libraries */
-// #include <poll.h>           // poll()
+#include <poll.h>           // poll()
 #include <stdio.h>          // IO Declarations
 #include <errno.h>          // errno, ...
 #include <fcntl.h>          // fcntl()
@@ -63,6 +63,53 @@ Connection& Connection::operator=(Connection&& other) {
 }
 
 /* ------------------------------------- Reception ------------------------------------ */
+bool Connection::wait(int timeout_ms) {
+    int poll_result;
+
+    int poll_timeout_ms = timeout_ms; // Wait indefinitely
+    struct pollfd poll_fds;
+
+    /* Setup Poll FD Settings */
+    poll_fds.fd = connection_fd_;
+    poll_fds.events = POLLIN;  // Wait for available data to read
+
+    while (true) {
+        /* Block for I/O operations. */
+        poll_result = poll(&poll_fds, 1, poll_timeout_ms);
+
+        /* Poll() returned errors. */
+        if (poll_result == -1) {
+            if (errno == EINTR) {
+                continue; /* A signal occurred before any requested event, resume polling. */
+            }
+            LOGE("Poll issue (error %d: %s)", errno, strerror(errno));
+            throw std::runtime_error("poll failed");
+        }
+
+        /* Poll() timed outed. */
+        if (poll_result == 0) {
+            return false;
+        }
+
+        /* Check for ERROR. */
+        if (poll_fds.revents & POLLERR) { 
+            LOGE("Poll issue (error %d: %s). Make sure the connection is started / running.", errno, strerror(errno));
+            throw std::runtime_error("poll failed");
+        }
+
+        /* Check for closed stream. */
+        if (poll_fds.revents & POLLHUP) { 
+            LOGE("Connection has been closed!");
+            throw std::runtime_error("Connection stream has been closed");
+        }
+
+        break;
+    }
+
+    /* Data available on connection. */
+    return true;
+};
+
 bool Connection::recieve(char* buffer, int bytes) const {
     int chars_read = -1;
 
@@ -110,6 +157,8 @@ bool Connection::send(char* buffer, int bytes) const {
         LOGE("Writing to socket: %s", std::strerror(errno));
         throw std::system_error(errno, std::generic_category(), "Writing to socket");
     }
+
+    // NOTE: Not all data might have been transmitted here.
 
     return true;
 };

@@ -46,19 +46,35 @@ class Looper {
             std::lock_guard<std::mutex> lock(running_mutex_);
             running_ = false;
         }
+
         if (thread_.joinable()){ /* Only valid if running in seperate thread. */
             thread_.join();
         }
+
+        threaded_ = false;
     };
 
     /**
      * @brief Starts an infinite loop in different thread.
      */
     void thread() {
+        threaded_ = true;
         thread_ =  std::thread(&Looper::start, this);
     };
 
    protected:
+    /**
+     * @brief Setup the thread where the infinite loop will run.
+     * @note Does nothing by default.
+     */
+    virtual void setup() { return; }
+
+    /**
+     * @brief Cleanup the thread where the infinite loop ran.
+     * @note Does nothing by default.
+     */
+    virtual void cleanup() { return; }
+
     /**
      * @brief Keep calling iteration(), until stop() is called.
      */
@@ -79,19 +95,15 @@ class Looper {
     }
 
     /**
-     * @brief Setup the thread where the infinite loop will run.
-     * @note Does nothing by default.
+     * @brief Return if this looper is running in a seperate thread.
      */
-    virtual void setup() { return; }
-
-    /**
-     * @brief Cleanup the thread where the infinite loop ran.
-     * @note Does nothing by default.
-     */
-    virtual void cleanup() { return; }
+    bool threaded() {
+        return threaded_;
+    }
 
    protected:
     std::thread thread_;
+    bool threaded_ = false;
 
     bool running_ = false;
     std::mutex running_mutex_;

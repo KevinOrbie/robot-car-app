@@ -35,23 +35,25 @@ class Socket {
 };
 
 
-class Client : public message::Transciever {
+class Client {
    public:
-    Client(std::string server_address, int port, bool blocking);
+    Client(std::string server_address, int port);
 
     /**
      * @brief Block until a Server connects to this client.
      */
-    void connect();
-
-    void iteration();
+    virtual void connect();
+    virtual void iteration();
+    virtual void thread();
+    virtual void stop();
 
    protected:
-
-   private:
     std::string server_address_ = "localhost";
     int port_                   = 2556;
-    bool blocking_              = false;
+
+    Connection connection_;
+    std::unique_ptr<message::Reciever>    message_reciever_;
+    std::unique_ptr<message::Transmitter> message_transmitter_;
 };
 
 

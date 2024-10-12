@@ -24,7 +24,7 @@ using namespace message;
 /* =========================== Macros ========================== */
 #define PIPE_MESSAGE(msg_id) \
 case msg_id: { \
-    Message<msg_id> *message = dynamic_cast<Message<msg_id>*>(message_base.get()); \
+    Message<msg_id> *message = dynamic_cast<Message<msg_id>*>(message_base); \
     on(message);    \
     break;          \
 }
@@ -37,12 +37,20 @@ class MessageHandler: public server::MessageHandler {
 
     void iteration() {
         std::unique_ptr<MessageBase> message_base = server_.popRecieveQueue();
-        if (!message_base) {
-            /* No message to process. */
-            return;
-        }
+        handle(message_base.get());
+    };
+
+    /**
+     * @note Can't be static, as `on()` needs to be overridden from base, which is not possible with static.
+     */
+    void handle(MessageBase* message_base) {
+        /* No message to process? */
+        if (!message_base) { return; }
+
+        /* Get Message ID. */
         MessageID id = message_base->getID();
 
+        /* Pipe given message to correct handler. */
         switch (id) {
             PIPE_MESSAGE(MessageID::CMD_DRIVE);
             
@@ -50,8 +58,9 @@ class MessageHandler: public server::MessageHandler {
                 LOGW("Recieved message, with ID %d, has not handler.", static_cast<int>(id));
                 break;
         }
-    };
+    }
 
+    /* --------------------- Specifc Message Handlers --------------------- */
     void on(Message<MessageID::CMD_DRIVE> *msg) override;
 
    private:

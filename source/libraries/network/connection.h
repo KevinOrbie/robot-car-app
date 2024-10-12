@@ -38,6 +38,12 @@ class Connection {
     bool send(char* buffer, int bytes) const;
     // bool send(int value) const;
 
+    /**
+     * @brief Block until a message is ready to be read. 
+     * @return True if a message was recieved, false on timeout.
+     */
+    bool wait(int timeout_ms);
+
     bool valid() const { return connection_fd_ >= 0; };
 
    private:

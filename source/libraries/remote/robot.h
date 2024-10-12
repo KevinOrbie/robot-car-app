@@ -28,15 +28,15 @@ namespace remote {
 /**
  * @brief This is the interface to the robot for a remote controller.
  */
-class Robot: public Looper, public InputSink, public FrameProvider {
+class Robot: public client::Client, public InputSink, public FrameProvider {
    public:
-    Robot(std::string server_address, int port): client_(server_address, port, false), handler_(client_){};
-
-    void connect();
+    Robot(std::string server_address, int port): client::Client(server_address, port){};
+    void connect() override;
 
     /* Looper. */
     void iteration() override;
-    void setup() override;
+    void thread() override;
+    void stop() override;
 
     /* Input Sink. */
     void sink(Input input) override;
@@ -47,8 +47,7 @@ class Robot: public Looper, public InputSink, public FrameProvider {
     void stopStream();
 
    private:
-    client::Client client_;
-    MessageHandler handler_;
+    std::unique_ptr<MessageHandler> message_handler_;
 };
 
 

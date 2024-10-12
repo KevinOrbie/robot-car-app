@@ -33,7 +33,6 @@ namespace client {
 /* ========================== Classes ========================== */
 
 /* --------------------- Socket --------------------- */
-
 Socket::Socket(std::string server_address, int port, bool blocking): blocking(blocking) {
     serv_addr = {};    // Address of the server to connect to
     hostent *server;   // Defines this host computer on the Internet
@@ -95,20 +94,39 @@ Connection Socket::link() {
 
 
 /* --------------------- Client --------------------- */
-
-Client::Client(std::string server_address, int port, bool blocking): 
-    server_address_(server_address), port_(port), blocking_(blocking) {};
+Client::Client(std::string server_address, int port): 
+    server_address_(server_address), port_(port){};
 
 void Client::connect() {
-    Socket socket = Socket(server_address_, port_, blocking_);
+    Socket socket = Socket(server_address_, port_, false);
     LOGI("Connecting to a server on: '%s'", server_address_.c_str());
-    connection_ = socket.link(); // Wait for server response.
+    connection_ = socket.link(); // Blocks, waiting for server response.
+
+    /* Initalize Reciever & Transmitter. */
+    message_transmitter_ = std::make_unique<message::Transmitter>(&connection_);
+    message_reciever_ = std::make_unique<message::Reciever>(&connection_);
 }
 
 void Client::iteration() {
-    send();
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    recieve();
+    message_transmitter_->iteration();
+    message_reciever_->iteration();
+};
+
+void Client::thread() {
+    if (!message_transmitter_ || !message_reciever_){
+        LOGE("Transmitter or Reciever not yet initialized!");
+        throw std::runtime_error("Transmitter or Reciever not yet initialized!");
+    }
+
+    message_transmitter_->thread();
+    message_reciever_->thread();
+};
+
+void Client::stop() {
+    LOGI("Stopping Reciever!");
+    message_reciever_->stop();
+    LOGI("Stopping Transmitter!");
+    message_transmitter_->stop();
 };
 
 } // namespace client
