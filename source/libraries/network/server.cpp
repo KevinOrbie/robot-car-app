@@ -101,19 +101,37 @@ Connection Socket::link() {
 
 
 /* --------------------- Server --------------------- */
-
-Server::Server(int port, bool blocking): port_(port), blocking_(blocking_) {};
+Server::Server(int port): port_(port){};
 
 void Server::connect() {
-    Socket socket = Socket(port_, blocking_);
-    connection_ = socket.link(); // Wait for one client to connect.
+    Socket socket = Socket(port_, false);
+    connection_ = socket.link(); // Blocks, waiting for server response.
+
+    /* Initalize Reciever & Transmitter. */
+    message_transmitter_ = std::make_unique<message::Transmitter>(&connection_);
+    message_reciever_ = std::make_unique<message::Reciever>(&connection_);
 }
 
 void Server::iteration() {
-    send();
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    recieve();
+    message_transmitter_->iteration();
+    message_reciever_->iteration();
+};
+
+void Server::thread() {
+    if (!message_transmitter_ || !message_reciever_){
+        LOGE("Transmitter or Reciever not yet initialized!");
+        throw std::runtime_error("Transmitter or Reciever not yet initialized!");
+    }
+
+    message_transmitter_->thread();
+    message_reciever_->thread();
+};
+
+void Server::stop() {
+    LOGI("Stopping Reciever!");
+    message_reciever_->stop();
+    LOGI("Stopping Transmitter!");
+    message_transmitter_->stop();
 };
 
 } // namespace server
-

@@ -8,7 +8,7 @@
 
 /* ========================== Include ========================== */
 /* Standard C Libraries */
-// None
+#include <unistd.h>  // gettid()
 
 /* Standard C++ Libraries */
 // None
@@ -31,13 +31,27 @@ case msg_id: { \
 
 
 /* ========================== Classes ========================== */
-class MessageHandler: public server::MessageHandler {
+class MessageHandler: public server::MessageHandler, public Looper {
    public:
-    MessageHandler(server::Server &server, InputSink *input_sink=nullptr): server_(server), input_sink_(input_sink) {};
+    MessageHandler(Reciever *recv, InputSink *input_sink=nullptr): message_reciever_(recv), input_sink_(input_sink) {};
 
     void iteration() {
-        std::unique_ptr<MessageBase> message_base = server_.popRecieveQueue();
-        handle(message_base.get());
+        /* If running in seperate thread, block this thread block until message vailable. */
+        if (threaded()) {
+            bool message_available = message_reciever_->waitForMessage(1000);
+
+            /* Wait again on timeout, needed to stop looper thread if requested. */
+            if (!message_available) { return; }
+        }
+
+        do { /* Process all queued messages. */
+            std::unique_ptr<MessageBase> message_base = message_reciever_->popRecieveQueue();
+            handle(message_base.get());
+        } while (message_reciever_->getQueueSize() > 0);
+    };
+
+    void setup() {
+        LOGI("Running MessageHandler (TID = %d)", gettid());
     };
 
     /**
@@ -64,7 +78,7 @@ class MessageHandler: public server::MessageHandler {
     void on(Message<MessageID::CMD_DRIVE> *msg) override;
 
    private:
-    server::Server &server_;
+    Reciever *message_reciever_;
     InputSink *input_sink_ = nullptr;
 };
 

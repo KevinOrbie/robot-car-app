@@ -23,19 +23,26 @@
 
 namespace robot {
 /* ========================== Classes ========================== */
-class Remote: public Looper {
+class Remote: public server::Server {
    public:
-    Remote(int port, InputSink *input_sink=nullptr): server_(port, false), handler_(server_, input_sink) {};
-
-    void connect();
+    Remote(int port, InputSink *input_sink=nullptr): server::Server(port){};
+    void connect() override;
     
+    /* Looper Interface. */
     void iteration() override;
-    void setup() override;
+    void thread() override;
+    void stop() override;
 
    private:
-    server::Server server_;
-    MessageHandler handler_;
+    std::unique_ptr<MessageHandler> message_handler_;
 };
 
+// TODO: Remove Transciever
+// TODO: Add LooperInterface for Classes containing loopers, but not running in a sperate thread themselves
+//   > iteration()
+//   > thread()
+//   > stop()
+
+// TODO: Update / Make Software Diagrams
 
 } // namespace robot

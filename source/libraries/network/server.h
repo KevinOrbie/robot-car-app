@@ -35,34 +35,26 @@ class Socket {
 };
 
 
-class Server: public message::Transciever {
+class Server {
    public:
-    Server(int port, bool blocking);
+    Server(int port);
 
     /**
      * @brief Block until a client connects to the server.
      */
-    void connect();
-
-    void iteration();
+    virtual void connect();
+    
+    /* Looper Interface. */
+    virtual void iteration();
+    virtual void thread();
+    virtual void stop();
 
    protected:
-
-    /**
-     * @brief Recieve message payload & take relevant actions.
-     */
-    template<message::MessageID ID> void handleMessage();
-
-   private:
     int port_        = 2556;
-    bool blocking_   = false;
+    
+    Connection connection_;
+    std::unique_ptr<message::Reciever>    message_reciever_;
+    std::unique_ptr<message::Transmitter> message_transmitter_;
 };
-
-
-/* ====================== Message Handlers ===================== */
-/* NOTE: Declarations with template specialization is best done in the same header file. */
-
-template<> void Server::handleMessage<message::MessageID::CMD_DRIVE>();
-
 
 } // namespace server

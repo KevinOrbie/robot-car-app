@@ -43,6 +43,8 @@ class Client {
      * @brief Block until a Server connects to this client.
      */
     virtual void connect();
+
+    /* Looper Interface. */
     virtual void iteration();
     virtual void thread();
     virtual void stop();

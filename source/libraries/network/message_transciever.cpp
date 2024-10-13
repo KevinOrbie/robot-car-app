@@ -213,10 +213,22 @@ void Reciever::iteration() {
         if (!message_available) { return; }
     }
     
+    /* Recieve initial message. */
     bool new_message_recieved;
-    do { /* Recieve all messages in the kernel buffers. */
+    new_message_recieved = recieve();
+
+    /* Detect broken connection. */
+    if (!new_message_recieved) {
+        /* Nothing recieved, while poll indicated somehting was recieved. */
+        LOGW("Connection broken, trying again in 3 seconds!");
+        std::this_thread::sleep_for(std::chrono::seconds(3));  // Prevent busy polling.
+        // TODO: possibly reset connection, and wait for connection.
+    }
+    
+    /* Recieve all remaining messages in the kernel buffers. */
+    while (new_message_recieved) {
         new_message_recieved = recieve(); /* Keep recieving one message at a time, until they are empty. */
-    } while (new_message_recieved);
+    }
 }
 
 void Reciever::setup() {
@@ -224,8 +236,6 @@ void Reciever::setup() {
 };
 
 bool Reciever::recieve() {
-    LOGI("Recieving Message!");
-
     /* Preliminary Checks. */
     if (!connection_ || !connection_->valid()) {
         LOGW("Message not recieved: Invalid Connection! (Could be because it is not yet initialized)");
