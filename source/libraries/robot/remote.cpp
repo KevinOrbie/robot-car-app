@@ -9,20 +9,21 @@
 #include "remote.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 // None
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "common/utils.h"  // gettid()
 
 
 namespace robot {
 /* ========================== Classes ========================== */
 void Remote::connect() {
     server::Server::connect();
-    message_handler_ = std::make_unique<MessageHandler>(message_reciever_.get());
+    message_handler_ = std::make_unique<MessageHandler>(message_reciever_.get(), input_sink_);
 };
 
 void Remote::iteration() {

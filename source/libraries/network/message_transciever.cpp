@@ -7,7 +7,7 @@
 #include "message_transciever.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 #include <utility>   // move()
@@ -17,6 +17,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "common/utils.h"  // gettid()
 #include "message.h"
 
 

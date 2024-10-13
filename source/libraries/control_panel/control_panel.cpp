@@ -9,7 +9,7 @@
 #include "control_panel.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 #include <stdexcept>
@@ -20,6 +20,7 @@
 #include "common/input_sink.h"
 #include "common/logger.h"
 #include "common/looper.h"
+#include "common/utils.h"  // gettid()
 
 
 /* ========================== Classes ========================== */

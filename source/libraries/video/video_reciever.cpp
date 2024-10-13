@@ -10,7 +10,7 @@
 #include "video_reciever.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 #include <stdexcept>
@@ -19,6 +19,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "common/utils.h"  // gettid()
 #include "video/image.h"
 
 

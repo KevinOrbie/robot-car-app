@@ -25,7 +25,7 @@ namespace robot {
 /* ========================== Classes ========================== */
 class Remote: public server::Server {
    public:
-    Remote(int port, InputSink *input_sink=nullptr): server::Server(port){};
+    Remote(int port, InputSink *input_sink=nullptr): server::Server(port), input_sink_(input_sink){};
     void connect() override;
     
     /* Looper Interface. */
@@ -35,6 +35,7 @@ class Remote: public server::Server {
 
    private:
     std::unique_ptr<MessageHandler> message_handler_;
+    InputSink* input_sink_;
 };
 
 // TODO: Remove Transciever

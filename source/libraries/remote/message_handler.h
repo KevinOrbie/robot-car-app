@@ -8,13 +8,14 @@
 
 /* ========================== Include ========================== */
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 // None
 
 /* Custom C++ Libraries */
 #include "common/looper.h"
+#include "common/utils.h"  // gettid()
 #include "network/message_handler.h"
 #include "network/message_transciever.h"
 

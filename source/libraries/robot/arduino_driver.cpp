@@ -9,7 +9,7 @@
 #include "arduino_driver.h"
 
 /* Standard C Libraries */
-#include <unistd.h>  // gettid()
+// None
 
 /* Standard C++ Libraries */
 #include <condition_variable>
@@ -17,6 +17,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "common/utils.h"  // gettid()
 
 
 /* ========================== Classes ========================== */
