@@ -31,7 +31,7 @@ case msg_id: \
 
 
 /* ========================== Classes ========================== */
-class MessageHandler: public client::MessageHandler, public Looper {
+class MessageHandler final: public client::MessageHandler, public Looper {
    public:
     MessageHandler(Reciever *recv): message_reciever_(recv) {};
 

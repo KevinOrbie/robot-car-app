@@ -27,7 +27,7 @@ namespace remote {
  * @note Later on this class can be used to interconnect multiple different systems 
  * (e.g. controller, pipeline, etc.).
  */
-class System {
+class System final {
    public:
     System();
 

@@ -25,6 +25,17 @@ using namespace message;
  */
 class MessageHandler {
    public:
+    /* Ensure correct destruction of derived class with runtime Polymorphism. */
+    virtual ~MessageHandler() = default;  
+
+    /* Rule of Five. */
+    MessageHandler()                                         = default;
+    MessageHandler(MessageHandler && other)                  = default;
+    MessageHandler(const MessageHandler& other)              = default;
+    MessageHandler& operator=(MessageHandler && other)       = default;
+    MessageHandler& operator=(const MessageHandler& other)   = default;
+
+   public:
     // TODO: Add new messages here.
 };
 } // namespace client
@@ -36,6 +47,17 @@ using namespace message;
  * @brief Handler for messages that could be recieved by the server.
  */
 class MessageHandler {
+   public:
+    /* Ensure correct destruction of derived class with runtime Polymorphism. */
+    virtual ~MessageHandler() = default;  
+
+    /* Rule of Five. */
+    MessageHandler()                                         = default;
+    MessageHandler(MessageHandler && other)                  = default;
+    MessageHandler(const MessageHandler& other)              = default;
+    MessageHandler& operator=(MessageHandler && other)       = default;
+    MessageHandler& operator=(const MessageHandler& other)   = default;
+    
    public:
     virtual void on(Message<MessageID::CMD_DRIVE> *msg) {};
 };

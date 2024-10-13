@@ -24,7 +24,7 @@
  *  camera.stop();
  * }
  */
-class VideoCam: public FrameProvider {
+class VideoCam final: public FrameProvider {
     /* --------------- Classes / Structures --------------- */
     struct buffer {
         /* Because start can point to memory allocated with mmap, I chose to keep this a normal pointer. */

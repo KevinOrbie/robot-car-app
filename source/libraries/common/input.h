@@ -70,7 +70,7 @@ struct Button {
     }
 };
 
-struct Input {
+struct Input final {
     /* Key Inputs */
     Button keys[Button::BUTTON_COUNT];
 

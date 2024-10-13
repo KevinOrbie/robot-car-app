@@ -28,7 +28,7 @@ namespace remote {
 /**
  * @brief This is the interface to the robot for a remote controller.
  */
-class Robot: public client::Client, public InputSink, public FrameProvider {
+class Robot final: public client::Client, public InputSink, public FrameProvider {
    public:
     Robot(std::string server_address, int port): client::Client(server_address, port){};
     void connect() override;

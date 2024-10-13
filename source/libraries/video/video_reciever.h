@@ -32,7 +32,7 @@ extern "C" { // ffmpeg
 /**
  * @brief Class to obtain frames from a file.
  */
-class VideoReciever: public Looper, public FrameProvider {
+class VideoReciever final: public Looper, public FrameProvider {
    public:
     VideoReciever(std::string const& address=std::string("udp://127.0.0.1:8999"));
     ~VideoReciever();

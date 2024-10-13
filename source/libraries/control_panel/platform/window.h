@@ -34,8 +34,7 @@ const unsigned int SCR_HEIGHT = 1200;
  * 
  * @note Don't forget to call 'cleanup()' to cleanup the glfw context on a different thread.
  */
-class Window 
-{
+class Window final{
    public:
     /**
      * @brief Singleton Window.

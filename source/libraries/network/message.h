@@ -33,6 +33,15 @@ class MessageBase {
     static des_mapping_t deserializers_;
 
    public:
+    virtual ~MessageBase() = default;  /* Runtime Polymorphism. */
+
+    /* Rule of Five. */
+    MessageBase()                                      = default;
+    MessageBase(MessageBase && other)                  = default;
+    MessageBase(const MessageBase& other)              = default;
+    MessageBase& operator=(MessageBase && other)       = default;
+    MessageBase& operator=(const MessageBase& other)   = default;
+
     virtual void serialize(Connection &connection) = 0;
     virtual MessageID getID() = 0;
 

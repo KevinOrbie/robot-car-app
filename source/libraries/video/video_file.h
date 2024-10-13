@@ -29,7 +29,7 @@ extern "C" { // ffmpeg
 /**
  * @brief Class to obtain frames from a file.
  */
-class VideoFile: public FrameProvider {
+class VideoFile final: public FrameProvider {
    public:
     VideoFile(std::string const& filepath);
     ~VideoFile();

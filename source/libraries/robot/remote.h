@@ -23,7 +23,7 @@
 
 namespace robot {
 /* ========================== Classes ========================== */
-class Remote: public server::Server {
+class Remote final: public server::Server {
    public:
     Remote(int port, InputSink *input_sink=nullptr): server::Server(port), input_sink_(input_sink){};
     void connect() override;
@@ -37,12 +37,6 @@ class Remote: public server::Server {
     std::unique_ptr<MessageHandler> message_handler_;
     InputSink* input_sink_;
 };
-
-// TODO: Remove Transciever
-// TODO: Add LooperInterface for Classes containing loopers, but not running in a sperate thread themselves
-//   > iteration()
-//   > thread()
-//   > stop()
 
 // TODO: Update / Make Software Diagrams
 

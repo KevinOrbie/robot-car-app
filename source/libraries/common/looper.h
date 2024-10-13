@@ -22,6 +22,15 @@
 /* ========================== Classes ========================== */
 class Looper {
    public:
+    virtual ~Looper() = default;  /* Runtime Polymorphism. */
+
+    /* Rule of Five. */
+    Looper()                                 = default;
+    Looper(Looper && other)                  = default;
+    Looper(const Looper& other)              = default;
+    Looper& operator=(Looper && other)       = default;
+    Looper& operator=(const Looper& other)   = default;
+
     /**
      * @brief Runs one loop iteration.
      */

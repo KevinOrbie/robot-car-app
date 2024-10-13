@@ -20,7 +20,7 @@
 
 
 /* =========================== Class =========================== */
-class Timer {
+class Timer final {
    public:
     /**
      * @brief Set a start time.

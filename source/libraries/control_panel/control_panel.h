@@ -26,7 +26,7 @@
 
 
 /* ========================== Classes ========================== */
-class ControlPanel: public Looper {
+class ControlPanel final: public Looper {
    public:
     ControlPanel(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr);
 

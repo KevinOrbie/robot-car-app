@@ -31,6 +31,14 @@ class FrameProvider {
      */
     virtual ~FrameProvider(){}; 
 
+    /* Rule of Five. */
+    FrameProvider()                                        = default;
+    FrameProvider(FrameProvider && other)                  = default;
+    FrameProvider(const FrameProvider& other)              = default;
+    FrameProvider& operator=(FrameProvider && other)       = default;
+    FrameProvider& operator=(const FrameProvider& other)   = default;
+
+    /* Interface */
     virtual Frame getFrame(double curr_time, PixelFormat requested_format) = 0;
     virtual void startStream() = 0;
     virtual void stopStream() = 0;

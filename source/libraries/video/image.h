@@ -27,7 +27,7 @@ enum class PixelFormat {
 };
 
 
-class ImageView {
+class ImageView final {
    public:
     ImageView(std::vector<uint8_t*> data, std::vector<int> linesize, int width, int height, PixelFormat fmt);
 
@@ -56,7 +56,7 @@ class ImageView {
 };
 
 
-class Image {
+class Image final {
    public:
     /**
      * @brief Create empty image.

@@ -26,5 +26,13 @@ class InputSink {
      * @link https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
      */
     virtual ~InputSink(){}; 
+
+    /* Rule of Five. */
+    InputSink()                                    = default;
+    InputSink(InputSink && other)                  = default;
+    InputSink(const InputSink& other)              = default;
+    InputSink& operator=(InputSink && other)       = default;
+    InputSink& operator=(const InputSink& other)   = default;
+
     virtual void sink(Input input) = 0;
 };

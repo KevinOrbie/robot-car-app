@@ -31,7 +31,7 @@ extern "C" { // ffmpeg
 /**
  * @brief Class to obtain frames from a file.
  */
-class VideoTransmitter: public Looper {
+class VideoTransmitter final: public Looper {
    public:
     VideoTransmitter(std::string const& address=std::string("udp://127.0.0.1:8999"), FrameProvider *frame_provider=nullptr);
     ~VideoTransmitter();
