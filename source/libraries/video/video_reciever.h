@@ -18,6 +18,7 @@
 
 /* Third Party C++ Libraries */
 extern "C" { // ffmpeg
+#include <libavutil/error.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }

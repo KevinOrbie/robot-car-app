@@ -29,6 +29,35 @@ sudo apt update
 sudo apt install libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libpostproc-dev libswresample-dev libswscale-dev
 ``` 
 
+## OpenCV (Ubuntu 24.04)
+OpenCV is a library of programming functions mainly for real-time computer vision. ([source](https://en.wikipedia.org/wiki/OpenCV))
+For this project we build OpenCV from source to make sure we are using version `3.4.20`.
+
+Version requirements:
+- **MYNT-EYE-D-SDK**: OpenCV version < 4.x ([source](https://mynt-eye-d-sdk.readthedocs.io/en/latest/sdk/install_ubuntu_src.html#install-sdk-dependencies))
+- **Kimera**: OpenCV version >= 3.4.x
+
+Download and build OpenCV from source; from the thirdparty directory, run:
+```shell
+# Download the correct OpenCV Version
+git clone https://github.com/opencv/opencv.git
+cd opencv/
+git checkout tags/3.4.20
+
+# Build OpenCV
+mkdir _build
+cd _build/
+
+# Setup Build System
+cmake ..
+
+# Build 
+make -j4  ## Fails
+
+# Install
+make DESTDIR=./_deploy install
+``` 
+
 ## GLFW (Ubuntu 24.04)
 A lightweight utility library for use with OpenGL. It provides programmers with the ability to create and manage windows and OpenGL contexts, as well as handle joystick, keyboard and mouse input. ([source](https://en.wikipedia.org/wiki/GLFW))
 

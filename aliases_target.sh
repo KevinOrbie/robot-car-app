@@ -1,13 +1,20 @@
+# File: aliases_target.sh
+# Author: Kevin Orbie
+#
+# Brief: Aliases providing a simplified uniform interface for the compilation, execution & debugging of RCA.
+#        This can be used in both the development docker, as well as on the runtime device.
+
 
 # =================================== Variables ===================================
-PROJECT_NAME="engine"
-
 if [[ -z "${APP_ROOT}" ]]; then
-    # Default value if not yet defined
-    APP_ROOT="/home/kevin/projects/RCA"
+    # Default value if not yet defined, use this script's directory as root
+    APP_ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 fi
 
+
 # ==================================== Aliases ====================================
+
+# ----------------- Compilation -----------------
 # NOTE: cmake --install is from CMAKE 3.15 or later
 alias rca-setup-build-release="(cd $APP_ROOT/ && cmake -S . -B./_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING='OFF')"          # -O2, usable with perf
 alias rca-setup-build-debug="(cd $APP_ROOT/ && cmake -S . -B./_build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING='OFF')"     # -O3

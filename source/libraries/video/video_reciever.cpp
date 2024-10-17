@@ -25,6 +25,12 @@
 
 /* ============================ Classes ============================ */
 VideoReciever::VideoReciever(std::string const& address): address_(address){
+    LOGI("Using libav-format version %d.%d.%d", LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+    LOGI("Using libav-codec version %d.%d.%d", LIBAVCODEC_VERSION_MAJOR, LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+    #if LIBAVCODEC_VERSION_MAJOR < 60
+        av_register_all();
+    #endif
+
     avformat_network_init();
     // av_log_set_level(AV_LOG_DEBUG);
     av_log_set_level(AV_LOG_QUIET);
@@ -47,7 +53,9 @@ VideoReciever::VideoReciever(std::string const& address): address_(address){
     // rtsp: rtsp
     int res = avformat_open_input(&ptr_format_context, address.c_str(), NULL, NULL);
     if (res < 0) {
-        LOGE("Issue while opening the input stream: %d", res);
+        char error_str[256];
+        av_strerror(res, error_str, 256);
+        LOGE("AV Issue while opening the input stream: error %d, %s", res, error_str);
         throw std::runtime_error("Failed to open the input stream");
     }
 

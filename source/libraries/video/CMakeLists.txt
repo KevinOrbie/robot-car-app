@@ -16,7 +16,6 @@ list(APPEND SOURCE_FILES image.cpp)
 ## Define Headers
 list(APPEND HEADER_FILES video_transmitter.h)
 list(APPEND HEADER_FILES video_reciever.h)
-list(APPEND HEADER_FILES frame_conversion.h)
 list(APPEND HEADER_FILES frame_provider.h)
 list(APPEND HEADER_FILES video_file.h)
 list(APPEND HEADER_FILES video_cam.h)
