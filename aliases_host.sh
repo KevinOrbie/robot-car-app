@@ -20,12 +20,12 @@ alias rca-docker-run="\
 sudo docker run -it --rm \
     --detach \
 	--gpus all \
+    --privileged \
 	--network=host \
 	--name rca_env \
 	--workdir /home/user/RCA \
 	--runtime=nvidia \
 	-v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY -e XAUTHORITY -e NVIDIA_DRIVER_CAPABILITIES=all \
-	--device=/dev/ttyUSB0 --device=/dev/video0 \
 	-h rca -v ${APP_ROOT}:/home/user/RCA \
 	rca:v1\
 "
@@ -33,7 +33,7 @@ alias rca-docker-stop="sudo docker stop rca_env"
 alias rca-docker-exec="sudo docker exec -it rca_env bash"
 
 
-# ------------------- Synching -------------------
+# ------------------- Syncing -------------------
 rca-sync-to-robot() {
     echo ">>> Updating source code on the robot..."
     # Rsync to Robot:
