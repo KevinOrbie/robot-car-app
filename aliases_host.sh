@@ -30,7 +30,7 @@ sudo docker run -it --rm \
 	rca:v1\
 "
 alias rca-docker-stop="sudo docker stop rca_env"
-alias rca-docker-exec="sudo docker exec -it rca_env bash"
+alias rca-docker-exec="sudo docker exec -it -e 'TERM=xterm-256color' rca_env bash"
 
 
 # ------------------- Syncing -------------------
