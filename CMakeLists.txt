@@ -32,6 +32,10 @@ add_subdirectory(thirdparty/v4l2)
 # [Threads] Default C++ Threads library
 find_package(Threads REQUIRED)
 
+# [MYNT-EYE-D-SDK] Stereo Camera SDK
+# add_subdirectory(thirdparty/mynteyed)
+
+
 ## ---------------- Include Project Code ------------------
 # Include pilot projects
 # add_subdirectory(pilots)

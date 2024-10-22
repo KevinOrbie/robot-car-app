@@ -55,7 +55,7 @@ cmake ..
 make -j4  ## Fails
 
 # Install
-make DESTDIR=./_deploy install
+make install
 ``` 
 
 ## GLFW (Ubuntu 24.04)

@@ -9,13 +9,20 @@ ENV XDG_RUNTIME_DIR=/tmp
 ENV DIRPATH=/root/
 WORKDIR $DIRPATH
 
+
 ## ------------------------------- Custom Dependencies -------------------------------
 RUN apt-get update && \ 
     apt-get install -y \
+      ###### Build Tools #######
       build-essential \
       pkg-config \
       cmake \
+      sudo \
+      curl \
+      git \
+      ########## V4L2 ##########
       libv4l-dev \
+      ######### FFMPEG #########
       libavcodec-dev \
       libavdevice-dev \
       libavfilter-dev \
@@ -23,51 +30,50 @@ RUN apt-get update && \
       libavutil-dev \
       libpostproc-dev \
       libswresample-dev \
-      libswscale-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-
-## Add Cusom User (add home folder, set shell)
-RUN useradd -m --shell /bin/bash --groups video,dialout user 
-USER user
-
-## Add alias source to ./bashrc
-RUN echo "\n\
-if [ -f /home/user/RCA/aliases_target.sh ]; then \n\ 
-    source ./aliases_target.sh \n\ 
-fi\n" >> ~/.bashrc
-
-## ------------------------------ MYNT-EYE Dependencies ------------------------------
-
-
-## ------------------------------- Kimera Dependencies -------------------------------
-## Install required build packages (Based on Kimera Dockefile).
-## Link: https://github.com/MIT-SPARK/Kimera-VIO/blob/master/Dockerfile_20_04
-# RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
-# RUN apt-get update && \
-#     apt-get install -y \
-#       build-essential \
-#       cmake \
+      libswscale-dev \
+      ##### MYNT-EYE-D-SDK #####
+    #   libgtk-3-dev \
+    #   libjpeg-dev \
+    #   libusb-dev && \
+      ######### Kimera #########
 #       gfortran \
-#       git \
 #       libatlas-base-dev \
 #       libboost-all-dev \
 #       libeigen3-dev \
 #       libgflags-dev \
 #       libgoogle-glog-dev \
 #       libmetis-dev \
-#       libopencv-dev \
-#       libopencv-contrib-dev \
 #       libtbb-dev \
-#       pkg-config \
 #       xvfb \
 #       python3 \
 #       python3-dev \
 #       python3-pip \
-#       python3-tk && \
-#     apt-get clean && \
-#     rm -rf /var/lib/apt/lists/*
+#       python3-tk
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
+## ------------------------------ MYNT-EYE Dependencies ------------------------------
+# Setup OpenCV Version 3.4.20
+RUN git clone https://github.com/opencv/opencv.git && \
+    cd opencv && \
+    git checkout tags/3.4.20 && \
+    mkdir _build && \
+    cd _build && \
+    cmake .. && \
+    make -j$(nproc) install
+
+# Setup MYNT-EYE-D-SDK
+# NOTE: while it normall should build wihtout OpenCV, this is not the case, as they use 'fabs()', without including the <math.h> C-header.
+# RUN git clone https://github.com/slightech/MYNT-EYE-D-SDK.git && \
+#     cd MYNT-EYE-D-SDK && \
+#     yes | make init && \
+#     yes | make -j$(nproc) install
+
+
+## ------------------------------- Kimera Dependencies -------------------------------
+## Install required build packages (Based on Kimera Dockefile).
+## Link: https://github.com/MIT-SPARK/Kimera-VIO/blob/master/Dockerfile_20_04
 
 # ADD https://api.github.com/repos/borglab/gtsam/git/refs/heads/develop version.json
 # RUN git clone https://github.com/borglab/gtsam.git && \
@@ -123,3 +129,18 @@ fi\n" >> ~/.bashrc
 # RUN python3 -m pip install --upgrade pip
 # ADD https://api.github.com/repos/MIT-SPARK/Kimera-VIO-Evaluation/git/refs/heads/fix/python3 version.json
 # RUN python3 -m pip install git+https://github.com/MIT-SPARK/Kimera-VIO-Evaluation.git@fix/python3
+
+# Install Kimera
+# TODO: Add
+
+
+## ----------------------------------- Final Setup -----------------------------------
+## Add Cusom User (add home folder, set shell)
+RUN useradd -m --shell /bin/bash --groups video,dialout user 
+USER user
+
+## Add alias source to ./bashrc
+RUN echo "\n\
+if [ -f /home/user/RCA/aliases_target.sh ]; then \n\ 
+    source ./aliases_target.sh \n\ 
+fi\n" >> ~/.bashrc
