@@ -18,6 +18,7 @@
 #include <Arduino.h>
 
 
+namespace arduino {
 /* ========================== Classes ========================== */
 enum class Throttle: uint8_t {STANDBY, FORWARD, REVERSE, BRAKE};
 enum class Direction: uint8_t {STRAIGHT, LEFT, RIGHT};
@@ -171,3 +172,4 @@ class DriveController {
     unsigned long last_cmd_time_ = 0;       // Last time we recieved a command (msec).
 };
 
+} // namespace arduino

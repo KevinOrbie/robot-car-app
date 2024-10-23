@@ -11,11 +11,15 @@
 
 
 /* ========================= Include ========================= */
-#include "core/master_connection.h"
-#include "core/drive_controller.h"
-#include "core/imu.h"
+#include "arduino_types.h"
+#include "logger.h"
+
+#include "master_connection.h"
+#include "drive_controller.h"
+#include "imu.h"
 
 
+using namespace arduino;
 /* ======================== Constants ======================== */
 /* Software Configuration. */
 #define TIMEOUT_MS 2000
@@ -30,9 +34,10 @@
 
 
 /* ======================== Variables ======================== */
-DriveController drive_ctrl = DriveController(PIN_SPEED_R, PIN_SPEED_L, PIN_DIRECTION_R, PIN_DIRECTION_L, TIMEOUT_MS);
 MasterConnection master = MasterConnection(Serial, BAUD_RATE);
-IMU imu = IMU(Serial3, BAUD_RATE);
+DriveController drive_ctrl = DriveController(PIN_SPEED_R, PIN_SPEED_L, PIN_DIRECTION_R, PIN_DIRECTION_L, TIMEOUT_MS);
+Logger logger = Logger::instance(&master);
+IMU &imu = IMU::instance(&Serial3);
 
 
 /* ========================= Handler ========================= */
@@ -42,20 +47,15 @@ IMU imu = IMU(Serial3, BAUD_RATE);
 void handle(Message msg) {
   switch (msg.id) {
     /* No Message Recieved */
-    case Message::ID::EMPTY:  
+    case MessageID::EMPTY:  
       break;
 
-    case Message::ID::CMD_DRIVE:
+    case MessageID::CMD_DRIVE:
       drive_ctrl.setState(msg);
       break;
     
     default: 
-      Message err_msg = {};
-      char err_string[] = "Invalid Message ID!";
-      err_msg.id = Message::ID::ERROR;
-      err_msg.data = reinterpret_cast<uint8_t*>(&err_string[0]);
-      err_msg.num_data_bytes = sizeof(err_string) - 1; // Ignore null termination
-      master.send(err_msg);
+      logger.error(ErrorID::UNKOWN_MSG_ID);
       break;
   }
 }
@@ -70,6 +70,8 @@ void setup() {
   drive_ctrl.setup();
   master.setup();
   imu.setup();
+
+  logger.info("Setup Finished!");
 }
 
 /**
@@ -82,15 +84,15 @@ void loop() {
   /* Handle recieved message. */
   handle(master.getMessage());
   
-  /* Motor Control */
+  /* Motor Control. */
   drive_ctrl.iteration();
 
-  /* IMU Control. */
-  // imu.recieve();
-  // if (imu.updated()) {
-  //   // TODO: send updated imu data
-  // }
+  /* IMU Data. */
+  imu.recieve();
+  while (imu.available()) {
+    master.send(imu.getDataMessage());
+  }
   
-  delay(20);
+  delay(5000);
 }
 

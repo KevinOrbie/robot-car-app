@@ -14,36 +14,15 @@
 /* Standard C++ Libraries */
 // None
 
-/* Custom C++ Libraries */
+/* Other C++ Libraries */
 #include <Arduino.h>
 
+/* Custom C++ Libraries */
+#include "arduino_types.h"
 
+
+namespace arduino {
 /* ========================== Classes ========================== */
-struct Message {
-    enum class ID: uint8_t {
-        EMPTY,
-
-        /* Master to MCU messages. */
-        CMD_DRIVE = static_cast<uint8_t>('A'), 
-        IMU_CALIB_ACC, 
-        IMU_CALIB_MAG, 
-        IMU_BAUD, 
-        IMU_RATE, 
-        IMU_CONTENT,
-
-        /* MCU to Master messages. */
-        IMU_DATA_ACC = static_cast<uint8_t>('a'),
-        IMU_DATA_GYRO,
-        IMU_DATA_ANGLE,
-        ERROR
-    };
-
-    ID id = ID::EMPTY;
-    uint8_t *data = nullptr;
-    int num_data_bytes = 0;
-};
-
-
 class MasterConnection {
    public:
     MasterConnection(HardwareSerial& serial, const int baudrate=9600): serial_(serial), baudrate_(baudrate) {};
@@ -73,7 +52,7 @@ class MasterConnection {
 
     void send(Message msg) {
         /* Ignore empty messages. */
-        if (msg.id == Message::ID::EMPTY) {return;};
+        if (msg.id == MessageID::EMPTY) {return;};
 
         /* Send message. */
         serial_.write('<');
@@ -97,7 +76,7 @@ class MasterConnection {
 
         /* Create message. */
         Message recieved_message = {};
-        recieved_message.id = static_cast<Message::ID>(cmd_buffer_[1]);
+        recieved_message.id = static_cast<MessageID>(cmd_buffer_[1]);
         recieved_message.data = &cmd_buffer_[0] + 2;
         recieved_message.num_data_bytes = last_byte_index - 2;
 
@@ -114,3 +93,5 @@ class MasterConnection {
     uint8_t cmd_buffer_index_ = 0;
     uint8_t cmd_buffer_[64] = {};            // Max message size of 60 databytes (15x int / 7x double)
 };
+
+} // namespace arduino

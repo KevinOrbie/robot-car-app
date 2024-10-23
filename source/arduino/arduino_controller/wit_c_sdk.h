@@ -8,7 +8,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "REG.h"
+#include "wit_c_sdk_REG.h"
 
 
 #define WIT_HAL_OK      (0)     /**< There is no error */
