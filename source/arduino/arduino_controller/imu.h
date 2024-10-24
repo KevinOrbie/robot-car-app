@@ -24,13 +24,13 @@
 
 
 namespace arduino {
-/* ========================== Defines ========================== */
+/* ========================== Constants ========================== */
 /* update_flags bit positions */
-#define ACC_UPDATE		0x01
-#define GYRO_UPDATE		0x02
-#define ANGLE_UPDATE	0x04
-#define MAG_UPDATE		0x08
-#define READ_UPDATE		0x80
+#define FLAG_BIT_UPDATE_ACC		0x01
+#define FLAG_BIT_UPDATE_GYRO	0x02
+#define FLAG_BIT_UPDATE_ANGLE	0x04
+#define FLAG_BIT_UPDATE_MAG		0x08
+#define FLAG_BIT_UPDATE_READ	0x80
 
 
 /* ========================== Classes ========================== */
@@ -68,24 +68,73 @@ class IMU {
         }
     };
 
-    void CalibrateAcceleration() {
-        WitStartAccCali();
+    /**
+     * @brief The accelerometer calibration is used to remove the zero bias of the accelerometer. 
+     * @note Keep the Module horizontally stationary
+     */
+    void calibrateAcceleration() {
+        int32_t result; 
+        result = WitStartAccCali();
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
+
+        delay(5000);
+
+        result = WitStopAccCali();
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
     };
 
-    void SetBandwidth() {
-        // WitSetBandwidth();
+    /**
+     * @brief Magnetic field calibration is used to remove the magnetic field sensor's zero offset.
+     * 
+     * @note Manually rotate the robot 
+     * @note Needs to be >20cm away from magnetic disturbances when called.
+     * @note If it is not calibrated, it will bring about a large measurement error and affect the 
+     * accuracy of the Z-axis angle measurement of the heading angle.
+     */
+    void calibrateMagnetometer() {
+        int32_t result; 
+        result = WitStartMagCali();
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
+
+        delay(5000);
+
+        result = WitStopMagCali();
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
     };
 
-    void SetOuputRate() {
-        // WitSetOutputRate();
+    /**
+     * @brief Sets the UART baudrate in an alternative manner?
+     */
+    void setBandwidth(Bandwidth bandwidth) {
+        int32_t result = WitSetBandwidth(static_cast<int32_t>(bandwidth));
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
     };
 
-    void SetBaudRate() {
-        // WitSetUartBaud();
+    /**
+     * @brief Set the rate at which the IMU outputs data (all data included).
+     */
+    void setOutputRate(OutputRate outputrate) {
+        int32_t result = WitSetOutputRate(static_cast<int32_t>(outputrate));
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
     };
 
-    void SetContent() {
-        // WitSetContent();
+    /**
+     * @brief Set the symbolrate of the connection between Arduino and IMU.
+     */
+    void setBaudRate(BaudRate baudrate) {
+        const uint32_t bauds[8] = {0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+        int32_t result = WitSetUartBaud(static_cast<int32_t>(baudrate));
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
+        else { serial_->begin(bauds[static_cast<int>(baudrate)]); }
+    };
+
+    /**
+     * @brief Set which content data to recieve repeatedly.
+     * @note To set what content to recieve, use the Content enum values.
+     */
+    void setContent(int32_t content_flags) {
+        int32_t result = WitSetContent(content_flags);
+        if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
     };
 
     /**
@@ -96,21 +145,21 @@ class IMU {
     Message getDataMessage() {
         Message data_msg = {};
 
-        if (update_flags & ACC_UPDATE) {
+        if (update_flags & FLAG_BIT_UPDATE_ACC) {
             data_msg.id = MessageID::IMU_DATA_ACC;
             data_msg.data = reinterpret_cast<uint8_t*>(&accel[0]);
             data_msg.num_data_bytes = sizeof(accel);
-            update_flags = update_flags & ~static_cast<uint8_t>(ACC_UPDATE);
-        } else if (update_flags & GYRO_UPDATE) {
+            update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_ACC);
+        } else if (update_flags & FLAG_BIT_UPDATE_GYRO) {
             data_msg.id = MessageID::IMU_DATA_GYRO;
             data_msg.data = reinterpret_cast<uint8_t*>(&gyro[0]);
             data_msg.num_data_bytes = sizeof(gyro);
-            update_flags = update_flags & ~static_cast<uint8_t>(GYRO_UPDATE);
-        } else if (update_flags & ANGLE_UPDATE) {
+            update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_GYRO);
+        } else if (update_flags & FLAG_BIT_UPDATE_ANGLE) {
             data_msg.id = MessageID::IMU_DATA_ANGLE;
             data_msg.data = reinterpret_cast<uint8_t*>(&angle[0]);
             data_msg.num_data_bytes = sizeof(angle);
-            update_flags = update_flags & ~static_cast<uint8_t>(ANGLE_UPDATE);
+            update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_ANGLE);
         } else {
             update_flags = 0;
         }
@@ -176,19 +225,19 @@ class IMU {
         for(int i = 0; i < uiRegNum; i++) {
             switch(uiReg) {
                 case AZ:
-                    IMU::instance().update_flags |= ACC_UPDATE;
+                    IMU::instance().update_flags |= FLAG_BIT_UPDATE_ACC;
                     break;
                 case GZ:
-                    IMU::instance().update_flags |= GYRO_UPDATE;
+                    IMU::instance().update_flags |= FLAG_BIT_UPDATE_GYRO;
                     break;
                 case HZ:
-                    IMU::instance().update_flags |= MAG_UPDATE;
+                    IMU::instance().update_flags |= FLAG_BIT_UPDATE_MAG;
                     break;
                 case Yaw:
-                    IMU::instance().update_flags |= ANGLE_UPDATE;
+                    IMU::instance().update_flags |= FLAG_BIT_UPDATE_ANGLE;
                     break;
                 default:
-                    IMU::instance().update_flags |= READ_UPDATE;
+                    IMU::instance().update_flags |= FLAG_BIT_UPDATE_READ;
                     break;
             }
             uiReg++;
@@ -197,6 +246,7 @@ class IMU {
 
    private:
     HardwareSerial* serial_;
+    bool calibrating_ = false;
 
     uint8_t update_flags = 0;
     uint16_t temperature = 0;

@@ -53,6 +53,42 @@ void handle(Message msg) {
     case MessageID::CMD_DRIVE:
       drive_ctrl.setState(msg);
       break;
+
+    case MessageID::IMU_CALIB_ACC_GRYO:
+      imu.calibrateAcceleration();
+      break;
+
+    case MessageID::IMU_CALIB_MAG:
+      imu.calibrateMagnetometer();
+      break;
+
+    case MessageID::IMU_BW: {
+      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      Bandwidth bandwidth = static_cast<Bandwidth>(*msg.data);
+      imu.setBandwidth(bandwidth);
+      break;
+    }
+
+    case MessageID::IMU_BAUD: {
+      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      BaudRate baudrate = static_cast<BaudRate>(*msg.data);
+      imu.setBaudRate(baudrate);
+      break;
+    }
+
+    case MessageID::IMU_RATE: {
+      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      OutputRate outputrate = static_cast<OutputRate>(*msg.data);
+      imu.setOutputRate(outputrate);
+      break;
+    }
+
+    case MessageID::IMU_CONTENT: {
+      if (msg.num_data_bytes != 2) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      int32_t content_flags = static_cast<int32_t>(*msg.data);
+      imu.setContent(content_flags);
+      break;
+    }
     
     default: 
       logger.error(ErrorID::UNKOWN_MSG_ID);
