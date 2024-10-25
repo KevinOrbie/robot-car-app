@@ -11,7 +11,8 @@
 
 
 /* ========================= Include ========================= */
-#include "arduino_types.h"
+#include "./public/arduino_types.h"
+#include "./arduino_message.h"
 #include "logger.h"
 
 #include "master_connection.h"
@@ -34,10 +35,10 @@ using namespace arduino;
 
 
 /* ======================== Variables ======================== */
-MasterConnection master = MasterConnection(Serial, BAUD_RATE);
-DriveController drive_ctrl = DriveController(PIN_SPEED_R, PIN_SPEED_L, PIN_DIRECTION_R, PIN_DIRECTION_L, TIMEOUT_MS);
-Logger logger = Logger::instance(&master);
-IMU &imu = IMU::instance(&Serial3);
+MasterConnection master     = MasterConnection(Serial, BAUD_RATE);
+DriveController  drive_ctrl = DriveController(PIN_SPEED_R, PIN_SPEED_L, PIN_DIRECTION_R, PIN_DIRECTION_L, TIMEOUT_MS);
+Logger           logger     = Logger::instance(&master);
+IMU              &imu       = IMU::instance(&Serial3);
 
 
 /* ========================= Handler ========================= */

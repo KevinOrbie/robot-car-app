@@ -1,8 +1,8 @@
 /**
- * @file arduino_messages.h
+ * @file arduino_types.h
  * @author Kevin Orbie
  * 
- * @brief Declares a list of arduino communication message and error types.
+ * @brief Declares a list of arduino message, error, and argument types.
  */
 
 #pragma once
@@ -39,12 +39,6 @@ enum class MessageID: uint8_t {
 
     INFO,
     ERROR
-};
-
-struct Message {
-    MessageID id = MessageID::EMPTY;
-    uint8_t *data = nullptr;
-    int num_data_bytes = 0;
 };
 
 

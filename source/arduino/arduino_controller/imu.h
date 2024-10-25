@@ -147,18 +147,18 @@ class IMU {
 
         if (update_flags & FLAG_BIT_UPDATE_ACC) {
             data_msg.id = MessageID::IMU_DATA_ACC;
-            data_msg.data = reinterpret_cast<uint8_t*>(&accel[0]);
-            data_msg.num_data_bytes = sizeof(accel);
+            data_msg.data = reinterpret_cast<uint8_t*>(&sReg[AX]);
+            data_msg.num_data_bytes = sizeof(sReg[AX]) * 3;
             update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_ACC);
         } else if (update_flags & FLAG_BIT_UPDATE_GYRO) {
             data_msg.id = MessageID::IMU_DATA_GYRO;
-            data_msg.data = reinterpret_cast<uint8_t*>(&gyro[0]);
-            data_msg.num_data_bytes = sizeof(gyro);
+            data_msg.data = reinterpret_cast<uint8_t*>(&sReg[GX]);
+            data_msg.num_data_bytes = sizeof(sReg[GX]) * 3;
             update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_GYRO);
         } else if (update_flags & FLAG_BIT_UPDATE_ANGLE) {
             data_msg.id = MessageID::IMU_DATA_ANGLE;
-            data_msg.data = reinterpret_cast<uint8_t*>(&angle[0]);
-            data_msg.num_data_bytes = sizeof(angle);
+            data_msg.data = reinterpret_cast<uint8_t*>(&sReg[Roll]);
+            data_msg.num_data_bytes = sizeof(sReg[Roll]) * 3;
             update_flags = update_flags & ~static_cast<uint8_t>(FLAG_BIT_UPDATE_ANGLE);
         } else {
             update_flags = 0;
@@ -249,10 +249,10 @@ class IMU {
     bool calibrating_ = false;
 
     uint8_t update_flags = 0;
-    uint16_t temperature = 0;
-    uint16_t angle[3] = {0, 0, 0};
-    uint16_t accel[3] = {0, 0, 0};
-    uint16_t gyro[3]  = {0, 0, 0};
+    // uint16_t temperature = 0;
+    // uint16_t angle[3] = {0, 0, 0};
+    // uint16_t accel[3] = {0, 0, 0};
+    // uint16_t gyro[3]  = {0, 0, 0};
 };
 
 } // namespace arduino

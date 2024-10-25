@@ -18,6 +18,7 @@ list(APPEND HEADER_FILES system.h)
 list(APPEND HEADER_FILES remote.h)
 list(APPEND HEADER_FILES arduino_socket.h)
 list(APPEND HEADER_FILES arduino_driver.h)
+list(APPEND HEADER_FILES arduino_message.h)
 list(APPEND HEADER_FILES message_handler.h)
 
 
@@ -29,4 +30,5 @@ add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${LIB_NAME} PRIVATE rca_common rca_network)
 
 ## Specify the root from which headers are defined
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/..)
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../../arduino/arduino_controller/public)

@@ -18,7 +18,7 @@
 #include <Arduino.h>
 
 /* Custom C++ Libraries */
-#include "arduino_types.h"
+#include "./arduino_message.h"
 
 
 namespace arduino {

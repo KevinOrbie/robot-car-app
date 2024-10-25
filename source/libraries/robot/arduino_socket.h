@@ -8,9 +8,14 @@
 #include <stdint.h>
 
 /* Standard C++ Libraries */
-#include<vector>
+#include <deque>
+#include <mutex>
 #include <string>
 #include <string_view>
+
+/* Custom C++ Code */
+#include "arduino_types.h"
+#include "arduino_message.h"
 
 
 /* ============================ Class =========================== */
@@ -18,7 +23,7 @@
 /* Custom BaudRate wrapper to not have to expose <termios.h>. */
 enum class ArduinoBaudRate: int {
     B0=0, B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800,
-    B2400, B4800, B9600, B19200, B38400, NUM_BAUDS
+    B2400, B4800, B9600, B19200, B38400, B115200, NUM_BAUDS
 };
 
 /**
@@ -33,9 +38,15 @@ class ArduinoSocket {
     ArduinoSocket(ArduinoBaudRate baudrate=ArduinoBaudRate::B9600, unsigned char vtime=10, unsigned char vmin=0);
     ~ArduinoSocket();
 
-    bool recieve(std::string& recieved_msg);
-    bool send(std::vector<uint8_t> msg);
+    void flush();
+    void wait();
+    void recieve();
+    void send(arduino::Message msg);
+
+    arduino::Message getMessage();
 
    private:
+    std::deque<arduino::Message> recv_queue_ = {};
+    std::mutex socket_mutex_;
     int fd_;
 };

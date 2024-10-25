@@ -124,13 +124,13 @@ int main(int argc, char *argv[]) {
     summary(remote_ip, video_file, use_camera, use_video_file, enable_arduino);
 
     /* ---------------- Setup & Run System ---------------- */
-    std::unique_ptr<ArduinoDriver> arduino        = nullptr;
+    std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
     std::unique_ptr<FrameProvider> frame_provider = nullptr;
 
     /* Setup & Start Arduino Driver. */
     if (enable_arduino) {
-        arduino = std::make_unique<ArduinoDriver>();
-        arduino->thread();
+        arduino_driver = std::make_unique<ArduinoDriver>();
+        arduino_driver->thread();
     }
     
     /* Setup & Start Frame Provider. */
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Setup LAN connection. */
-    robot::Remote remote = {2556, arduino.get()};
+    robot::Remote remote = {2556, arduino_driver.get()};
     remote.connect();
     remote.thread();
 
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
 
     /* Command threads to finnish. */
     remote.stop();
-    if (arduino) {
-        arduino->stop();
+    if (arduino_driver) {
+        arduino_driver->stop();
     }
 
     return EXIT_SUCCESS;
