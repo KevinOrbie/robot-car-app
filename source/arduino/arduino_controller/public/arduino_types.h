@@ -45,7 +45,7 @@ enum class MessageID: uint8_t {
  * @brief Returns the number of data bytes the given message is expected to have.
  * @brief Negative if no explicit data size is defined.
  */
-int getDataSize(MessageID id) {
+inline int getDataSize(MessageID id) {
     switch (id) {
         case MessageID::IMU_DATA_ACC: return 6;
         case MessageID::IMU_DATA_GYRO: return 6;

@@ -157,50 +157,69 @@ void ArduinoSocket::recieve() {
     // LOGI("Buffer: [%s]", stringify_buffer(read_buf, last_filled_index + 1).c_str());
 
     /* Parse out messages. */
-    int open_index = -1;
-    int close_index = -1;
+    enum class ParseState {OPEN, ID, DATA, CLOSE, FINISHED} state = ParseState::OPEN;
+    arduino::MessageID msg_id = arduino::MessageID::EMPTY;
     int last_processed_index = -1;
+    int close_index = -1;
+    int open_index = -1;
+
     for (int i=0; i <= last_filled_index; i++) {
+        /* Parse incoming bytes depending on state. */
+        switch (state) {
+            /* Wait for an open character. */
+            case ParseState::OPEN: {
+                if (read_buf[i] == static_cast<uint8_t>('<')) {
+                    state = ParseState::ID;
+                    last_processed_index = i - 1;
+                    open_index = i; 
+                }
+            } break;
 
-        /* Parse start / stop characters. */
-        switch (read_buf[i]) {
-            case static_cast<uint8_t>('<'): {
-                if (open_index < 0) { open_index = i; };
-                // LOGI("Open <: index=%d", i);
-                break;
-            }
-
-            case static_cast<uint8_t>('>'): {
-                if (open_index >= 0) { close_index = i; };
-                // LOGI("Close >: index=%d", i);
-                break;
-            }
+            /* Recieve a MessageID character. */
+            case ParseState::ID: {
+                msg_id = static_cast<arduino::MessageID>(read_buf[i]);
+                if (arduino::getDataSize(msg_id) > 0) {
+                    state = ParseState::DATA;
+                } else {
+                    /* Skip data if msg type has no specified data length. */
+                    state = ParseState::CLOSE;
+                }
+            } break;
             
-            default: 
-                continue;
-                break;
+            /* Wait for all data characters. */
+            case ParseState::DATA: {
+                /* Number of data elements recieved, including the current one. */
+                int data_size = i - open_index - 1;
+                if (data_size >= arduino::getDataSize(msg_id)) {
+                    state = ParseState::CLOSE;
+                }
+            } break;
+
+            /* Wait for the close character. */
+            case ParseState::CLOSE: {
+                if (read_buf[i] == static_cast<uint8_t>('>')) {
+                    state = ParseState::FINISHED;
+                    close_index = i; 
+                }
+            } break;
+
+            default: break;
         };
 
-        /* Message detected. */
-        if ((open_index >= 0) && (close_index > open_index)) {
+        /* Message detected, add to queue. */
+        if (state == ParseState::FINISHED) {
             // LOGI("Message Detected: open: %d, close: %d", open_index, close_index);
 
-            /* Message at least 3 bytes. */
-            if (close_index - open_index > 2) {
-                arduino::Message msg = {};
-                msg.id = static_cast<arduino::MessageID>(read_buf[open_index + 1]);
-                msg.data.insert(msg.data.end(), &read_buf[open_index + 2], &read_buf[close_index]);
-                recv_queue_.push_back(msg);
-                
-                if (msg.id == arduino::MessageID::ERROR) {
-                    LOGI("Last filled buffer index: %d", last_filled_index);
-                    LOGI("Buffer: [%s]", stringify_buffer(read_buf, last_filled_index + 1).c_str());
-                }
-            }
+            /* Create Message */
+            arduino::Message msg = {msg_id};
+            msg.data.assign(&read_buf[open_index + 2], &read_buf[close_index]);
+            recv_queue_.push_back(msg);
             
+            /* Set this msg data to be removed. */
             last_processed_index = close_index;
 
             /* Reset message indexes. */
+            state = ParseState::OPEN;
             open_index = -1;
             close_index = -1;
         }
@@ -215,7 +234,6 @@ void ArduinoSocket::recieve() {
 
     /* Prevent garbage data from accumilating. */
     if (last_filled_index > 24) {
-        // TODO: improve this, by only removing before the last '<', if not too long ago.
         last_filled_index = -1;
     }
     
