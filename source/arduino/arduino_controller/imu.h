@@ -74,6 +74,7 @@ class IMU {
      */
     void calibrateAcceleration() {
         int32_t result; 
+        Logger::instance().info("Calibrating Acc and Gyro!");
         result = WitStartAccCali();
         if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
 
@@ -93,6 +94,7 @@ class IMU {
      */
     void calibrateMagnetometer() {
         int32_t result; 
+        Logger::instance().info("Calibrating Mag!");
         result = WitStartMagCali();
         if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); return; }
 
@@ -114,6 +116,7 @@ class IMU {
      * @brief Set the rate at which the IMU outputs data (all data included).
      */
     void setOutputRate(OutputRate outputrate) {
+        Logger::instance().info("Setting Outputrate!");
         int32_t result = WitSetOutputRate(static_cast<int32_t>(outputrate));
         if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
     };
@@ -122,6 +125,7 @@ class IMU {
      * @brief Set the symbolrate of the connection between Arduino and IMU.
      */
     void setBaudRate(BaudRate baudrate) {
+        Logger::instance().info("Setting Baudrate!");
         const uint32_t bauds[8] = {0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
         int32_t result = WitSetUartBaud(static_cast<int32_t>(baudrate));
         if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
@@ -133,6 +137,7 @@ class IMU {
      * @note To set what content to recieve, use the Content enum values.
      */
     void setContent(int32_t content_flags) {
+        Logger::instance().info("Setting Content!");
         int32_t result = WitSetContent(content_flags);
         if (result != WIT_HAL_OK) { Logger::instance().error(ErrorID::OPERATION_FAILED); }
     };

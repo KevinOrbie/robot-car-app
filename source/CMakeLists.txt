@@ -17,4 +17,5 @@ add_subdirectory(projects/engine)
 if((NOT DEFINED ENV{HOST}) OR (NOT $ENV{HOST} STREQUAL "robot"))
     # Requires extra libraries
     add_subdirectory(projects/controller)
+    add_subdirectory(projects/arduino_cli)
 endif()

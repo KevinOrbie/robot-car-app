@@ -69,9 +69,6 @@ class ArduinoDriver: public InputSink {
     void iteration();
     void thread();
     void stop();
-
-    void sendDriveCmd();
-    // TODO: Add functions to send other commands
     
     void sink(Input input) override;
     void handle(arduino::Message &msg);
@@ -82,8 +79,17 @@ class ArduinoDriver: public InputSink {
     void setAngle(float x, float y, float z) { angle_ = {x, y, z}; };
     void setGyro(float x, float y, float z) { gyro_ = {x, y, z}; };
 
+    void setupIMU();
+    void calibrateAccGyro();
+    void calibrateMag();
+    void setIMUOutputRate(arduino::OutputRate rate);
+    void setIMUBaudrate(arduino::BaudRate baud);
+    void setIMUContent(int32_t content);
+
+    void sendDriveCmd(uint8_t *value = nullptr);
+
    private:
-    ArduinoSocket arduino_ctrl_ = ArduinoSocket();
+    ArduinoSocket arduino_ctrl_ = ArduinoSocket(ArduinoBaudRate::B9600, 10);
     LifePulser life_pulser_;
     Reciever reciever_;
 

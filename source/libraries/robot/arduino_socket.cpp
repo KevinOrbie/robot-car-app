@@ -20,9 +20,11 @@
 #include<array>
 #include<vector>
 #include <stdexcept>
+#include <unordered_map>
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "arduino_types.h"
 
 
 /* ============================ Class =========================== */
@@ -119,7 +121,7 @@ ArduinoSocket::~ArduinoSocket() {
 }
 
 void ArduinoSocket::flush() {
-    tcflush(fd_,TCIOFLUSH);
+    tcflush(fd_, TCIOFLUSH);
 }
 
 /**
@@ -139,17 +141,16 @@ void ArduinoSocket::recieve() {
     static int last_filled_index = -1;
 
     /* Read bytes from serial port. */
-    int num_bytes;
-    {
-        std::lock_guard<std::mutex> lock(socket_mutex_);
-        num_bytes = read(fd_, &read_buf[last_filled_index + 1], 32 - last_filled_index);
-    }
+    /* Note: This read() is thread-safe, no mutex required (can result in deadlock). */
+    int num_bytes = read(fd_, &read_buf[last_filled_index + 1], 32 - last_filled_index);
 
     if (num_bytes < 0) {
         LOGE("Reading from file descriptor issue (error %d: %s)", errno, strerror(errno));
         return;
+    } else if ( num_bytes == 0) {
+        return;
     }
-
+    
     last_filled_index += num_bytes;
     // LOGI(">>> Recieved #bytes: %d", num_bytes);
     // LOGI("Last filled buffer index: %d", last_filled_index);
@@ -190,6 +191,11 @@ void ArduinoSocket::recieve() {
                 msg.id = static_cast<arduino::MessageID>(read_buf[open_index + 1]);
                 msg.data.insert(msg.data.end(), &read_buf[open_index + 2], &read_buf[close_index]);
                 recv_queue_.push_back(msg);
+                
+                if (msg.id == arduino::MessageID::ERROR) {
+                    LOGI("Last filled buffer index: %d", last_filled_index);
+                    LOGI("Buffer: [%s]", stringify_buffer(read_buf, last_filled_index + 1).c_str());
+                }
             }
             
             last_processed_index = close_index;
@@ -221,17 +227,17 @@ void ArduinoSocket::send(arduino::Message msg) {
     std::vector<uint8_t> msg_bytes = std::vector<uint8_t>(msg.data.size() + 3);
     msg_bytes.front()   = static_cast<uint8_t>('<');
     msg_bytes[1]        = static_cast<uint8_t>(msg.id);
-    msg_bytes.insert(msg_bytes.begin() + 2, msg.data.begin(), msg.data.end());
+    for (size_t i = 0; i < msg.data.size(); i++) {
+        msg_bytes[2 + i] = msg.data[i];
+    }
     msg_bytes.back()    = static_cast<uint8_t>('>');
 
     /* Write bytes over serial port. */
-    // LOGI("Socket Send: fd_ = %d, msg.size() = %ld", fd_, msg.size());
-    int num_bytes;
-    {
-        std::lock_guard<std::mutex> lock(socket_mutex_);
-        num_bytes = write(fd_, msg_bytes.data(), msg_bytes.size());
-    }
+    /* Note: This write() is thread-safe, no mutex required (could result in deadlock). */
+    int num_bytes = write(fd_, msg_bytes.data(), msg_bytes.size());
 
+    LOGI("Sending Message: %c, data size=%d", static_cast<char>(msg.id), msg.data.size());
+    LOGI("Send Buffer: [%s]", stringify_buffer(&msg_bytes[0], msg_bytes.size()).c_str());
     if (num_bytes < 0) {
         LOGE("Writing to file descriptor issue (error %d: %s)", errno, strerror(errno));
     }

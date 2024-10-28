@@ -18,7 +18,7 @@
 #include <Arduino.h>
 
 /* Custom C++ Libraries */
-#include "./arduino_message.h"
+#include "arduino_message.h"
 
 
 namespace arduino {
@@ -59,6 +59,7 @@ class MasterConnection {
         serial_.write(static_cast<char>(msg.id));
         serial_.write(msg.data, msg.num_data_bytes);
         serial_.write('>');
+        serial_.flush();
     };
 
     Message getMessage() {
@@ -90,7 +91,7 @@ class MasterConnection {
     HardwareSerial& serial_;
     int baudrate_;
 
-    uint8_t cmd_buffer_index_ = 0;
+    int cmd_buffer_index_ = 0;
     uint8_t cmd_buffer_[64] = {};            // Max message size of 60 databytes (15x int / 7x double)
 };
 

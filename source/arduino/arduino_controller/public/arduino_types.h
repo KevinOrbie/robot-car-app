@@ -21,7 +21,7 @@
 namespace arduino {
 /* ========================= Messaging ========================= */
 enum class MessageID: uint8_t {
-    EMPTY,
+    EMPTY = static_cast<uint8_t>('0'),
 
     /* Master --> MCU messages. */
     CMD_DRIVE = static_cast<uint8_t>('A'), 
@@ -41,6 +41,18 @@ enum class MessageID: uint8_t {
     ERROR
 };
 
+/**
+ * @brief Returns the number of data bytes the given message is expected to have.
+ * @brief Negative if no explicit data size is defined.
+ */
+int getDataSize(MessageID id) {
+    switch (id) {
+        case MessageID::IMU_DATA_ACC: return 6;
+        case MessageID::IMU_DATA_GYRO: return 6;
+        case MessageID::IMU_DATA_ANGLE: return 6;
+        default: return -1;
+    }
+}
 
 /* ========================== Errors =========================== */
 enum class ErrorID: uint8_t {

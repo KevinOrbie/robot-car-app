@@ -79,6 +79,10 @@ void ArduinoDriver::LifePulser::reset() {
 /* ======================== Driver Class ======================= */
 ArduinoDriver::ArduinoDriver(): life_pulser_(*this), reciever_(*this) {};
 
+void ArduinoDriver::setupIMU() {
+
+};
+
 /* ---------------------------- Looper Interface ---------------------------- */
 void ArduinoDriver::iteration() {
     life_pulser_.iteration();
@@ -86,12 +90,12 @@ void ArduinoDriver::iteration() {
 };
 
 void ArduinoDriver::thread() {
-    life_pulser_.thread();
+    // life_pulser_.thread();
     reciever_.thread();
 }
 
 void ArduinoDriver::stop() {
-    life_pulser_.stop();
+    // life_pulser_.stop();
     reciever_.stop();
 }
 
@@ -142,13 +146,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         uint16_t *accel = reinterpret_cast<uint16_t*>(&msg.data[0]);
         setAcceleration(accel[0], accel[1], accel[2]);
-        LOGW("ACC: %d, %d, %d", static_cast<int>(accel[0]), static_cast<int>(accel[1]), static_cast<int>(accel[2]));
-
-        // TODO: update range and print floats, like:
-        // fAcc[i] = sReg[AX+i] / 32768.0f * 16.0f;
-		// fGyro[i] = sReg[GX+i] / 32768.0f * 2000.0f;
-		// fAngle[i] = sReg[Roll+i] / 32768.0f * 180.0f;
-
+        LOGW("ACC: %f, %f, %f", 
+            static_cast<float>(accel[0]/ 32768.0f * 16.0f), 
+            static_cast<float>(accel[1]/ 32768.0f * 16.0f), 
+            static_cast<float>(accel[2]/ 32768.0f * 16.0f)
+        );
         break;
     }
 
@@ -159,7 +161,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         uint16_t *angle = reinterpret_cast<uint16_t*>(&msg.data[0]);
         setAngle(angle[0], angle[1], angle[2]);
-        LOGW("ANGLE: %d, %d, %d", static_cast<int>(angle[0]), static_cast<int>(angle[1]), static_cast<int>(angle[2]));
+        LOGW("ANGLE: %f, %f, %f", 
+            static_cast<float>(angle[0]/ 32768.0f * 180.0f), 
+            static_cast<float>(angle[1]/ 32768.0f * 180.0f), 
+            static_cast<float>(angle[2]/ 32768.0f * 180.0f)
+        );
         break;
     }
 
@@ -170,7 +176,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         uint16_t *gyro = reinterpret_cast<uint16_t*>(&msg.data[0]);
         setGyro(gyro[0], gyro[1], gyro[2]);
-        LOGW("GYRO: %d, %d, %d", static_cast<int>(gyro[0]), static_cast<int>(gyro[1]), static_cast<int>(gyro[2]));
+        LOGW("GYRO: %f, %f, %f", 
+            static_cast<float>(gyro[0]/ 32768.0f * 2000.0f), 
+            static_cast<float>(gyro[1]/ 32768.0f * 2000.0f), 
+            static_cast<float>(gyro[2]/ 32768.0f * 2000.0f)
+        );
         break;
     }
 
@@ -185,9 +195,9 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         if (msg.data.size() >= 2) {
             char *msg_text = reinterpret_cast<char*>(&msg.data[1]);
             int text_length = msg.data.size() - 1;
-            LOGE("(Arduino) ERROR:%c, MSG:%.*s", static_cast<char>(err), text_length, msg_text);
+            LOGE("(Arduino) ERROR: %c, MSG: %.*s", static_cast<char>(err), text_length, msg_text);
         } else {
-            LOGE("(Arduino) ERROR:%c", static_cast<char>(err));
+            LOGE("(Arduino) ERROR: %c", static_cast<char>(err));
         }
         break;
     }
@@ -210,16 +220,74 @@ void ArduinoDriver::handle(arduino::Message &msg) {
   }
 }
 
-void ArduinoDriver::sendDriveCmd() {
+void ArduinoDriver::sendDriveCmd(uint8_t *value) {
     /* Create Command. */
     std::vector<uint8_t> command = {0};
-    command[0] |= speed_ & 0x0F;
-    command[0] |= (static_cast<uint8_t>(direction_) << 6);
-    command[0] |= (static_cast<uint8_t>(throttle_) << 4);
+    if (value) {
+        command[0] = *value;
+    } else {
+        command[0] |= speed_ & 0x0F;
+        command[0] |= (static_cast<uint8_t>(direction_) << 6);
+        command[0] |= (static_cast<uint8_t>(throttle_) << 4);
+    }
+    
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::CMD_DRIVE;
+    msg.data = command;
 
-    /* Forward Command. */
-    // arduino_ctrl_.send(command);
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
 
     /* Deal with timing. */
     life_pulser_.reset();
+};
+
+void ArduinoDriver::calibrateAccGyro() {
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::IMU_CALIB_ACC_GRYO;
+
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
+};
+
+void ArduinoDriver::calibrateMag() {
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::IMU_CALIB_MAG;
+
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
+};
+
+void ArduinoDriver::setIMUOutputRate(arduino::OutputRate rate) {
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::IMU_RATE;
+    msg.data = {static_cast<uint8_t>(rate)};
+
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
+};
+
+void ArduinoDriver::setIMUBaudrate(arduino::BaudRate baud) {
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::IMU_BAUD;
+    msg.data = {static_cast<uint8_t>(baud)};
+
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
+};
+
+void ArduinoDriver::setIMUContent(int32_t content) {
+    /* Create Message. */
+    arduino::Message msg = {};
+    msg.id = arduino::MessageID::IMU_CONTENT;
+    uint8_t *data_bytes = reinterpret_cast<uint8_t*>(&content);
+    msg.data = {data_bytes[0], data_bytes[1], data_bytes[2], data_bytes[3]};
+
+    /* Forward Message. */
+    arduino_ctrl_.send(msg);
 };

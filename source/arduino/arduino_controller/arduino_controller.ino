@@ -51,9 +51,11 @@ void handle(Message msg) {
     case MessageID::EMPTY:  
       break;
 
-    case MessageID::CMD_DRIVE:
+    case MessageID::CMD_DRIVE: {
       drive_ctrl.setState(msg);
+      Logger::instance().info( "Recieved MSG: drive");
       break;
+    }
 
     case MessageID::IMU_CALIB_ACC_GRYO:
       imu.calibrateAcceleration();
@@ -64,28 +66,47 @@ void handle(Message msg) {
       break;
 
     case MessageID::IMU_BW: {
-      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      if (msg.num_data_bytes != 1) { 
+        char str[10];
+        sprintf(str, "%d", msg.num_data_bytes);
+        logger.error(ErrorID::INVALID_MSG_DATA, &str[0]); 
+        return;
+      };
       Bandwidth bandwidth = static_cast<Bandwidth>(*msg.data);
       imu.setBandwidth(bandwidth);
       break;
     }
 
     case MessageID::IMU_BAUD: {
-      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      if (msg.num_data_bytes != 1) { 
+        char str[10];
+        sprintf(str, "%d", msg.num_data_bytes);
+        logger.error(ErrorID::INVALID_MSG_DATA, &str[0]); 
+        return;
+      };
       BaudRate baudrate = static_cast<BaudRate>(*msg.data);
       imu.setBaudRate(baudrate);
       break;
     }
 
     case MessageID::IMU_RATE: {
-      if (msg.num_data_bytes != 1) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      if (msg.num_data_bytes != 1) { 
+        char num_bytes = '0' + msg.num_data_bytes; // Valid between 0 and 9
+        logger.error(ErrorID::INVALID_MSG_DATA, num_bytes); 
+        return;
+      };
       OutputRate outputrate = static_cast<OutputRate>(*msg.data);
       imu.setOutputRate(outputrate);
       break;
     }
 
     case MessageID::IMU_CONTENT: {
-      if (msg.num_data_bytes != 2) { logger.error(ErrorID::INVALID_MSG_DATA); };
+      if (msg.num_data_bytes != 4) { 
+        char str[10];
+        sprintf(str, "%d", msg.num_data_bytes);
+        logger.error(ErrorID::INVALID_MSG_DATA, &str[0]); 
+        return;
+      };
       int32_t content_flags = static_cast<int32_t>(*msg.data);
       imu.setContent(content_flags);
       break;
@@ -130,6 +151,6 @@ void loop() {
     master.send(imu.getDataMessage());
   }
   
-  delay(5000);
+  // delay(5000);
 }
 

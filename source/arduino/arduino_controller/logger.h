@@ -46,8 +46,10 @@ class Logger {
         size_t size = (msg) ? strlen(msg) : 0;
         uint8_t data[size + 1];  // tmp stack allocated data array
         data[0] = static_cast<uint8_t>(error);
-        memcpy(&data + 1, msg, size); // Copy string without terminator
-
+        if (size > 0) {
+            memcpy(&data[1], msg, size); // Copy string without terminator
+        }
+        
         /* Setup Message. */
         Message err_msg = {};
         err_msg.id = MessageID::ERROR;
