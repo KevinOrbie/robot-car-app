@@ -254,8 +254,8 @@ void ArduinoSocket::send(arduino::Message msg) {
     /* Note: This write() is thread-safe, no mutex required (could result in deadlock). */
     int num_bytes = write(fd_, msg_bytes.data(), msg_bytes.size());
 
-    LOGI("Sending Message: %c, data size=%d", static_cast<char>(msg.id), msg.data.size());
-    LOGI("Send Buffer: [%s]", stringify_buffer(&msg_bytes[0], msg_bytes.size()).c_str());
+    // LOGI("Sending Message: %c, data size=%d", static_cast<char>(msg.id), msg.data.size());
+    // LOGI("Send Buffer: [%s]", stringify_buffer(&msg_bytes[0], msg_bytes.size()).c_str());
     if (num_bytes < 0) {
         LOGE("Writing to file descriptor issue (error %d: %s)", errno, strerror(errno));
     }

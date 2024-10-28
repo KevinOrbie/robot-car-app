@@ -10,6 +10,7 @@
 #include <unistd.h>  // getopt
 
 /* Standard C++ Libraries */
+#include <stdexcept>
 #include <iostream>
 #include <thread>
 
@@ -138,8 +139,13 @@ int main(int argc, char *argv[]) {
 
     /* Setup & Start Frame Provider. */
     if (use_camera) {
-        frame_provider = std::make_unique<VideoCam>();
-        frame_provider->startStream();
+        try {
+            frame_provider = std::make_unique<VideoCam>();
+            frame_provider->startStream();
+        } catch (const std::runtime_error& error) {
+            LOGW("No camera device found, running without framegrabber!");
+            frame_provider = nullptr;
+        }
     } else if (use_video_file) {
         frame_provider = std::make_unique<VideoFile>(video_file);
         frame_provider->startStream();

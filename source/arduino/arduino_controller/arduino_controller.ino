@@ -53,7 +53,6 @@ void handle(Message msg) {
 
     case MessageID::CMD_DRIVE: {
       drive_ctrl.setState(msg);
-      Logger::instance().info( "Recieved MSG: drive");
       break;
     }
 
@@ -129,7 +128,7 @@ void setup() {
   master.setup();
   imu.setup();
 
-  logger.info("Setup Finished!");
+  // logger.info("Setup Finished!");
 }
 
 /**
