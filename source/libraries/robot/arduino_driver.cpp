@@ -13,6 +13,7 @@
 
 /* Standard C++ Libraries */
 #include <condition_variable>
+#include <thread>
 #include <chrono>
 
 /* Custom C++ Libraries */
@@ -80,7 +81,16 @@ void ArduinoDriver::LifePulser::reset() {
 ArduinoDriver::ArduinoDriver(): life_pulser_(*this), reciever_(*this) {};
 
 void ArduinoDriver::setupIMU() {
-
+    LOGI("Setting up Arduino Connection...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // Wait until baudrate was found for IMU
+    setIMUBaudrate(arduino::BaudRate::BD_9600);
+    setIMUOutputRate(arduino::OutputRate::OR_50HZ);
+    setIMUContent(
+        static_cast<int32_t>(arduino::Content::CNT_ACC) | 
+        static_cast<int32_t>(arduino::Content::CNT_GYRO) | 
+        static_cast<int32_t>(arduino::Content::CNT_ANGLE)
+    );
+    calibrateAccGyro();
 };
 
 /* ---------------------------- Looper Interface ---------------------------- */
@@ -90,6 +100,7 @@ void ArduinoDriver::iteration() {
 };
 
 void ArduinoDriver::thread() {
+    setupIMU();
     life_pulser_.thread();
     reciever_.thread();
 }
@@ -101,8 +112,6 @@ void ArduinoDriver::stop() {
 
 /* ------------------------------- Input Sink ------------------------------- */
 void ArduinoDriver::sink(Input input) {
-    // TODO: Make thread-safe
-
     /* Throttle Control. */
     if (input.keys[Button::W].held && input.keys[Button::S].held) {
         throttle_ = Throttle::BRAKE;
@@ -144,13 +153,13 @@ void ArduinoDriver::handle(arduino::Message &msg) {
             LOGE("Arduino Message does not contain enough data: #bytes=%d", static_cast<int>(msg.data.size()));
             return;
         }
-        uint16_t *accel = reinterpret_cast<uint16_t*>(&msg.data[0]);
+        int16_t *accel = reinterpret_cast<int16_t*>(&msg.data[0]);
         setAcceleration(accel[0], accel[1], accel[2]);
-        // LOGW("ACC: %f, %f, %f", 
-        //     static_cast<float>(accel[0]/ 32768.0f * 16.0f), 
-        //     static_cast<float>(accel[1]/ 32768.0f * 16.0f), 
-        //     static_cast<float>(accel[2]/ 32768.0f * 16.0f)
-        // );
+        LOGW("ACC: %f, %f, %f", 
+            static_cast<float>(accel[0]/ 32768.0f * 16.0f), 
+            static_cast<float>(accel[1]/ 32768.0f * 16.0f), 
+            static_cast<float>(accel[2]/ 32768.0f * 16.0f)
+        );
         break;
     }
 
@@ -159,13 +168,13 @@ void ArduinoDriver::handle(arduino::Message &msg) {
             LOGE("Arduino Message does not contain enough data: #bytes=%d", static_cast<int>(msg.data.size()));
             return;
         }
-        uint16_t *angle = reinterpret_cast<uint16_t*>(&msg.data[0]);
+        int16_t *angle = reinterpret_cast<int16_t*>(&msg.data[0]);
         setAngle(angle[0], angle[1], angle[2]);
-        // LOGW("ANGLE: %f, %f, %f", 
-        //     static_cast<float>(angle[0]/ 32768.0f * 180.0f), 
-        //     static_cast<float>(angle[1]/ 32768.0f * 180.0f), 
-        //     static_cast<float>(angle[2]/ 32768.0f * 180.0f)
-        // );
+        LOGW("ANGLE: %f, %f, %f", 
+            static_cast<float>(angle[0]/ 32768.0f * 180.0f), 
+            static_cast<float>(angle[1]/ 32768.0f * 180.0f), 
+            static_cast<float>(angle[2]/ 32768.0f * 180.0f)
+        );
         break;
     }
 
@@ -174,13 +183,13 @@ void ArduinoDriver::handle(arduino::Message &msg) {
             LOGE("Arduino Message does not contain enough data: #bytes=%d", static_cast<int>(msg.data.size()));
             return;
         }
-        uint16_t *gyro = reinterpret_cast<uint16_t*>(&msg.data[0]);
+        int16_t *gyro = reinterpret_cast<int16_t*>(&msg.data[0]);
         setGyro(gyro[0], gyro[1], gyro[2]);
-        // LOGW("GYRO: %f, %f, %f", 
-        //     static_cast<float>(gyro[0]/ 32768.0f * 2000.0f), 
-        //     static_cast<float>(gyro[1]/ 32768.0f * 2000.0f), 
-        //     static_cast<float>(gyro[2]/ 32768.0f * 2000.0f)
-        // );
+        LOGW("GYRO: %f, %f, %f", 
+            static_cast<float>(gyro[0]/ 32768.0f * 2000.0f), 
+            static_cast<float>(gyro[1]/ 32768.0f * 2000.0f), 
+            static_cast<float>(gyro[2]/ 32768.0f * 2000.0f)
+        );
         break;
     }
 

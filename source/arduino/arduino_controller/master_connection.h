@@ -41,8 +41,6 @@ class MasterConnection {
                 cmd_buffer_index_ = 0;
             }
 
-            // TODO: find a way to deal with '>' in data
-
             /* Valid start character ? */
             if (cmd_buffer_[0] != '<') {
                 cmd_buffer_index_ = 0;
