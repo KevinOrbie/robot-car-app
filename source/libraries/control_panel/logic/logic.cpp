@@ -55,6 +55,7 @@ void Application::glsetup() {
 void Application::glcleanup() {
     /* Destory OpenGL Objects */
     state->screen.release();
+    state->grid.release();
 };
 
 bool Application::processFrame(float timedelta, int width, int height, Input& input) {
@@ -77,41 +78,25 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     /* Process Input */
     if (input.keys[Button::W].held) {
         state->camera->ProcessKeyboard(FORWARD, timedelta); 
-        // LOGI("Key Updated: %s", (input.keysUpdated()) ? "true": "false");
     }
     if (input.keys[Button::A].held) {
         state->camera->ProcessKeyboard(LEFT, timedelta); 
-        // LOGI("A held!");
     }
     if (input.keys[Button::S].held) {
         state->camera->ProcessKeyboard(BACKWARD, timedelta); 
-        // LOGI("S held!");
     }
     if (input.keys[Button::D].held) {
         state->camera->ProcessKeyboard(RIGHT, timedelta); 
-        // LOGI("D held!");
     }
     if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f)
         state->camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
     if (input.scroll_y_offset != 0.0f)
         state->camera->ProcessMouseScroll(input.scroll_y_offset);
-    // if (input.keys[Button::SPACE].pressed) {
-    //     grass->num_blades += 100000;
-    //     std::cout << "Number of Blades: " << grass->num_blades << "\n";
-    // }
 
     /* Forward Input to sink (optional). */
     if (input_sink_ && input.keysUpdated()) {
         input_sink_->sink(input);
     }
-
-    /* Transformations */
-    glm::mat4 view = state->camera->GetViewMatrix();
-    glm::mat4 projection = glm::perspective(
-        glm::radians(state->camera->Zoom), 
-        (float)width / (float)height, 
-        0.1f, 500.0f
-    );
 
     /* Load Image (optional) */
     if (frame_provider_) {
@@ -124,13 +109,21 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
         );
     }
 
+    /* Transformations */
+    glm::mat4 view = state->camera->GetViewMatrix();
+    glm::mat4 projection = glm::perspective(
+        glm::radians(state->camera->Zoom), 
+        (float)width / (float)height, 
+        0.1f, 500.0f
+    );
+
     /* Rendering */
     // Clear Screen
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    // state->screen->draw();
+    state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->grid->draw(view, projection);
     return true;
 };

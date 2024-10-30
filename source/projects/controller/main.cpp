@@ -46,12 +46,14 @@ static void help() {
     fprintf(stderr, "%s", msg.c_str());
 };
 
-static void summary(std::string robot_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino) {
+static void summary(std::string robot_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino, bool test_mode) {
     std::string frame_provider = "";
     if (use_camera) {
         frame_provider = "camera";
     } else if (use_video_file) {
         frame_provider = video_file;
+    } else if (test_mode) {
+        frame_provider = "none";
     } else {
         frame_provider = "robot";
     }
@@ -59,6 +61,8 @@ static void summary(std::string robot_ip, std::string video_file, bool use_camer
     std::string input_sink = "";
     if (enable_arduino) {
         input_sink = "arduino";
+    } else if (test_mode) {
+        input_sink = "none";
     } else {
         input_sink = "robot";
     }
@@ -132,7 +136,7 @@ int main(int argc, char *argv[]) {
     
     /* Notify user of used settings. */
     LOGI("CONTROLLER: Version %d", CONTROLLER_VERSION);
-    summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino);
+    summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino, test_mode);
 
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<FrameProvider> frame_provider = nullptr;

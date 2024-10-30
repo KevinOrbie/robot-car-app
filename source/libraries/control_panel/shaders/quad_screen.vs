@@ -6,7 +6,7 @@ layout (location = 1) in vec2 quadTexCoord;
 
 // Uniform Data
 // uniform float time;
-// uniform mat4 model;
+uniform mat4 model;
 // uniform mat4 view;
 // uniform mat4 projection;
 
@@ -20,6 +20,6 @@ out vec2 TexCoord;
 /* ----------------------- Entry Point ----------------------- */
 void main()
 {   
-    gl_Position = vec4(quadPos, 1.0);
+    gl_Position = model * vec4(quadPos, 1.0);
     TexCoord = quadTexCoord;
 }

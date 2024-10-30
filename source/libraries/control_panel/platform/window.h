@@ -95,6 +95,8 @@ class Window final{
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
         /* Create a Window */
         window_ = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Simple Cube", NULL, NULL);
         if (window_ == NULL)
