@@ -1,5 +1,5 @@
 /**
- * @brief OpenGL Grass Model Class.
+ * @brief OpenGL QuadScreen Class.
  * @author Kevin Orbie
  */
 
@@ -36,7 +36,7 @@ class QuadScreen {
              1.0f, -1.0f,  0.0f,    1.0f,  1.0f
         };
 
-        // Build / Compile Shader
+        /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/quad_screen.vs", "./shaders/quad_screen.fs");
 
         /* Setting up Texture Data. */

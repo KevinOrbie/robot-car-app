@@ -27,7 +27,7 @@ Download all ffmpeg development files:
 ```shell
 sudo apt update
 sudo apt install libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libpostproc-dev libswresample-dev libswscale-dev
-``` 
+```
 
 ## OpenCV (Ubuntu 24.04)
 OpenCV is a library of programming functions mainly for real-time computer vision. ([source](https://en.wikipedia.org/wiki/OpenCV))

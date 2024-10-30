@@ -18,8 +18,11 @@
 #include "video/frame_provider.h"
 #include "common/input.h"
 #include "common/input_sink.h"
-#include "quad_screen.h"
 #include "camera.h"
+
+/* Custom OpenGL Objects */
+#include "quad_screen.h"
+#include "grid.h"
 
 
 /* ========================== Classes ========================== */
@@ -40,6 +43,7 @@ struct AppState {
     
     /* OpenGL Variables */
     std::unique_ptr<QuadScreen> screen = nullptr;
+    std::unique_ptr<ShaderGrid2D> grid = nullptr;
     bool opengl_initialized = false;
 };
 

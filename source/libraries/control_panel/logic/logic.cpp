@@ -25,6 +25,7 @@
 #include "quad_screen.h"
 #include "shader.h"
 #include "camera.h"
+#include "grid.h"
 
 
 /* ========================== Classes ========================== */
@@ -43,6 +44,7 @@ void Application::glsetup() {
 
     /* Initialize OpenGL Objects */
     state->screen = std::make_unique<QuadScreen>();
+    state->grid = std::make_unique<ShaderGrid2D>();
 
     /* Initialize OpenGL */
     glEnable(GL_DEPTH_TEST);
@@ -104,12 +106,12 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     }
 
     /* Transformations */
-    // glm::mat4 view = state->camera->GetViewMatrix();
-    // glm::mat4 projection = glm::perspective(
-    //     glm::radians(state->camera->Zoom), 
-    //     (float)width / (float)height, 
-    //     0.1f, 500.0f
-    // );
+    glm::mat4 view = state->camera->GetViewMatrix();
+    glm::mat4 projection = glm::perspective(
+        glm::radians(state->camera->Zoom), 
+        (float)width / (float)height, 
+        0.1f, 500.0f
+    );
 
     /* Load Image (optional) */
     if (frame_provider_) {
@@ -128,6 +130,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    state->screen->draw();
+    // state->screen->draw();
+    state->grid->draw(view, projection);
     return true;
 };

@@ -37,6 +37,7 @@ static void help() {
     msg += "  -a              enable camera and arduino driver\n";
     msg += "  -d              enable the arduino driver (don't require remote connection)\n";
     msg += "  -c              stream from the camera\n";
+    msg += "  -t              standalone test configuration\n";
     msg += "  -v <path>       stream from the video file\n";
     msg += "  -i <address>    ip address of the robot to connect to\n";
     
@@ -74,13 +75,14 @@ int main(int argc, char *argv[]) {
     std::string robot_ip = "192.168.0.212";
     std::string video_file;
 
+    bool test_mode      = false;
     bool use_camera     = false;
     bool use_video_file = false;
     bool enable_arduino = false;
 
     /* ----------------- Parse User Input ----------------- */
     int option;
-    while ((option = getopt(argc, argv, "acv:di:h")) != -1) {
+    while ((option = getopt(argc, argv, "actv:di:h")) != -1) {
         switch (option) {
             case 'a': {
                 use_camera = true;
@@ -88,6 +90,9 @@ int main(int argc, char *argv[]) {
                 robot_ip = "localhost";
                 break;
             }
+            case 't':
+                test_mode = true;
+                break;
             case 'c':
                 use_camera = true;
                 break;
@@ -118,6 +123,12 @@ int main(int argc, char *argv[]) {
         help();
         return EXIT_SUCCESS;
     }
+
+    if (test_mode) {
+        robot_ip = "none";
+        use_camera = false;
+        enable_arduino = false;
+    }
     
     /* Notify user of used settings. */
     LOGI("CONTROLLER: Version %d", CONTROLLER_VERSION);
@@ -131,6 +142,8 @@ int main(int argc, char *argv[]) {
     if (enable_arduino) {
         input_sink = std::make_unique<ArduinoDriver>();
         dynamic_cast<ArduinoDriver*>(input_sink.get())->thread();
+    } else if(test_mode) {
+        input_sink = nullptr;
     } else {
         input_sink = std::make_unique<remote::Robot>(robot_ip, 2556);
         dynamic_cast<remote::Robot*>(input_sink.get())->connect();
@@ -149,6 +162,8 @@ int main(int argc, char *argv[]) {
     } else if (use_video_file) {
         frame_provider = std::make_unique<VideoFile>(video_file);
         frame_provider->startStream();
+    } else if (test_mode) {
+        frame_provider = nullptr;
     } else {
         frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
         frame_provider->startStream();
