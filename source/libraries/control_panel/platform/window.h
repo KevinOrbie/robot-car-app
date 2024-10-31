@@ -59,6 +59,8 @@ class Window final{
             close();
 
         /* Other Inputs */
+        input_.keys[Button::T].updateState(glfwGetKey(window_, GLFW_KEY_T) == GLFW_PRESS);
+        input_.keys[Button::C].updateState(glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS);
         input_.keys[Button::W].updateState(glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS);
         input_.keys[Button::A].updateState(glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS);
         input_.keys[Button::S].updateState(glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS);
@@ -68,6 +70,12 @@ class Window final{
         input_.keys[Button::UP   ].updateState(glfwGetKey(window_, GLFW_KEY_UP   ) == GLFW_PRESS);
         input_.keys[Button::DOWN ].updateState(glfwGetKey(window_, GLFW_KEY_DOWN ) == GLFW_PRESS);
         input_.keys[Button::SPACE].updateState(glfwGetKey(window_, GLFW_KEY_SPACE) == GLFW_PRESS);
+
+        /* Detect window related inputs. */
+        if (input_.keys[Button::C].pressed) {
+            cursor_caught_ = !cursor_caught_;
+            catchCursor(cursor_caught_);
+        }
     }
 
     void cleanup() {
@@ -85,6 +93,14 @@ class Window final{
 
     void setTitle(char* title){
         glfwSetWindowTitle(window_, title);
+    }
+
+    void catchCursor(bool needs_to_catch) {
+        if (needs_to_catch) {
+            glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 
    private:
@@ -115,7 +131,7 @@ class Window final{
         glfwSetScrollCallback(window_, scroll_callback);
 
         // Tell GLFW to capture our mouse
-        // glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        catchCursor(cursor_caught_);
 
         /* Misc GLFW */
         glfwSwapInterval(0);  // Don't limit to 60 FPS.
@@ -181,6 +197,7 @@ class Window final{
 
    private:
     GLFWwindow* window_ = nullptr;
+    bool cursor_caught_ = false;
 };
 
 #endif
