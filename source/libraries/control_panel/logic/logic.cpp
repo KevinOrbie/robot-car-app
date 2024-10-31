@@ -101,6 +101,11 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
         state->camera->lookAt(0.0f, 0.0f, 0.0f);
         // TODO: Maybe fix camera to move in a plane?
     }
+    // if (input.keys[Button::SPACE].held) {
+    //     static int count = 0;
+    //     state->trajectory->addPosition(static_cast<float>(count) * 0.02, 0.0f, static_cast<float>(count) * 0.02);
+    //     count++;
+    // }
 
     /* Forward Input to sink (optional). */
     if (input_sink_ && input.keysUpdated()) {

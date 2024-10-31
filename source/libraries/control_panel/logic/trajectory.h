@@ -10,8 +10,9 @@
 
 /* ========================== Include ========================== */
 /* C/C++ Libraries */
-#include <memory>
 #include <array>
+#include <memory>
+#include <algorithm>
 
 /* Third Party Libraries */
 #include <glad/glad.h>
@@ -20,6 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>          // GLSL Linear Algebra Library
 
 /* Custom C++ Libraries */
+#include "common/logger.h"
 #include "shader.h"
 
 
@@ -27,20 +29,10 @@
 
 /**
  * @brief A 3D trajectory path.
- * 
- * NOTE: We can use glCopySubBuffer to only copy part of the buffer for every new element.
  */
 class Trajectory {
    public:
     Trajectory(){
-        /* Setting up vertex data. */
-        vertices_ = {
-            glm::vec3(0.0f, 0.01f, 0.0f),
-            glm::vec3(0.5f, 0.01f, 0.0f),
-            glm::vec3(0.5f, 0.01f, 0.5f),
-            glm::vec3(2.0f, 0.01f, 2.0f)
-        };
- 
         /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/trajectory.vs", "./shaders/trajectory.fs");
 
@@ -68,6 +60,30 @@ class Trajectory {
         glDeleteBuffers(1, &VBO_);
     }
 
+    void addPosition(float x, float y, float z) {
+        if (vertices_.size() < point_limit_) {
+            vertices_.push_back(glm::vec3(x,y,z));
+        } else {
+            /* Shift all vector elements to the left by 1. */
+            std::move(vertices_.begin() + 1, vertices_.end(), vertices_.begin());
+            vertices_.back() = glm::vec3(x,y,z);
+        }
+        sendDataToGPU();
+        LOGI("Number of points: %d", vertices_.size());
+    }
+
+    /**
+     * @brief Sends the current object's vertex data to the GPU. 
+     * 
+     * @note Even with 100,000 points, we still get 3800 FPS, thus, for the moment this is not a terribly bad bottleneck.
+     * @note If this would become a bad bottleneck, we could opt to go for an indexed drawing method, and only send the new index and point.
+     */
+    void sendDataToGPU() {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+        glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(glm::vec3), &vertices_[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
     /**
      * @brief Run OpenGL draw calls.
      */
@@ -90,5 +106,7 @@ class Trajectory {
     unsigned int VAO_;
     unsigned int VBO_;
     std::unique_ptr<Shader> shader_;
-    std::vector<glm::vec3> vertices_;
+
+    std::vector<glm::vec3> vertices_ = {};
+    int point_limit_ = 100000;
 };
