@@ -43,6 +43,7 @@ void Application::glsetup() {
     LOGI("Initializing GL.");
 
     /* Initialize OpenGL Objects */
+    state->trajectory = std::make_unique<Trajectory>();
     state->screen = std::make_unique<QuadScreen>();
     state->grid = std::make_unique<ShaderGrid2D>();
 
@@ -54,6 +55,7 @@ void Application::glsetup() {
 
 void Application::glcleanup() {
     /* Destory OpenGL Objects */
+    state->trajectory.release();
     state->screen.release();
     state->grid.release();
 };
@@ -124,6 +126,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
 
     // Draw Objects
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
+    state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
     return true;
 };

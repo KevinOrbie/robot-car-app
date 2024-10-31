@@ -22,6 +22,7 @@
 
 /* Custom OpenGL Objects */
 #include "quad_screen.h"
+#include "trajectory.h"
 #include "grid.h"
 
 
@@ -44,6 +45,7 @@ struct AppState {
     /* OpenGL Variables */
     std::unique_ptr<QuadScreen> screen = nullptr;
     std::unique_ptr<ShaderGrid2D> grid = nullptr;
+    std::unique_ptr<Trajectory> trajectory = nullptr;
     bool opengl_initialized = false;
 };
 
