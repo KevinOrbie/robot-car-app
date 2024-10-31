@@ -24,6 +24,7 @@
 #include "quad_screen.h"
 #include "trajectory.h"
 #include "grid.h"
+#include "car.h"
 
 
 /* ========================== Classes ========================== */
@@ -43,6 +44,7 @@ struct AppState {
     std::unique_ptr<Camera> camera  = nullptr;
     
     /* OpenGL Variables */
+    std::unique_ptr<CarModel> car = nullptr;
     std::unique_ptr<QuadScreen> screen = nullptr;
     std::unique_ptr<ShaderGrid2D> grid = nullptr;
     std::unique_ptr<Trajectory> trajectory = nullptr;

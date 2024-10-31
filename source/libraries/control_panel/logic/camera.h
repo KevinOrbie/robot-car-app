@@ -63,6 +63,11 @@ public:
         updateCameraVectors();
     }
 
+    void viewFrom(float xpos, float ypos, float zpos) {
+        Position = glm::vec3(xpos, ypos, zpos);
+        updateCameraVectors();
+    }
+
     // Look at a specific point in space.
     void lookAt(float posX, float posY, float posZ)
     {

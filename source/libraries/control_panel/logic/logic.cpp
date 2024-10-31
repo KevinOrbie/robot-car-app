@@ -22,10 +22,8 @@
 #include "common/logger.h"
 
 /* Custom C++ Source Code */
-#include "quad_screen.h"
 #include "shader.h"
 #include "camera.h"
-#include "grid.h"
 
 
 /* ========================== Classes ========================== */
@@ -46,6 +44,7 @@ void Application::glsetup() {
     state->trajectory = std::make_unique<Trajectory>();
     state->screen = std::make_unique<QuadScreen>();
     state->grid = std::make_unique<ShaderGrid2D>();
+    state->car = std::make_unique<CarModel>();
 
     /* Initialize OpenGL */
     glEnable(GL_DEPTH_TEST);
@@ -58,6 +57,7 @@ void Application::glcleanup() {
     state->trajectory.release();
     state->screen.release();
     state->grid.release();
+    state->car.release();
 };
 
 bool Application::processFrame(float timedelta, int width, int height, Input& input) {
@@ -90,10 +90,17 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     if (input.keys[Button::D].held) {
         state->camera->ProcessKeyboard(RIGHT, timedelta); 
     }
-    if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f)
+    if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f) {
         state->camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
-    if (input.scroll_y_offset != 0.0f)
+    }
+    if (input.scroll_y_offset != 0.0f) {
         state->camera->ProcessMouseScroll(input.scroll_y_offset);
+    }
+    if (input.keys[Button::T].pressed) {
+        state->camera->viewFrom(0.0f, 5.0f, 0.0f);
+        state->camera->lookAt(0.0f, 0.0f, 0.0f);
+        // TODO: Maybe fix camera to move in a plane?
+    }
 
     /* Forward Input to sink (optional). */
     if (input_sink_ && input.keysUpdated()) {
@@ -128,5 +135,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
+    state->car->draw(view, projection);
     return true;
 };

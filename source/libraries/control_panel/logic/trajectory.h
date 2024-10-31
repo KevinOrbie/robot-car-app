@@ -91,7 +91,4 @@ class Trajectory {
     unsigned int VBO_;
     std::unique_ptr<Shader> shader_;
     std::vector<glm::vec3> vertices_;
-
-    float linewidth_ = 0.008f;
-    
 };
