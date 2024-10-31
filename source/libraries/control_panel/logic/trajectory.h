@@ -80,7 +80,9 @@ class Trajectory {
         shader_->setMat4("view", view);
 
         /* Draw Grid Plane */
+        glLineWidth(4.0);
         glDrawArrays(GL_LINE_STRIP, 0, static_cast<unsigned int>(vertices_.size()));
+        glLineWidth(1.0);
         glBindVertexArray(0);
     };
 
