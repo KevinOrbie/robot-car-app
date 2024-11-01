@@ -16,8 +16,9 @@
 
 /* Custom C++ Libraries */
 #include "video/frame_provider.h"
-#include "common/input.h"
 #include "common/input_sink.h"
+#include "common/input.h"
+#include "common/pose.h"
 #include "camera.h"
 
 /* Custom OpenGL Objects */
@@ -51,9 +52,10 @@ struct AppState {
     bool opengl_initialized = false;
 };
 
+
 class Application {
    public:
-    Application(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr);
+    Application(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
 
     void glsetup();
     void glcleanup();
@@ -63,5 +65,6 @@ class Application {
    private:
     std::unique_ptr<AppState> state = nullptr;
     FrameProvider *frame_provider_  = nullptr;
+    PoseProvider *pose_provider_    = nullptr;
     InputSink *input_sink_          = nullptr;
 };

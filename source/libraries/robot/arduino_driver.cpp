@@ -113,12 +113,12 @@ void ArduinoDriver::stop() {
 /* ------------------------------- Input Sink ------------------------------- */
 void ArduinoDriver::sink(Input input) {
     /* Throttle Control. */
-    if (input.keys[Button::W].held && input.keys[Button::S].held) {
+    if (input.keys[Button::UP].held && input.keys[Button::DOWN].held) {
         throttle_ = Throttle::BRAKE;
-    } else if (input.keys[Button::W].held) {
+    } else if (input.keys[Button::UP].held) {
         throttle_ = Throttle::FORWARD;
         speed_ = 255;
-    } else if (input.keys[Button::S].held) {
+    } else if (input.keys[Button::DOWN].held) {
         throttle_ = Throttle::REVERSE;
         speed_ = 255;
     } else {
@@ -126,11 +126,11 @@ void ArduinoDriver::sink(Input input) {
     }
 
     /* Direction Control. */
-    if (input.keys[Button::A].held && input.keys[Button::D].held) {
+    if (input.keys[Button::LEFT].held && input.keys[Button::RIGHT].held) {
         direction_ = Direction::STRAIGHT;
-    } else if (input.keys[Button::A].held) {
+    } else if (input.keys[Button::LEFT].held) {
         direction_ = Direction::LEFT;
-    } else if (input.keys[Button::D].held) {
+    } else if (input.keys[Button::RIGHT].held) {
         direction_ = Direction::RIGHT;
     } else {
         direction_ = Direction::STRAIGHT;

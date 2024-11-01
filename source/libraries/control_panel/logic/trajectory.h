@@ -32,7 +32,7 @@
  */
 class Trajectory {
    public:
-    Trajectory(){
+    Trajectory(PoseProvider *pose_provider){
         /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/trajectory.vs", "./shaders/trajectory.fs");
 

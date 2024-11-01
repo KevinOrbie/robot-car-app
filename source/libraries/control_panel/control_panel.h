@@ -18,6 +18,7 @@
 #include "video/frame_provider.h"
 #include "common/input_sink.h"
 #include "common/looper.h"
+#include "common/pose.h"
 
 /* Custom C++ Project Code */
 #include "platform/window.h"
@@ -28,7 +29,7 @@
 /* ========================== Classes ========================== */
 class ControlPanel final: public Looper {
    public:
-    ControlPanel(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr);
+    ControlPanel(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
 
     void iteration() override;
 

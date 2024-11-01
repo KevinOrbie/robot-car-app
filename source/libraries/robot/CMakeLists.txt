@@ -20,6 +20,7 @@ list(APPEND HEADER_FILES arduino_socket.h)
 list(APPEND HEADER_FILES arduino_driver.h)
 list(APPEND HEADER_FILES arduino_message.h)
 list(APPEND HEADER_FILES message_handler.h)
+list(APPEND HEADER_FILES robot_simulation.h)
 
 
 ## --------------------------- Config ----------------------------

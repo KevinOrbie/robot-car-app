@@ -24,8 +24,8 @@
 
 
 /* ========================== Classes ========================== */
-ControlPanel::ControlPanel(FrameProvider *frame_provider, InputSink *input_sink): 
-    stopwatch_(Timer()), application_(std::make_unique<Application>(frame_provider, input_sink)) {
+ControlPanel::ControlPanel(FrameProvider *frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
+    stopwatch_(Timer()), application_(std::make_unique<Application>(frame_provider, input_sink, pose_provider)) {
     LOGI("Building Control Panel.");
 };
 

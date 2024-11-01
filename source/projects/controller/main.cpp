@@ -16,6 +16,7 @@
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
+#include "robot/robot_simulation.h"
 #include "video/video_reciever.h"
 #include "remote/robot.h"
 
@@ -140,6 +141,7 @@ int main(int argc, char *argv[]) {
 
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<FrameProvider> frame_provider = nullptr;
+    std::unique_ptr<PoseProvider> pose_provider   = nullptr;
     std::unique_ptr<InputSink> input_sink         = nullptr;
 
     /* Setup & Start Input Sink. */
@@ -153,6 +155,8 @@ int main(int argc, char *argv[]) {
         dynamic_cast<remote::Robot*>(input_sink.get())->connect();
         dynamic_cast<remote::Robot*>(input_sink.get())->thread();
     }
+
+    std::unique_ptr<robot::RobotInputSimulation> simulation = std::make_unique<robot::RobotInputSimulation>();
 
     /* Setup & Start Frame Provider. */
     if (use_camera) {
@@ -175,7 +179,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Setup & Start Controller. */
-    ControlPanel panel = {frame_provider.get(), input_sink.get()};
+    ControlPanel panel = {frame_provider.get(), simulation.get(), simulation.get()};
     panel.start();  // Run in main thread
 
     /* Command threads to finnish. */

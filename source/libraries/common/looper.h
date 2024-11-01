@@ -2,7 +2,7 @@
  * @file looper.h
  * @author Kevin Orbie
  * 
- * @brief Declares the remote robot class (simulates a direct connection to the robot).
+ * @brief Declares the looper interface.
  */
 
 #pragma once

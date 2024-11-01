@@ -6,7 +6,7 @@
 
 /* ========================== Include ========================== */
 /* C/C++ Libraries */
-// None
+#include <vector>
 
 /* Third Party Libraries */
 // None
@@ -35,4 +35,18 @@ class InputSink {
     InputSink& operator=(const InputSink& other)   = default;
 
     virtual void sink(Input input) = 0;
+};
+
+
+class InputSinkSplitter: public InputSink {
+   public:
+    InputSinkSplitter(std::vector<InputSink*> sinks): sinks_(sinks) {};
+    void sink(Input input) {
+        for (InputSink *sink: sinks_) {
+            sink->sink(input);
+        }
+    };
+
+   private:
+    std::vector<InputSink*> sinks_ = {};
 };

@@ -27,8 +27,8 @@
 
 
 /* ========================== Classes ========================== */
-Application::Application(FrameProvider* frame_provider, InputSink *input_sink): 
-        frame_provider_(frame_provider), input_sink_(input_sink) {
+Application::Application(FrameProvider* frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
+        frame_provider_(frame_provider), input_sink_(input_sink), pose_provider_(pose_provider) {
     /* Initialize Application State. */
     state = std::make_unique<AppState>();
 
@@ -41,10 +41,10 @@ void Application::glsetup() {
     LOGI("Initializing GL.");
 
     /* Initialize OpenGL Objects */
-    state->trajectory = std::make_unique<Trajectory>();
+    state->trajectory = std::make_unique<Trajectory>(pose_provider_);
     state->screen = std::make_unique<QuadScreen>();
     state->grid = std::make_unique<ShaderGrid2D>();
-    state->car = std::make_unique<CarModel>();
+    state->car = std::make_unique<CarModel>(pose_provider_);
 
     /* Initialize OpenGL */
     glEnable(GL_DEPTH_TEST);
@@ -130,6 +130,9 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
         (float)width / (float)height, 
         0.1f, 500.0f
     );
+
+    /* Update Objects. */
+    state->car->update();
 
     /* Rendering */
     // Clear Screen

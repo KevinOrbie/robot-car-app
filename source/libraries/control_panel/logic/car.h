@@ -12,6 +12,7 @@
 /* C/C++ Libraries */
 #include <memory>
 #include <vector>
+#include <chrono>
 
 /* Third Party Libraries */
 #include <glad/glad.h>
@@ -20,6 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>          // GLSL Linear Algebra Library
 
 /* Custom C++ Libraries */
+#include "common/pose.h"
 #include "shader.h"
 
 
@@ -34,7 +36,9 @@
  */
 class CarModel {
    public:
-    CarModel(){
+    CarModel(PoseProvider *pose_provider): pose_provider_(pose_provider) {
+        model_matrix_ = glm::mat4(1.0f);
+
         /* Setting up vertex data. */
         std::vector<glm::vec3> vertices = {
             glm::vec3( 0.1100f, 0.00f, -0.1025f),  // Bottom - left  - front
@@ -93,6 +97,14 @@ class CarModel {
         glDeleteVertexArrays(1, &VAO_);
         glDeleteBuffers(1, &VBO_);
         glDeleteBuffers(1, &EBO_);
+    };
+
+    void update() {
+        if (pose_provider_) {
+            Pose pose = pose_provider_->getPose(std::chrono::high_resolution_clock::now());
+            model_matrix_ = glm::mat4(1.0f);
+            model_matrix_ = glm::translate(model_matrix_, glm::vec3(pose.pos[0], pose.pos[1], pose.pos[2]));
+        }
     }
 
     /**
@@ -104,6 +116,7 @@ class CarModel {
 
         /* Update Uniform Values */
         shader_->setMat4("projection", projection);
+        shader_->setMat4("model", model_matrix_);
         shader_->setMat4("view", view);
 
         /* Draw Grid Plane */
@@ -115,5 +128,7 @@ class CarModel {
     unsigned int VAO_;
     unsigned int VBO_;
     unsigned int EBO_;
+    glm::mat4 model_matrix_;
+    PoseProvider *pose_provider_;
     std::unique_ptr<Shader> shader_;
 };
