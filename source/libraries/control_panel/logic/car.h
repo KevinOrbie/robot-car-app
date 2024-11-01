@@ -21,6 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>          // GLSL Linear Algebra Library
 
 /* Custom C++ Libraries */
+#include "common/clock.h"
 #include "common/pose.h"
 #include "shader.h"
 
@@ -101,7 +102,7 @@ class CarModel {
 
     void update() {
         if (pose_provider_) {
-            Pose pose = pose_provider_->getPose(std::chrono::high_resolution_clock::now());
+            Pose pose = pose_provider_->getPose(common::now());
             model_matrix_ = glm::mat4(1.0f);
             model_matrix_ = glm::translate(model_matrix_, glm::vec3(pose.pos[0], pose.pos[1], pose.pos[2]));
         }

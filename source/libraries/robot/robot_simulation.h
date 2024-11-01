@@ -17,6 +17,7 @@
 
 /* Custom C++ Libraries */
 #include "common/input_sink.h"
+#include "common/clock.h"
 #include "common/pose.h"
 
 
@@ -26,32 +27,29 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
     enum class Throttle: uint8_t {STANDBY, FORWARD, REVERSE, BRAKE};
     enum class Direction: uint8_t {STRAIGHT, LEFT, RIGHT};
 
-    typedef std::chrono::time_point<std::chrono::high_resolution_clock> timestamp_t;
     typedef std::array<float,3> acc_t;
     typedef std::array<float,3> vel_t;
 
    public:
     RobotInputSimulation() {
-        last_update_timestamp_ = std::chrono::high_resolution_clock::now();
+        last_update_timestamp_ = common::now();
     }
 
     void advance(double timesdelta_seconds) {
         pose_WR_W_.translate(timesdelta_seconds * vel_W_[0], timesdelta_seconds * vel_W_[1], timesdelta_seconds * vel_W_[2]);
     }
 
-    Pose getPose(std::chrono::time_point<std::chrono::high_resolution_clock> request_timestamp) {
+    Pose getPose(timestamp_t timestamp) {
         const std::lock_guard<std::mutex> lock(pose_mutex_);
-        double timestep_seconds = std::chrono::duration_cast<std::chrono::microseconds>(request_timestamp - last_update_timestamp_).count() * 1e-6;
-        advance(timestep_seconds);
-        last_update_timestamp_ = request_timestamp;
+        advance(common::seconds(last_update_timestamp_, timestamp));
+        last_update_timestamp_ = timestamp;
         return pose_WR_W_;
     };
 
     void sink(Input input) {
-        timestamp_t input_timestamp = std::chrono::high_resolution_clock::now();
+        timestamp_t input_timestamp = common::now();
 
         const std::lock_guard<std::mutex> lock(pose_mutex_);
-        double timestep_seconds = std::chrono::duration_cast<std::chrono::microseconds>(input_timestamp - last_update_timestamp_).count() * 1e-6;
 
         /* Detect Control. */
         Direction direction = Direction::STRAIGHT;
@@ -85,13 +83,12 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
             vel_W_[0] = 0.0f;
         }
 
-        // TODO: 1) Simple cnst velocity on W system
         // TODO: 2) move to eigen for all vectors / rotations
         // TODO: 3) Use Acceleration?
         // TODO: 4) Add rotations
         // TODO: 5) Refine using actual robot measurments (via camera).
 
-        advance(timestep_seconds);
+        advance(common::seconds(last_update_timestamp_, input_timestamp));
         last_update_timestamp_ = input_timestamp;
     };
 

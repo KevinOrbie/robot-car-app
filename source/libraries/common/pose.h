@@ -14,10 +14,10 @@
 
 /* Standard C++ Libraries */
 #include <array>
-#include <chrono>
 
 /* Custom C++ Libraries */
 #include "logger.h"
+#include "clock.h"
 
 
 /* ========================== Classes ========================== */
@@ -57,5 +57,5 @@ class PoseProvider {
     PoseProvider& operator=(const PoseProvider& other)   = default;
 
     /* Interface */
-    virtual Pose getPose(std::chrono::time_point<std::chrono::high_resolution_clock> request_timestamp) = 0;
+    virtual Pose getPose(timestamp_t request_timestamp) = 0;
 };
