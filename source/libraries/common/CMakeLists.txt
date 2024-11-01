@@ -16,6 +16,7 @@ list(APPEND HEADER_FILES input.h)
 list(APPEND HEADER_FILES timer.h)
 list(APPEND HEADER_FILES clock.h)
 list(APPEND HEADER_FILES utils.h)
+list(APPEND HEADER_FILES pose.h)
 
 
 ## --------------------------- Config ----------------------------

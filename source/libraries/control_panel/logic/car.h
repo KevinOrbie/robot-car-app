@@ -12,7 +12,6 @@
 /* C/C++ Libraries */
 #include <memory>
 #include <vector>
-#include <chrono>
 
 /* Third Party Libraries */
 #include <glad/glad.h>
