@@ -24,25 +24,42 @@
 
 
 /* ========================== Classes ========================== */
-struct Pose {
-    typedef std::array<float,3> position_t;
+typedef Eigen::Vector3d position_t;
+typedef Eigen::Matrix3d rotation_t;
 
+typedef Eigen::Vector3d velocity_t;
+typedef Eigen::Vector3d acceleration_t;
+
+
+class Pose {
+   public:
     Pose() = default;
-    Pose(float x, float y, float z): pos{x, y, z} {};
-
-    void translate(float x, float y, float z) {
-        pos[0] += x;
-        pos[1] += y;
-        pos[2] += z;
-    };
     
+    Pose(position_t position): pos_(position) {};
+    Pose(rotation_t rotation): rot_(rotation) {};
+    Pose(position_t position, rotation_t rotation): pos_(position), rot_(rotation) {};
+    Pose(double x, double y, double z): pos_(x, y, z) {};
+
+    void translate(double x, double y, double z) {
+        pos_[0] += x;
+        pos_[1] += y;
+        pos_[2] += z;
+    };
+
+    void setPosition(position_t position) { pos_ = position; };
+    position_t getPosition() { return pos_; };
+    double x() { return pos_[0]; };
+    double y() { return pos_[1]; };
+    double z() { return pos_[2]; };
+
+    // TODO: overwrite multiplication
     Pose invert() { return {}; };
 
-    void setPosition();
-
-    position_t pos;
-    // TODO: rotation as eigen Rot matrix.
+   private:
+    position_t pos_;
+    rotation_t rot_;
 };
+
 
 class PoseProvider {
    public:
