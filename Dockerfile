@@ -31,6 +31,8 @@ RUN apt-get update && \
       libpostproc-dev \
       libswresample-dev \
       libswscale-dev \
+      ######### Eigen ##########
+      libeigen3-dev && \
       ##### MYNT-EYE-D-SDK #####
     #   libgtk-3-dev \
     #   libjpeg-dev \
@@ -53,15 +55,21 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
+## -------------------------------- Dev Dependencies ---------------------------------
+# Setup VSCode Reqs
+# TODO
+
+
+
 ## ------------------------------ MYNT-EYE Dependencies ------------------------------
 # Setup OpenCV Version 3.4.20
-RUN git clone https://github.com/opencv/opencv.git && \
-    cd opencv && \
-    git checkout tags/3.4.20 && \
-    mkdir _build && \
-    cd _build && \
-    cmake .. && \
-    make -j$(nproc) install
+# RUN git clone https://github.com/opencv/opencv.git && \
+#     cd opencv && \
+#     git checkout tags/3.4.20 && \
+#     mkdir _build && \
+#     cd _build && \
+#     cmake .. && \
+#     make -j$(nproc) install
 
 # Setup MYNT-EYE-D-SDK
 # NOTE: while it normall should build wihtout OpenCV, this is not the case, as they use 'fabs()', without including the <math.h> C-header.

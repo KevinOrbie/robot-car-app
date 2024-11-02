@@ -15,6 +15,9 @@
 /* Standard C++ Libraries */
 #include <array>
 
+/* Thirdparty C++ Libraries */
+#include <eigen3/Eigen/Dense>
+
 /* Custom C++ Libraries */
 #include "logger.h"
 #include "clock.h"

@@ -29,6 +29,9 @@ add_subdirectory(thirdparty/ffmpeg)
 # [v4l2] realtime video capture on Linux systems
 add_subdirectory(thirdparty/v4l2)
 
+# [Eigen] C++ template library for linear algebra
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 # [Threads] Default C++ Threads library
 find_package(Threads REQUIRED)
 
