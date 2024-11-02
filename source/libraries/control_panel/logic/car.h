@@ -23,6 +23,7 @@
 #include "common/clock.h"
 #include "common/pose.h"
 #include "shader.h"
+#include "utils.h"
 
 
 /* ========================== Classes ========================== */
@@ -102,8 +103,9 @@ class CarModel {
     void update() {
         if (pose_provider_) {
             Pose pose = pose_provider_->getPose(common::now());
-            model_matrix_ = glm::mat4(1.0f);
-            model_matrix_ = glm::translate(model_matrix_, glm::vec3(pose.x(), pose.y(), pose.z()));
+            // model_matrix_ = glm::mat4(1.0f);
+            // model_matrix_ = glm::translate(model_matrix_, glm::vec3(pose.x(), pose.y(), pose.z()));
+            model_matrix_ = utils::convert(pose.toMatrix());
         }
     }
 

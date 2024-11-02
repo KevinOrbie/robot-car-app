@@ -22,7 +22,7 @@ add_library(${LIB_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 ## Link External Libraries
-target_link_libraries(${LIB_NAME} PUBLIC glad glfw stb_image glm rca_common)
+target_link_libraries(${LIB_NAME} PUBLIC glad glfw stb_image glm rca_common Eigen3::Eigen)
 
 
 ## ------------------------- Installation -------------------------

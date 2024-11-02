@@ -26,6 +26,7 @@
 /* ========================== Classes ========================== */
 typedef Eigen::Vector3d position_t;
 typedef Eigen::Matrix3d rotation_t;
+typedef Eigen::Matrix4d transform_t;
 
 typedef Eigen::Vector3d velocity_t;
 typedef Eigen::Vector3d acceleration_t;
@@ -40,6 +41,7 @@ class Pose {
     Pose(position_t position, rotation_t rotation): pos_(position), rot_(rotation) {};
     Pose(double x, double y, double z): pos_(x, y, z) {};
 
+    void rotate() {};
     void translate(double x, double y, double z) {
         pos_[0] += x;
         pos_[1] += y;
@@ -52,12 +54,20 @@ class Pose {
     double y() { return pos_[1]; };
     double z() { return pos_[2]; };
 
-    // TODO: overwrite multiplication
-    Pose invert() { return {}; };
+    Pose inverse() { return {}; };
+    transform_t toMatrix() { 
+        transform_t transform = transform_t::Identity();
+        transform.block(0,0,3,3) = rot_;
+        transform.block(0,3,3,1) = pos_;
+        return transform; 
+    };
+
+    Pose operator*(const Pose &other) { return {}; };
+    position_t operator*(const position_t &other) { return {}; };
 
    private:
     position_t pos_;
-    rotation_t rot_;
+    rotation_t rot_ = rotation_t::Identity();
 };
 
 
