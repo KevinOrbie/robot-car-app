@@ -25,6 +25,7 @@ sudo docker run -it --rm \
 	--name rca_env \
 	--workdir /home/user/RCA \
 	--runtime=nvidia \
+    -v /.vscode/vscode-server:$HOME/.vscode-server \
 	-v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY -e XAUTHORITY -e NVIDIA_DRIVER_CAPABILITIES=all \
 	-h rca -v ${APP_ROOT}:/home/user/RCA \
 	rca:v1\

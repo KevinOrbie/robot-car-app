@@ -1,0 +1,3 @@
+// VSCode extention storage in dev container
+// Link: https://stackoverflow.com/questions/63354237/how-to-install-vs-code-extensions-in-a-dockerfile
+.vscode-server/** 

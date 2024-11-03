@@ -13,7 +13,7 @@
 // None
 
 /* Standard C++ Libraries */
-#include <array>
+// None
 
 /* Thirdparty C++ Libraries */
 #include <eigen3/Eigen/Dense>
