@@ -40,12 +40,16 @@ class InputSink {
 
 class InputSinkSplitter: public InputSink {
    public:
-    InputSinkSplitter(std::vector<InputSink*> sinks): sinks_(sinks) {};
+    InputSinkSplitter(std::vector<InputSink*> sinks = {}): sinks_(sinks) {};
     void sink(Input input) {
         for (InputSink *sink: sinks_) {
             sink->sink(input);
         }
     };
+
+    void add(InputSink* sink) {
+        sinks_.push_back(sink);
+    }
 
    private:
     std::vector<InputSink*> sinks_ = {};

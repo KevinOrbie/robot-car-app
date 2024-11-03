@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <thread>
+#include <vector>
 
 /* Custom C++ Libraries */
 #include "control_panel/control_panel.h"
@@ -142,22 +143,25 @@ int main(int argc, char *argv[]) {
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<FrameProvider> frame_provider = nullptr;
     std::unique_ptr<PoseProvider> pose_provider   = nullptr;
-    std::unique_ptr<InputSink> input_sink         = nullptr;
+
+    std::unique_ptr<InputSinkSplitter> input_sink = std::make_unique<InputSinkSplitter>();
+    std::unique_ptr<robot::RobotInputSimulation> simulation = std::make_unique<robot::RobotInputSimulation>();
+    std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
+    std::unique_ptr<remote::Robot> robot = nullptr;
 
     /* Setup & Start Input Sink. */
+    input_sink->add(simulation.get());
     if (enable_arduino) {
-        input_sink = std::make_unique<ArduinoDriver>();
-        dynamic_cast<ArduinoDriver*>(input_sink.get())->thread();
-    } else if(test_mode) {
-        input_sink = nullptr;
-    } else {
-        input_sink = std::make_unique<remote::Robot>(robot_ip, 2556);
-        dynamic_cast<remote::Robot*>(input_sink.get())->connect();
-        dynamic_cast<remote::Robot*>(input_sink.get())->thread();
+        arduino_driver = std::make_unique<ArduinoDriver>();
+        input_sink->add(arduino_driver.get());
+        arduino_driver->thread();
+    } else if(!test_mode) {
+        robot = std::make_unique<remote::Robot>(robot_ip, 2556);
+        input_sink->add(robot.get());
+        robot->connect();
+        robot->thread();
     }
-
-    std::unique_ptr<robot::RobotInputSimulation> simulation = std::make_unique<robot::RobotInputSimulation>();
-
+    
     /* Setup & Start Frame Provider. */
     if (use_camera) {
         try {
@@ -179,7 +183,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Setup & Start Controller. */
-    ControlPanel panel = {frame_provider.get(), simulation.get(), simulation.get()};
+    ControlPanel panel = {frame_provider.get(), input_sink.get(), simulation.get()};
     panel.start();  // Run in main thread
 
     /* Command threads to finnish. */

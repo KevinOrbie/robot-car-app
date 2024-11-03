@@ -155,11 +155,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         int16_t *accel = reinterpret_cast<int16_t*>(&msg.data[0]);
         setAcceleration(accel[0], accel[1], accel[2]);
-        LOGW("ACC: %f, %f, %f", 
-            static_cast<float>(accel[0]/ 32768.0f * 16.0f), 
-            static_cast<float>(accel[1]/ 32768.0f * 16.0f), 
-            static_cast<float>(accel[2]/ 32768.0f * 16.0f)
-        );
+        // LOGW("ACC: %f, %f, %f", 
+        //     static_cast<float>(accel[0]/ 32768.0f * 16.0f), 
+        //     static_cast<float>(accel[1]/ 32768.0f * 16.0f), 
+        //     static_cast<float>(accel[2]/ 32768.0f * 16.0f)
+        // );
         break;
     }
 
@@ -170,11 +170,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         int16_t *angle = reinterpret_cast<int16_t*>(&msg.data[0]);
         setAngle(angle[0], angle[1], angle[2]);
-        LOGW("ANGLE: %f, %f, %f", 
-            static_cast<float>(angle[0]/ 32768.0f * 180.0f), 
-            static_cast<float>(angle[1]/ 32768.0f * 180.0f), 
-            static_cast<float>(angle[2]/ 32768.0f * 180.0f)
-        );
+        // LOGW("ANGLE: %f, %f, %f", 
+        //     static_cast<float>(angle[0]/ 32768.0f * 180.0f), 
+        //     static_cast<float>(angle[1]/ 32768.0f * 180.0f), 
+        //     static_cast<float>(angle[2]/ 32768.0f * 180.0f)
+        // );
         break;
     }
 
@@ -185,11 +185,11 @@ void ArduinoDriver::handle(arduino::Message &msg) {
         }
         int16_t *gyro = reinterpret_cast<int16_t*>(&msg.data[0]);
         setGyro(gyro[0], gyro[1], gyro[2]);
-        LOGW("GYRO: %f, %f, %f", 
-            static_cast<float>(gyro[0]/ 32768.0f * 2000.0f), 
-            static_cast<float>(gyro[1]/ 32768.0f * 2000.0f), 
-            static_cast<float>(gyro[2]/ 32768.0f * 2000.0f)
-        );
+        // LOGW("GYRO: %f, %f, %f", 
+        //     static_cast<float>(gyro[0]/ 32768.0f * 2000.0f), 
+        //     static_cast<float>(gyro[1]/ 32768.0f * 2000.0f), 
+        //     static_cast<float>(gyro[2]/ 32768.0f * 2000.0f)
+        // );
         break;
     }
 
