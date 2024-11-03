@@ -20,6 +20,10 @@
 #include "common/clock.h"
 #include "common/pose.h"
 
+/* ========================= Constants ========================= */
+static const double LINEAR_VELOCITY = 0.39;   // m / s
+static const double ANGULAR_VELOCITY = 0.77;  // rad / s
+
 
 namespace robot {
 /* ========================== Classes ========================== */
@@ -74,17 +78,17 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
 
         /* Update Kinematics. */
         if (throttle == Throttle::FORWARD) {
-            vel_W_ = pose_WR_.UnitX() * 1.0f;
+            vel_W_ = pose_WR_.UnitX() * LINEAR_VELOCITY;
         } else if (throttle == Throttle::REVERSE) {
-            vel_W_ = pose_WR_.UnitX() * -1.0f;
+            vel_W_ = pose_WR_.UnitX() * -LINEAR_VELOCITY;
         } else {
             vel_W_ = {};
         }
 
         if (direction == Direction::LEFT) {
-            ang_vel_W_[1] = 1.0f;
+            ang_vel_W_[1] = ANGULAR_VELOCITY;
         } else if (direction == Direction::RIGHT) {
-            ang_vel_W_[1] = -1.0f;
+            ang_vel_W_[1] = -ANGULAR_VELOCITY;
         } else {
             ang_vel_W_ = {};
         }
