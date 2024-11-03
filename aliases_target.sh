@@ -45,16 +45,17 @@ rca-run() {
 }
 
 # ----------------- Testing -----------------
-alias rca-test-setup-build="(cd $APP_ROOT/ && cmake -B./_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING='ON')"
+alias rca-test-setup-build="(cd $APP_ROOT/ && cmake -S . -B./_build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING='ON')"
 alias rca-test-build-install="rca-build-install"
 
 rca-test-run() {
+    # NOTE: '--test-dir' only supported from CMake 3.20 (Ubuntu 18.04 has CMake 3.10)
     if [[ $# -eq 1 ]] ; then
         echo ">>> Running tests that match regex: '$1'"
-        (cd $APP_ROOT/ && ctest -R $1 -V --test-dir ./_build)
+        (cd $APP_ROOT/_build/ && ctest -R $1 -V)
     else
         echo ">>> Running all tests..."
-        (cd $APP_ROOT/ && ctest --test-dir ./_build)
+        (cd $APP_ROOT/_build/ && ctest)
     fi
 
     return 0

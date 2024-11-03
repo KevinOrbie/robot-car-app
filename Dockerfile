@@ -54,11 +54,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-
-## -------------------------------- Dev Dependencies ---------------------------------
-# Setup VSCode Reqs
-# TODO
-
+## ------------------------------------ GoogleTest -----------------------------------
+RUN apt-get update && apt-get install -y libgtest-dev build-essential cmake && \
+    cd /usr/src/googletest && \
+    cmake . && \
+    cmake --build . --target install
 
 
 ## ------------------------------ MYNT-EYE Dependencies ------------------------------

@@ -27,23 +27,21 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
     enum class Throttle: uint8_t {STANDBY, FORWARD, REVERSE, BRAKE};
     enum class Direction: uint8_t {STRAIGHT, LEFT, RIGHT};
 
-    typedef std::array<float,3> acc_t;
-    typedef std::array<float,3> vel_t;
-
    public:
     RobotInputSimulation() {
         last_update_timestamp_ = common::now();
     }
 
     void advance(double timesdelta_seconds) {
-        pose_WR_W_.translate(timesdelta_seconds * vel_W_[0], timesdelta_seconds * vel_W_[1], timesdelta_seconds * vel_W_[2]);
+        pose_WR_.translate(vel_W_ * timesdelta_seconds);
+        pose_WR_.rotate(ang_vel_W_ * timesdelta_seconds);
     }
 
     Pose getPose(timestamp_t timestamp) {
         const std::lock_guard<std::mutex> lock(pose_mutex_);
         advance(common::seconds(last_update_timestamp_, timestamp));
         last_update_timestamp_ = timestamp;
-        return pose_WR_W_;
+        return pose_WR_;
     };
 
     void sink(Input input) {
@@ -76,17 +74,20 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
 
         /* Update Kinematics. */
         if (throttle == Throttle::FORWARD) {
-            vel_W_[0] = 1.0f;
+            vel_W_ = pose_WR_.UnitX() * 1.0f;
         } else if (throttle == Throttle::REVERSE) {
-            vel_W_[0] = -1.0f;
+            vel_W_ = pose_WR_.UnitX() * -1.0f;
         } else {
-            vel_W_[0] = 0.0f;
+            vel_W_ = {};
         }
 
-        // TODO: 2) move to eigen for all vectors / rotations
-        // TODO: 3) Use Acceleration?
-        // TODO: 4) Add rotations
-        // TODO: 5) Refine using actual robot measurments (via camera).
+        if (direction == Direction::LEFT) {
+            ang_vel_W_[1] = 1.0f;
+        } else if (direction == Direction::RIGHT) {
+            ang_vel_W_[1] = -1.0f;
+        } else {
+            ang_vel_W_ = {};
+        }
 
         advance(common::seconds(last_update_timestamp_, input_timestamp));
         last_update_timestamp_ = input_timestamp;
@@ -95,9 +96,10 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
    private:
     timestamp_t last_update_timestamp_;
     std::mutex pose_mutex_;
-    Pose pose_WR_W_ = {};
-    acc_t acc_W_ = {}; // NOTE: does not remain constant, but depends on speed (maybe model some force m)
-    vel_t vel_W_ = {}; // NOTE: 
+
+    Pose pose_WR_ = {};
+    velocity_t vel_W_ = {};
+    angular_velocity_t ang_vel_W_ = {};
 };
 
 // TODO: add all new files to CMakeLists.txt file

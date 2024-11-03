@@ -39,7 +39,7 @@ class CarModel {
    public:
     CarModel(PoseProvider *pose_provider): pose_provider_(pose_provider) {
         model_matrix_ = glm::mat4(1.0f);
-
+        
         /* Setting up vertex data. */
         std::vector<glm::vec3> vertices = {
             glm::vec3( 0.1100f, 0.00f, -0.1025f),  // Bottom - left  - front
