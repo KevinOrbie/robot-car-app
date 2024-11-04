@@ -22,6 +22,7 @@
 
 /* Custom C++ Libraries */
 #include "common/logger.h"
+#include "common/clock.h"
 #include "shader.h"
 
 
@@ -32,7 +33,7 @@
  */
 class Trajectory {
    public:
-    Trajectory(PoseProvider *pose_provider){
+    Trajectory(PoseProvider *pose_provider): pose_provider_(pose_provider){
         /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/trajectory.vs", "./shaders/trajectory.fs");
 
@@ -58,6 +59,11 @@ class Trajectory {
     ~Trajectory() {
         glDeleteVertexArrays(1, &VAO_);
         glDeleteBuffers(1, &VBO_);
+    }
+
+    void update() {
+        position_t position = pose_provider_->getPose(common::now()).getPosition();
+        addPosition(position[0], position[1], position[2]);
     }
 
     void addPosition(float x, float y, float z) {
@@ -105,6 +111,7 @@ class Trajectory {
    private:
     unsigned int VAO_;
     unsigned int VBO_;
+    PoseProvider *pose_provider_;
     std::unique_ptr<Shader> shader_;
 
     std::vector<glm::vec3> vertices_ = {};

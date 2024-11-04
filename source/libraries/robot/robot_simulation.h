@@ -82,7 +82,7 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
         } else if (throttle == Throttle::REVERSE) {
             vel_W_ = pose_WR_.UnitX() * -LINEAR_VELOCITY;
         } else {
-            vel_W_ = {};
+            vel_W_ = {0.0, 0.0, 0.0};
         }
 
         if (direction == Direction::LEFT) {
@@ -90,7 +90,7 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
         } else if (direction == Direction::RIGHT) {
             ang_vel_W_[1] = -ANGULAR_VELOCITY;
         } else {
-            ang_vel_W_ = {};
+            ang_vel_W_ = {0.0, 0.0, 0.0};
         }
 
         advance(common::seconds(last_update_timestamp_, input_timestamp));

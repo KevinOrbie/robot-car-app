@@ -89,13 +89,15 @@ class Pose {
         rot_ = rotation * rot_;
     };
     void rotate(Eigen::Vector3d euler_angles) {
-        rotate(euler_angles[0], euler_angles[1], euler_angles[3]);
+        rotate(euler_angles[0], euler_angles[1], euler_angles[2]);
     };
 
     /**
      * @brief Get the unit axis of this Pose's Frame, expressed in reference frame coordinates.
      */
-    Eigen::Vector3d UnitX() { return rot_.block(0,0,3,1); };
+    Eigen::Vector3d UnitX() { 
+        return rot_.block(0,0,3,1); 
+    };
     Eigen::Vector3d UnitY() { return rot_.block(0,1,3,1); };
     Eigen::Vector3d UnitZ() { return rot_.block(0,2,3,1); };
 
@@ -143,6 +145,10 @@ class Pose {
     Pose operator+(const position_t &other) { 
         return Pose(getPosition() + other, getRotation()); 
     };
+
+    void print() {
+        LOGI("Pose: [%f, %f, %f], [%f, %f, %f]", x(), y(), z(), xrot(), yrot(), zrot());
+    }
 
    private:
     position_t pos_;
