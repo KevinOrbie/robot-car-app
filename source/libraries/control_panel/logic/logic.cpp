@@ -114,7 +114,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     timer += timedelta;
     if (timer > 0.3) {  // Update every 0.5 sec
         state->trajectory->update();
-        timer -= 0.5;
+        timer -= 0.3;
     }
 
     /* Forward Input to sink (optional). */
