@@ -102,11 +102,19 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
         // TODO: Maybe fix camera to move in a plane?
     }
 
-    if (input.keys[Button::LEFT].pressed  || 
-        input.keys[Button::RIGHT].pressed || 
-        input.keys[Button::UP].pressed    || 
-        input.keys[Button::DOWN].pressed) {
+    /* Update Trajectory. */
+    // if (input.keys[Button::LEFT].pressed  || 
+    //     input.keys[Button::RIGHT].pressed || 
+    //     input.keys[Button::UP].pressed    || 
+    //     input.keys[Button::DOWN].pressed) {
+    //     state->trajectory->update();
+    // }
+
+    static double timer = 0.0;
+    timer += timedelta;
+    if (timer > 0.3) {  // Update every 0.5 sec
         state->trajectory->update();
+        timer -= 0.5;
     }
 
     /* Forward Input to sink (optional). */

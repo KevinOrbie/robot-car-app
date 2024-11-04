@@ -63,7 +63,11 @@ class Trajectory {
 
     void update() {
         position_t position = pose_provider_->getPose(common::now()).getPosition();
-        addPosition(position[0], position[1], position[2]);
+        glm::vec3 glm_pos = {position[0], position[1], position[2]};
+        if (vertices_.empty() || glm_pos != vertices_.back()) {
+            // Only update with new position.
+            addPosition(position[0], position[1], position[2]);
+        }
     }
 
     void addPosition(float x, float y, float z) {
