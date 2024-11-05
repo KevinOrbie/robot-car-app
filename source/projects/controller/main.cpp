@@ -132,7 +132,6 @@ int main(int argc, char *argv[]) {
 
     if (test_mode) {
         robot_ip = "none";
-        use_camera = false;
         enable_arduino = false;
     }
     
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
     /* Setup & Start Frame Provider. */
     if (use_camera) {
         try {
-            frame_provider = std::make_unique<VideoCam>();
+            frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
             frame_provider->startStream();
         } catch (const std::runtime_error& error) {
             LOGW("No camera device found, running without framegrabber!");

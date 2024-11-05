@@ -17,10 +17,8 @@ out vec4 FragColor;
 /* ----------------------- Entry Point ----------------------- */
 void main()
 {
-    /* Display YUV directly */
+    // Display YUV as GREYSCALE
     // FragColor = vec4(texture(screenTexture, TexCoord).xxx, 1.0);
-    // FragColor = vec4(texture(screenTexture, TexCoord).yyy, 1.0);
-    // FragColor = vec4(texture(screenTexture, TexCoord).zzz, 1.0);
 
     // Convert YUV to RGB
     vec4 texColor = texture(screenTexture, TexCoord);

@@ -48,7 +48,7 @@ class VideoCam final: public FrameProvider {
 
     /* --------------- Function Declarations -------------- */
    public:
-    VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP);
+    VideoCam(CamType type=CamType::MYNT_EYE_STEREO, IO_Method io_method=IO_Method::MMAP, std::string device_name="/dev/video0");
     ~VideoCam();
     Frame getFrame(double curr_time, PixelFormat fmt) override;
     void startStream();

@@ -22,6 +22,7 @@
 #include "camera.h"
 
 /* Custom OpenGL Objects */
+#include "depth_image_cloud.h"
 #include "quad_screen.h"
 #include "trajectory.h"
 #include "grid.h"
@@ -49,6 +50,7 @@ struct AppState {
     std::unique_ptr<QuadScreen> screen = nullptr;
     std::unique_ptr<ShaderGrid2D> grid = nullptr;
     std::unique_ptr<Trajectory> trajectory = nullptr;
+    std::unique_ptr<DepthImageCloud> depth_cloud = nullptr;
     bool opengl_initialized = false;
 };
 

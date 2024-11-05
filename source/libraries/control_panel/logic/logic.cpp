@@ -41,6 +41,7 @@ void Application::glsetup() {
     LOGI("Initializing GL.");
 
     /* Initialize OpenGL Objects */
+    state->depth_cloud = std::make_unique<DepthImageCloud>();
     state->trajectory = std::make_unique<Trajectory>(pose_provider_);
     state->screen = std::make_unique<QuadScreen>();
     state->grid = std::make_unique<ShaderGrid2D>();
@@ -54,6 +55,7 @@ void Application::glsetup() {
 
 void Application::glcleanup() {
     /* Destory OpenGL Objects */
+    state->depth_cloud.release();
     state->trajectory.release();
     state->screen.release();
     state->grid.release();
@@ -118,7 +120,14 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     /* Load Image (optional) */
     if (frame_provider_) {
         Frame new_frame = frame_provider_->getFrame(state->time, PixelFormat::YUV);
-        state->screen->load_texture(
+        // state->screen->load_texture(
+        //     new_frame.image.getData(), 
+        //     new_frame.image.getWidth(), 
+        //     new_frame.image.getHeight(), 
+        //     GL_RGB
+        // );
+
+        state->depth_cloud->load_texture(
             new_frame.image.getData(), 
             new_frame.image.getWidth(), 
             new_frame.image.getHeight(), 
@@ -143,7 +152,9 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    state->screen->draw(10, 10, 16 * 2 * 30, 9 * 30, width, height);
+    glm::mat4 cloud_model = glm::mat4(1.0f);
+    state->depth_cloud->draw(cloud_model, view, projection);
+    state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
     state->car->draw(view, projection);

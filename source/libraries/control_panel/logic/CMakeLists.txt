@@ -1,5 +1,6 @@
 ## Update local values
 list(APPEND HEADER_FILES 
+  ${CMAKE_CURRENT_SOURCE_DIR}/depth_image_cloud.h 
   ${CMAKE_CURRENT_SOURCE_DIR}/quad_screen.h 
   ${CMAKE_CURRENT_SOURCE_DIR}/logic.h
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.h

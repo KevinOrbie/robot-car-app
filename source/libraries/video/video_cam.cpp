@@ -49,9 +49,7 @@ static int xioctl(int fh, int request, void *arg) {
 
 /* =============================== Classes =============================== */
 
-VideoCam::VideoCam(CamType type, IO_Method io_method): cam_type_(type), io_method_(io_method) {
-    device_name_ = "/dev/video0";
-
+VideoCam::VideoCam(CamType type, IO_Method io_method, std::string device_name): cam_type_(type), io_method_(io_method), device_name_(device_name) {
     /* ------------ Open Camera Device ------------ */
     struct stat st;
 
@@ -592,7 +590,7 @@ Frame VideoCam::getFrame(double curr_time, PixelFormat fmt){
     frame_data_.image.to(fmt);
 
     int poll_result = -1;
-    int poll_timeout_ms = 5000;
+    int poll_timeout_ms = 20000; // Max wait 20 seconds
     struct pollfd poll_fds;
 
     /* Setup Poll FD Settings */
@@ -662,8 +660,9 @@ Frame VideoCam::getFrame(double curr_time, PixelFormat fmt){
     return frame_data_;
 }
 
-void VideoCam::readFrame(unsigned int buffer_index){
+void VideoCam::readFrame(unsigned int buffer_index) {
     switch (cam_type_) {
+        case CamType::MYNT_EYE_SINGLE:
         case CamType::MYNT_EYE_STEREO:
         case CamType::ARKMICRO_WEBCAM: {
             /* Directly copy YUV422 to YUV422. */

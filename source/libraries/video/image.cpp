@@ -111,7 +111,7 @@ void Image::to(PixelFormat fmt) {
     /* Test if conversion is required. */
     if (fmt == format_) { return; }
 
-    LOGI("Converting from %d to %d", static_cast<int>(format_), static_cast<int>(fmt));
+    LOGI("Converting pixelformat from %d to %d", static_cast<int>(format_), static_cast<int>(fmt));
 
     /* Create Image copy in requested format. */
     Image new_image = Image(width_, height_, fmt);
