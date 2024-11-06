@@ -27,8 +27,8 @@
 
 
 /* ========================== Classes ========================== */
-Application::Application(FrameProvider* frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
-        frame_provider_(frame_provider), input_sink_(input_sink), pose_provider_(pose_provider) {
+Application::Application(FrameProvider *color_frame_provider, FrameProvider *depth_frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
+        color_frame_provider_(color_frame_provider), depth_frame_provider_(depth_frame_provider), input_sink_(input_sink), pose_provider_(pose_provider) {
     /* Initialize Application State. */
     state = std::make_unique<AppState>();
 
@@ -118,16 +118,20 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     }
 
     /* Load Image (optional) */
-    if (frame_provider_) {
-        Frame new_frame = frame_provider_->getFrame(state->time, PixelFormat::YUV);
-        // state->screen->load_texture(
-        //     new_frame.image.getData(), 
-        //     new_frame.image.getWidth(), 
-        //     new_frame.image.getHeight(), 
-        //     GL_RGB
-        // );
-
+    if (depth_frame_provider_) {
+        // NOTE: Depth image must be loaded first
+        Frame new_frame = depth_frame_provider_->getFrame(state->time, PixelFormat::YUV);
         state->depth_cloud->load_texture(
+            new_frame.image.getData(), 
+            new_frame.image.getWidth(), 
+            new_frame.image.getHeight(), 
+            GL_RGB
+        );
+    }
+
+    if (color_frame_provider_) {
+        Frame new_frame = color_frame_provider_->getFrame(state->time, PixelFormat::YUV);
+        state->screen->load_texture(
             new_frame.image.getData(), 
             new_frame.image.getWidth(), 
             new_frame.image.getHeight(), 
@@ -147,18 +151,17 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     Pose pose_WO = pose_provider_->getPose(common::now()); // Car Object Frame w.r.t. World Frame
     state->car->position(pose_WO);
 
+    position_t camera_offset_OC_O_ = {0.08f, 0.25f, 0.0f};
+    Pose pose_OC = Pose(camera_offset_OC_O_); // Camera Frame w.r.t. Car Object Frame
+    glm::mat4 cloud_model = utils::convert((pose_WO * pose_OC).toMatrix());  // Camera Frame w.r.t. World Frame
+
     /* Rendering */
     // Clear Screen
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    position_t camera_offset_OC_O_ = {0.08f, 0.25f, 0.0f};
-    Pose pose_OC = Pose(camera_offset_OC_O_); // Camera Frame w.r.t. Car Object Frame
-
-    glm::mat4 cloud_model = utils::convert((pose_WO * pose_OC).toMatrix());  // Camera Frame w.r.t. World Frame
     state->depth_cloud->draw(cloud_model, view, projection);
-
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);

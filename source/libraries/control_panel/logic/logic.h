@@ -57,7 +57,7 @@ struct AppState {
 
 class Application {
    public:
-    Application(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
+    Application(FrameProvider *color_frame_provider=nullptr, FrameProvider *depth_frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
 
     void glsetup();
     void glcleanup();
@@ -66,7 +66,8 @@ class Application {
 
    private:
     std::unique_ptr<AppState> state = nullptr;
-    FrameProvider *frame_provider_  = nullptr;
+    FrameProvider *color_frame_provider_  = nullptr;
+    FrameProvider *depth_frame_provider_  = nullptr;
     PoseProvider *pose_provider_    = nullptr;
     InputSink *input_sink_          = nullptr;
 };

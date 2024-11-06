@@ -29,7 +29,7 @@
 /* ========================== Classes ========================== */
 class ControlPanel final: public Looper {
    public:
-    ControlPanel(FrameProvider *frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
+    ControlPanel(FrameProvider *color_frame_provider=nullptr, FrameProvider *depth_frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
 
     void iteration() override;
 

@@ -599,7 +599,7 @@ Frame VideoCam::getFrame(double curr_time, PixelFormat fmt){
 
     while (true) {
         /* Block for I/O operations. */
-        poll_result = poll(&poll_fds, 1, poll_timeout_ms);
+        poll_result = poll(&poll_fds, 1, poll_timeout_ms);  // Blocked here ???
 
         /* Poll() returned errors. */
         if (poll_result == -1) {

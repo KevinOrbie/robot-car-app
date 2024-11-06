@@ -140,7 +140,8 @@ int main(int argc, char *argv[]) {
     summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino, test_mode);
 
     /* ---------------- Setup & Run System ---------------- */
-    std::unique_ptr<FrameProvider> frame_provider = nullptr;
+    std::unique_ptr<FrameProvider> color_frame_provider = nullptr;
+    std::unique_ptr<FrameProvider> depth_frame_provider = nullptr;
     std::unique_ptr<PoseProvider> pose_provider   = nullptr;
 
     std::unique_ptr<InputSinkSplitter> input_sink = std::make_unique<InputSinkSplitter>();
@@ -164,25 +165,28 @@ int main(int argc, char *argv[]) {
     /* Setup & Start Frame Provider. */
     if (use_camera) {
         try {
-            frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
-            frame_provider->startStream();
+            depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
+            depth_frame_provider->startStream();
+            color_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video0");
+            color_frame_provider->startStream();
         } catch (const std::runtime_error& error) {
-            LOGW("No camera device found, running without framegrabber!");
-            frame_provider = nullptr;
+            LOGW("No camera device found, running without framegrabbers!");
+            color_frame_provider = nullptr;
+            depth_frame_provider = nullptr;
         }
     } else if (use_video_file) {
-        frame_provider = std::make_unique<VideoFile>(video_file);
-        frame_provider->startStream();
+        color_frame_provider = std::make_unique<VideoFile>(video_file);
+        color_frame_provider->startStream();
     } else if (test_mode) {
-        frame_provider = nullptr;
+        color_frame_provider = nullptr;
     } else {
-        frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
-        frame_provider->startStream();
-        dynamic_cast<VideoReciever*>(frame_provider.get())->thread();
+        color_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
+        color_frame_provider->startStream();
+        dynamic_cast<VideoReciever*>(color_frame_provider.get())->thread();
     }
 
     /* Setup & Start Controller. */
-    ControlPanel panel = {frame_provider.get(), input_sink.get(), simulation.get()};
+    ControlPanel panel = {color_frame_provider.get(), depth_frame_provider.get(), input_sink.get(), simulation.get()};
     panel.start();  // Run in main thread
 
     /* Command threads to finnish. */
@@ -193,7 +197,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!use_camera && !use_video_file) {
-        dynamic_cast<VideoReciever*>(frame_provider.get())->stop();
+        dynamic_cast<VideoReciever*>(color_frame_provider.get())->stop();
     }
 
     return 0;
