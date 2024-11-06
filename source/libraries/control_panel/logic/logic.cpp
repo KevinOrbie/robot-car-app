@@ -33,7 +33,7 @@ Application::Application(FrameProvider* frame_provider, InputSink *input_sink, P
     state = std::make_unique<AppState>();
 
     /* Setup Start Camera. */
-    state->camera = std::make_unique<Camera>(glm::vec3(0.0f, 3.0f, 2.0f));
+    state->camera = std::make_unique<Camera>(glm::vec3(-2.0f, 2.0f, 0.0f));
     state->camera->lookAt(0.0f, 0.0f, 0.0f);
 };
 
@@ -45,7 +45,7 @@ void Application::glsetup() {
     state->trajectory = std::make_unique<Trajectory>(pose_provider_);
     state->screen = std::make_unique<QuadScreen>();
     state->grid = std::make_unique<ShaderGrid2D>();
-    state->car = std::make_unique<CarModel>(pose_provider_);
+    state->car = std::make_unique<CarModel>();
 
     /* Initialize OpenGL */
     glEnable(GL_DEPTH_TEST);
@@ -144,7 +144,8 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     );
 
     /* Update Objects. */
-    state->car->update();
+    Pose pose_WO = pose_provider_->getPose(common::now()); // Car Object Frame w.r.t. World Frame
+    state->car->position(pose_WO);
 
     /* Rendering */
     // Clear Screen
@@ -152,8 +153,12 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    glm::mat4 cloud_model = glm::mat4(1.0f);
+    position_t camera_offset_OC_O_ = {0.08f, 0.25f, 0.0f};
+    Pose pose_OC = Pose(camera_offset_OC_O_); // Camera Frame w.r.t. Car Object Frame
+
+    glm::mat4 cloud_model = utils::convert((pose_WO * pose_OC).toMatrix());  // Camera Frame w.r.t. World Frame
     state->depth_cloud->draw(cloud_model, view, projection);
+
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);

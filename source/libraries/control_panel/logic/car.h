@@ -37,7 +37,7 @@
  */
 class CarModel {
    public:
-    CarModel(PoseProvider *pose_provider): pose_provider_(pose_provider) {
+    CarModel() {
         model_matrix_ = glm::mat4(1.0f);
         
         /* Setting up vertex data. */
@@ -100,13 +100,8 @@ class CarModel {
         glDeleteBuffers(1, &EBO_);
     };
 
-    void update() {
-        if (pose_provider_) {
-            Pose pose = pose_provider_->getPose(common::now());
-            // model_matrix_ = glm::mat4(1.0f);
-            // model_matrix_ = glm::translate(model_matrix_, glm::vec3(pose.x(), pose.y(), pose.z()));
-            model_matrix_ = utils::convert(pose.toMatrix());
-        }
+    void position(Pose pose) {
+        model_matrix_ = utils::convert(pose.toMatrix());
     }
 
     /**
@@ -131,6 +126,5 @@ class CarModel {
     unsigned int VBO_;
     unsigned int EBO_;
     glm::mat4 model_matrix_;
-    PoseProvider *pose_provider_;
     std::unique_ptr<Shader> shader_;
 };

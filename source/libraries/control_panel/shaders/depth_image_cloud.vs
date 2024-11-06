@@ -29,8 +29,13 @@ void main()
     float v = (floor(float(gl_InstanceID) / float(image_width)) / float(image_height));
     imageCoord = vec2(u, v);
 
-    float depth = texture(depthTexture, imageCoord).x;
-    vec3 point_pos = vec3(u, 1.0 - v, depth);
+    vec3 point_pos = vec3(0.00245f, (1.0 - v), u);
+    point_pos.y = (point_pos.y - 0.5f) * 0.00135805717f;  // Rescale to [-0.5, 0.5]
+    point_pos.z = (point_pos.z - 0.5f) * 0.00319290216f;  // Rescale to [-0.5, 0.5]
+    point_pos = normalize(point_pos);
+
+    float depth = 1.0 - texture(depthTexture, imageCoord).x;
+    point_pos = point_pos * depth;
 
     gl_Position = projection * view * model * vec4(point_pos, 1.0);
 }

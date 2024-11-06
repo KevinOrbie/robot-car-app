@@ -82,9 +82,11 @@ public:
         if (Front.x == 0 && Front.z == 0) {
             Pitch = (Front.y > 0) ? 89.0f : -89.0f;
         } else {
-            Pitch = glm::degrees(atan(Front.y/((abs(Front.x) > abs(Front.z)) ? Front.x : Front.z)));
+            Pitch = glm::degrees(atan(abs(Front.y)/((abs(Front.x) > abs(Front.z)) ? Front.x : Front.z)));
             Pitch = Pitch * ((Front.y > 0) ? 1 : -1);
         }
+
+        updateCameraVectors();
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix

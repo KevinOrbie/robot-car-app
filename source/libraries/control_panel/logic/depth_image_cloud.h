@@ -93,6 +93,8 @@ class DepthImageCloud {
         /* Set texture. */
         shader_->setInt("image_width", image_width_);
         shader_->setInt("image_height", image_height_);
+        shader_->setInt("plane_width", image_width_);
+        shader_->setInt("plane_height", image_height_);
 
         glActiveTexture(GL_TEXTURE0);
         shader_->setInt("depthTexture", 0);
@@ -112,4 +114,9 @@ class DepthImageCloud {
 
     int image_width_ = 0;
     int image_height_ = 0;
+
+    const float baseline_ = 0.120f;
+    const float focus_length_ = 0.00245f;
+    const float view_angle_vertical_ = 58.0f;
+    const float view_angle_horizontal_ = 105.0f;
 };
