@@ -161,7 +161,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    state->depth_cloud->draw(cloud_model, view, projection);
+    state->depth_cloud->draw(cloud_model, view, projection, state->screen->texture_);
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);

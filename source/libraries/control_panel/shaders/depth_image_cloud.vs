@@ -32,9 +32,11 @@ void main()
     vec3 point_pos = vec3(0.00245f, (1.0 - v), u);
     point_pos.y = (point_pos.y - 0.5f) * 0.00135805717f;  // Rescale to [-0.5, 0.5]
     point_pos.z = (point_pos.z - 0.5f) * 0.00319290216f;  // Rescale to [-0.5, 0.5]
-    point_pos = normalize(point_pos);
 
     float depth = 1.0 - texture(depthTexture, imageCoord).x;
+    depth = depth * length(point_pos) / 0.00245f;  // Get the depth orthogonal to the focal plane
+
+    point_pos = normalize(point_pos);
     point_pos = point_pos * depth;
 
     gl_Position = projection * view * model * vec4(point_pos, 1.0);

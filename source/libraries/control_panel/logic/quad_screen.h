@@ -131,7 +131,7 @@ class QuadScreen {
         draw(1, 1, 0, 0, 1, 1);
     }
 
-   private:
+   public:
     std::unique_ptr<Shader> shader_  = nullptr;
     unsigned int texture_;
     unsigned int VAO_;
