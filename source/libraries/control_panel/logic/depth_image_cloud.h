@@ -82,7 +82,7 @@ class DepthImageCloud {
         }
     }
 
-    void draw(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection, unsigned int color_texture) {
+    void draw(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection, unsigned int color_texture=33) {
         shader_->use();
 
         /* Apply transforms. */
@@ -100,9 +100,11 @@ class DepthImageCloud {
         shader_->setInt("depthTexture", 0);
         glBindTexture(GL_TEXTURE_2D, depth_texture_);
 
-        glActiveTexture(GL_TEXTURE0 + 1);
-        shader_->setInt("colorTexture", 1);
-        glBindTexture(GL_TEXTURE_2D, color_texture);
+        if (color_texture <= 32) {
+            glActiveTexture(GL_TEXTURE0 + 1);
+            shader_->setInt("colorTexture", 1);
+            glBindTexture(GL_TEXTURE_2D, color_texture);
+        }
 
         /* Draw quad triangles. */
         glBindVertexArray(VAO_);
