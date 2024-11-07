@@ -36,6 +36,11 @@ void Remote::thread() {
     message_handler_->thread();
 };
 
+void Remote::start() {
+    server::Server::thread();
+    message_handler_->start();
+};
+
 void Remote::stop() {
     LOGI("Stopping Remote!");
     server::Server::stop();

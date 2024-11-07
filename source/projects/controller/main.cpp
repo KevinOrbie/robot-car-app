@@ -180,8 +180,11 @@ int main(int argc, char *argv[]) {
     } else if (test_mode) {
         color_frame_provider = nullptr;
     } else {
+        depth_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8998");
+        depth_frame_provider->startStream();
         color_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
         color_frame_provider->startStream();
+        dynamic_cast<VideoReciever*>(depth_frame_provider.get())->thread();
         dynamic_cast<VideoReciever*>(color_frame_provider.get())->thread();
     }
 

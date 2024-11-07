@@ -31,6 +31,7 @@ class Remote final: public server::Server {
     /* Looper Interface. */
     void iteration() override;
     void thread() override;
+    void start();
     void stop() override;
 
    private:

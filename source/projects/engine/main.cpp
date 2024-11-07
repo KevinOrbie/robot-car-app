@@ -125,7 +125,8 @@ int main(int argc, char *argv[]) {
 
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
-    std::unique_ptr<FrameProvider> frame_provider = nullptr;
+    std::unique_ptr<FrameProvider> color_frame_provider = nullptr;
+    std::unique_ptr<FrameProvider> depth_frame_provider = nullptr;
 
     /* Setup & Start Arduino Driver. */
     if (enable_arduino) {
@@ -135,21 +136,31 @@ int main(int argc, char *argv[]) {
     
     /* Setup & Start Frame Provider. */
     if (use_camera) {
-        frame_provider = std::make_unique<VideoCam>();
-        frame_provider->startStream();
+        try {
+            depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
+            depth_frame_provider->startStream();
+            color_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video0");
+            color_frame_provider->startStream();
+        } catch (const std::runtime_error& error) {
+            LOGW("No camera device found, running without framegrabbers!");
+            color_frame_provider = nullptr;
+            depth_frame_provider = nullptr;
+        }
     } else if (use_video_file) {
-        frame_provider = std::make_unique<VideoFile>(video_file);
-        frame_provider->startStream();
+        color_frame_provider = std::make_unique<VideoFile>(video_file);
+        color_frame_provider->startStream();
     }
+
+    /* Setup Video Transmitters. */
+    VideoTransmitter depth_frame_transmitter = {"udp://" + remote_ip + ":8998", depth_frame_provider.get()};
+    VideoTransmitter color_frame_transmitter = {"udp://" + remote_ip + ":8999", color_frame_provider.get()};
+    depth_frame_transmitter.thread();
+    color_frame_transmitter.thread();
 
     /* Setup LAN connection. */
     robot::Remote remote = {2556, arduino_driver.get()};
     remote.connect();
-    remote.thread();
-
-    /* Setup Video Transmitter. */
-    VideoTransmitter transmitter = {"udp://" + remote_ip + ":8999", frame_provider.get()};
-    transmitter.start();  // Run in local thread.
+    remote.start();
 
     /* Command threads to finnish. */
     remote.stop();

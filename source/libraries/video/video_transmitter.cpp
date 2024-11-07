@@ -70,7 +70,7 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     /* Fill the CODEC context. */
     ptr_codec_context->codec_id = AV_CODEC_ID_H264;
     ptr_codec_context->bit_rate = 1000000;  // 1 Mbps
-    ptr_codec_context->width = 2560;
+    ptr_codec_context->width = 1280;
     ptr_codec_context->height = 720;
     ptr_codec_context->time_base = AVRational{1, 30};
     ptr_codec_context->framerate = AVRational{30, 1};
