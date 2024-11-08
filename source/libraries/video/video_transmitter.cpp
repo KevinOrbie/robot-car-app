@@ -127,8 +127,9 @@ VideoTransmitter::VideoTransmitter(std::string const& address, FrameProvider *fr
     if (ptr_codec_context->codec_id == AV_CODEC_ID_H264) {
         // av_dict_set(&ptr_codec_opts, "profile", "high", 0);  // Only supported with YUV420P
         av_dict_set(&ptr_codec_opts, "profile", "high422", 0);
-        av_dict_set(&ptr_codec_opts, "preset", "veryfast", 0);  // ultrafast, superfast, veryfast, faster, fast, medium (default), slow, veryslow
+        av_dict_set(&ptr_codec_opts, "preset", "ultrafast", 0);  // ultrafast, superfast, veryfast, faster, fast, medium (default), slow, veryslow
         av_dict_set(&ptr_codec_opts, "tune", "zerolatency", 0);
+        // av_dict_set(&ptr_codec_opts, "crf", "1", 0);  // Constant Rate Factor: [0, 51]
         av_dict_set(&ptr_codec_opts, "x264-params", "keyint=30", 0);
     }
 

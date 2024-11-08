@@ -149,8 +149,11 @@ VideoReciever::VideoReciever(std::string const& address): address_(address){
     ptr_frame->height = ptr_codec_context->height;
 
     /* Allocate frame data (data buffer). */
-    if (av_frame_get_buffer(ptr_frame, 0) < 0) {
-        LOGE("Failed to allocate memory for AVFrame data.");
+    res = av_frame_get_buffer(ptr_frame, 0);
+    if (res < 0) {
+        char error_str[256];
+        av_strerror(res, error_str, 256);
+        LOGE("Failed to allocate memory for AVFrame data: %s", error_str);
         throw std::runtime_error("Failed to allocate memory for AVFrame data");
     }
     av_frame_make_writable(ptr_frame);
