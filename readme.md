@@ -1,5 +1,5 @@
 # Robotic Car Application
-A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on target robot code and a custom, low-latency, OpenGL based GUI to control / monitor the robot remotely.
+A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on-target robot code and a custom, low-latency, OpenGL based GUI to control / monitor the robot remotely.
 
 ![Remote Control GUI](./assets/images/1024x512.png "Remote Control GUI")
 
@@ -32,7 +32,7 @@ Code to add to Desktop `.bashrc`:
 ############# RCA #############
 HOST=desktop
 if [ -f <CORRECT_PATH>/RCA/aliases.sh ]; then
-    source <CORRECT_PATH>/RCA/aliases.sh
+    source <CORRECT_PATH>/RCA/aliases_host.sh
 fi
 ############# RCA #############
 ```
@@ -43,7 +43,7 @@ Code to add to Robot `.bashrc`:
 HOST=robot
 APP_ROOT=~/RCA
 if [ -f ~/RCA/aliases.sh ]; then
-    source ~/RCA/aliases.sh
+    source ~/RCA/aliases_target.sh
 fi
 ############# RCA #############
 ```
