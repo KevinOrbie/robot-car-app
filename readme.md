@@ -49,7 +49,7 @@ fi
 ```
 
 ## Build
-If not yet sourced in '.bashrc', source the `aliases.sh` file for this shell session.
+If not yet sourced in `.bashrc`, source the `aliases.sh` file for this shell session.
 ```shell
 source alias.sh
 ```
@@ -89,6 +89,20 @@ rca-run controller
 
 For more information, use the `-h` option.
 
+### Unit Tests
+```shell
+# Build & Install
+rca-test-setup-build
+rca-test-build-install
+
+# Run all tests
+rca-test-run
+
+# Run tests that match regex
+rca-test-run <regex>
+```
+
+
 ## Custom Built Car
 
 ![Robotic Car](./assets/images/1024x512.png "Custom Built Car")
@@ -118,4 +132,4 @@ For more information, use the `-h` option.
 | Angled USB A/B connector          | /                          |
 
 ## Project Layout
-
+TODO
