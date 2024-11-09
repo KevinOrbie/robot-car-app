@@ -1,7 +1,7 @@
 # Third Party Libraries
 Below, we describe how to obtain the required libraries for this project.
 
-## Docker
+## Using Docker
 If you have docker installed, you can build and run the code in a Docker container built using the provided `Dockerfile`:
 ```shell
 # Build the docker file
@@ -33,11 +33,11 @@ rca-docker-stop     # Stop the running RCA container
 rca-docker-exec     # Connect to the running RCA container in the current shell
 ```
 
-<span style="color:gold">WARNING</span>: Due to legacy reasons, not all the libraries required to run the GUI are included in the Docker Image. If you want to run the GUI Application, you will need to install the following libraries manually anyway (see related sections below):
+<span style="color:gold">WARNING</span>: Due to legacy reasons, not all the libraries required to run the GUI are included in the Docker Image. If you want to run the GUI Application, you will need to install the following libraries manually (see related sections below):
 - [GLFW](#glfw-ubuntu-2404)
 - [GLM](#glm)
 
-## Without Docker
+## Manually Installing Libraries
 If you want to run the code without docker, directly on your development device, you will need to install all the dependencies as described below.
 
 ### CMake (Ubuntu 18.04)
