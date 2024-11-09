@@ -2,12 +2,16 @@
 Below, we describe how to obtain the required libraries for this project.
 
 ## Using Docker
+<span style="color:gold">WARNING</span>: Due to legacy reasons, not all the libraries required to run the GUI are included in the Docker Image. If you want to run the GUI Application, you will need to install the following libraries manually (see related sections below):
+- [GLFW](#glfw-ubuntu-2404)
+- [GLM](#glm)
+
 If you have docker installed, you can build and run the code in a Docker container built using the provided `Dockerfile`:
 ```shell
-# Build the docker file
+# Build the docker image
 docker build -f </path/to/Dockerfile> -t rca:v1 </path/to/project/root/>
 
-# Run the RCA container (in the background)
+# Run the RCA image (in the background)
 docker run -it --rm \
     --detach \
 	--gpus all \
@@ -21,7 +25,7 @@ docker run -it --rm \
 	-h rca -v </path/to/project/root/>:/home/user/RCA \
 	rca:v1
 
-# Connect to the running container
+# Connect to the running RCA container
 docker exec -it -e 'TERM=xterm-256color' rca_env bash
 ```
 
@@ -32,10 +36,6 @@ rca-docker-run      # Start an RCA container in the background
 rca-docker-stop     # Stop the running RCA container
 rca-docker-exec     # Connect to the running RCA container in the current shell
 ```
-
-<span style="color:gold">WARNING</span>: Due to legacy reasons, not all the libraries required to run the GUI are included in the Docker Image. If you want to run the GUI Application, you will need to install the following libraries manually (see related sections below):
-- [GLFW](#glfw-ubuntu-2404)
-- [GLM](#glm)
 
 ## Manually Installing Libraries
 If you want to run the code without docker, directly on your development device, you will need to install all the dependencies as described below.
