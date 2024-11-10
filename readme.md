@@ -5,8 +5,8 @@ A C++ software suite to control and monitor a custom-built miniature vision-base
 
 ## Highlights
 - Tested on Linux 18.04 LTS
-- Low-latency visualization of remote camera stream
-- Low-latency vision-based depth estimation & visualization
+- Low-latency visualization of remote camera stream (via ffmpeg)
+- 3D pointcloud visualization (from stereo depth estimation)
 - Real-time user drive controls
 
 ## State of project
@@ -18,6 +18,9 @@ Some ideas I would have implemented if I had more time:
 - Track point cloud accross time, and build 3D mesh of environment.
 - Do 2D trajectory optimization to calculate trajectory to target location commanded by user.
 - Setup CI pipeline to make sure code does not break or result in worse performance.
+- Improve code coverage for the unit tests
+- Add integration tests
+- Add regression tests
 
 
 ## Installation & Setup
