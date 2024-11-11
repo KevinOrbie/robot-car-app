@@ -108,7 +108,8 @@ rca-test-run <regex>
 
 ## Custom Built Car
 
-![Robotic Car](./assets/images/1024x512.png "Custom Built Car")
+![Robotic Car](./assets/images/robot_views.png "Custom Built Car")
+![Connection Diagram](./assets/images/connection_diagram.png "Connection Diagram")
 
 | Component Name                    | Size                       |
 | --------------------------------- | -------------------------- |
