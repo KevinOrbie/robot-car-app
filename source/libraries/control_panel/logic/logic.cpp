@@ -145,6 +145,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     }
     
     if (input.keys[Button::T].pressed) {
+        LOGI("Camera moved to top view.");
         state->camera->viewFrom(0.0f, 5.0f, 0.0f);
         state->camera->lookAt(0.0f, 0.0f, 0.0f);
         // TODO: Maybe fix camera to move in a plane?
@@ -152,6 +153,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
 
     if (input.keys[Button::F].pressed) {
         state->camera_follow = !state->camera_follow;
+        LOGI("Camera robot follow-mode %s.", (state->camera_follow) ? "enabled": "disabled");
     }
 
     /* Update Trajectory. */

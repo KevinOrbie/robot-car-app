@@ -77,12 +77,8 @@ public:
             Yaw = (Front.z > 0) ? 90.0f : -90.0f;
         } else {
             Yaw = glm::degrees(atan(Front.z/abs(Front.x)));  // Limited to +- 90
-            LOGW("Yaw: %f", Yaw);
             if (Front.x < 0) {
-                LOGW("Yaw Added: %f", (Front.z > 0) ? 180.0f : -180.0f);  // TODO: Remove
                 Yaw = ((Front.z > 0) ? 180.0f : -180.0f) - Yaw;
-            } else {
-                LOGW("Yaw Added: %f", 0.0);
             }
         }
         
