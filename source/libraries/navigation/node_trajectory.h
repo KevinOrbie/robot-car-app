@@ -21,7 +21,7 @@
 /* =========================== Class =========================== */
 class NodeTrajectory {
    public:
-    NodeTrajectory(std::deque<position_t> nodes={}): nodes_(nodes) {};
+    NodeTrajectory(std::deque<position_t> nodes={}, bool closed=true): nodes_(nodes), closed_(closed) {};
 
     position_t closestNode(position_t curr_pos) {
         position_t closest_node;
@@ -38,11 +38,30 @@ class NodeTrajectory {
         return closest_node;
     }
 
-    position_t nextNode(position_t) {
-        return {};
+    position_t nextNode(position_t curr_pos) {
+        /* Handle Exceptions. */
+        if (nodes_.empty()) {
+            return {};
+        } 
+        
+        position_t target_node = nodes_[next_node_index_];
+        double node_distance = (target_node - curr_pos).norm();
+
+        if (node_distance < POSITION_TOLERANCE) {
+            if (next_node_index_ < static_cast<int>(nodes_.size()) - 1) {
+                next_node_index_++;
+            } else if (closed_) {
+                next_node_index_ = 0;
+            }
+        }
+        
+        return nodes_[next_node_index_];
     }
 
    private:
     std::deque<position_t> nodes_ = {};
+    int next_node_index_ = 0;
+    bool closed_ = true;
+    const double POSITION_TOLERANCE = 0.01; // 1 cm
 };
 

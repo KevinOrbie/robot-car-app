@@ -34,7 +34,7 @@ class TrajectoryFollower: public InputSource {
 
         Pose pose_WOcurr = pose_provider_->getPose(common::now());
         position_t pos_WOcurr_W = pose_WOcurr.getPosition();
-        position_t pos_WOnext_W = trajectory_.closestNode(pos_WOcurr_W);
+        position_t pos_WOnext_W = trajectory_.nextNode(pos_WOcurr_W);
 
         position_t pos_WFront_W = pose_WOcurr.UnitX();
         position_t pos_OcOn_W = pos_WOnext_W - pos_WOcurr_W;  // Direction (curr -> next)
@@ -70,9 +70,9 @@ class TrajectoryFollower: public InputSource {
 
    private:
     /**
-     * @brief Returns an angle in the [-PI, PI] range, where a positive angle is to the left.
+     * @brief Returns an angle in the [-PI, PI] range, where a positive angle is a rotation to the left.
      */
-    double getYAngle(Eigen::Vector3d vec1, Eigen::Vector3d vec2) {
+    static double getYAngle(Eigen::Vector3d vec1, Eigen::Vector3d vec2) {
         /* Project to X-Z plane. */
         vec1[1] = 0;
         vec2[1] = 0;
@@ -102,6 +102,6 @@ class TrajectoryFollower: public InputSource {
     NodeTrajectory trajectory_ = {{}};
 
     const double ROTATION_TOLERANCE = 0.0174533 * 2; // 2 Degrees
-    const double POSITION_TOLERANCE = 0.02;          // 2 cm
+    const double POSITION_TOLERANCE = 0.005;          // 2 cm
 };
 

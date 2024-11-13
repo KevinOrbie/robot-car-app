@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
     std::unique_ptr<remote::Robot> robot = nullptr;
 
-    NodeTrajectory trajectory = {{{2, 0, 0}}};
+    NodeTrajectory trajectory = {{{2, 0, 0}, {2, 0, 2}, {0, 0, 2}}};
     std::unique_ptr<TrajectoryFollower> trajectory_follower = std::make_unique<TrajectoryFollower>(simulation.get(), trajectory);
 
     /* Setup & Start Input Sink. */
