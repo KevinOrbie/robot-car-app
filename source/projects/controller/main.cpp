@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
     std::unique_ptr<remote::Robot> robot = nullptr;
 
-    NodeTrajectory trajectory = {{{2, 0, 0}, {2, 0, 2}, {0, 0, 2}}};
+    NodeTrajectory trajectory = {{{0, 0, 0}, {0.9, 0, 0}, {0.9, 0, -0.6}, {0, 0, -0.6}}, false};
     std::unique_ptr<TrajectoryFollower> trajectory_follower = std::make_unique<TrajectoryFollower>(simulation.get(), trajectory);
 
     /* Setup & Start Input Sink. */
@@ -184,11 +184,11 @@ int main(int argc, char *argv[]) {
     } else if (test_mode) {
         color_frame_provider = nullptr;
     } else {
-        depth_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8998");
-        depth_frame_provider->startStream();
+        // depth_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8998");
+        // depth_frame_provider->startStream();
         color_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
         color_frame_provider->startStream();
-        dynamic_cast<VideoReciever*>(depth_frame_provider.get())->thread();
+        // dynamic_cast<VideoReciever*>(depth_frame_provider.get())->thread();
         dynamic_cast<VideoReciever*>(color_frame_provider.get())->thread();
     }
 

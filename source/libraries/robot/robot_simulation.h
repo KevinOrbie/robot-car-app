@@ -22,7 +22,7 @@
 
 /* ========================= Constants ========================= */
 static const double LINEAR_VELOCITY = 0.39;   // m / s
-static const double ANGULAR_VELOCITY = 0.77;  // rad / s
+static const double ANGULAR_VELOCITY = 0.79;  // rad / s
 
 
 namespace robot {

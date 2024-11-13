@@ -39,11 +39,14 @@ class TrajectoryFollower: public InputSource {
         position_t pos_WFront_W = pose_WOcurr.UnitX();
         position_t pos_OcOn_W = pos_WOnext_W - pos_WOcurr_W;  // Direction (curr -> next)
 
+        /* Offsets to reach target. */
         double rotation_offset = getYAngle(pos_WFront_W, pos_OcOn_W);
         double position_offset = pos_OcOn_W.norm();
 
         /* First rotate. */
-        if (abs(rotation_offset) > ROTATION_TOLERANCE) {
+        static bool rotating = false;  // Added rotation trigger hysteresis, to avoid constant corrections.
+        if (abs(rotation_offset) > ROTATION_TOLERANCE_MAX || 
+            (rotating && abs(rotation_offset) > ROTATION_TOLERANCE_MIN)) {
             if (rotation_offset < 0) {
                 control_input_.keys[Button::RIGHT].updateState(true);
                 control_input_.keys[Button::LEFT].updateState(false);
@@ -52,10 +55,12 @@ class TrajectoryFollower: public InputSource {
                 control_input_.keys[Button::LEFT].updateState(true);
             }
 
+            rotating = true;
             return control_input_;
         } else {
             control_input_.keys[Button::RIGHT].updateState(false);
             control_input_.keys[Button::LEFT].updateState(false);
+            rotating = false;
         }
 
         /* If rotation sufficient, move. */
@@ -101,7 +106,8 @@ class TrajectoryFollower: public InputSource {
     PoseProvider *pose_provider_ = nullptr;
     NodeTrajectory trajectory_ = {{}};
 
-    const double ROTATION_TOLERANCE = 0.0174533 * 2; // 2 Degrees
+    const double ROTATION_TOLERANCE_MIN = 0.0174533 * 0.5; // 0.5 Degrees
+    const double ROTATION_TOLERANCE_MAX = 0.0174533 * 5; // 5 Degrees
     const double POSITION_TOLERANCE = 0.005;          // 2 cm
 };
 

@@ -137,8 +137,8 @@ int main(int argc, char *argv[]) {
     /* Setup & Start Frame Provider. */
     if (use_camera) {
         try {
-            depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
-            depth_frame_provider->startStream();
+            // depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
+            // depth_frame_provider->startStream();
             color_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video0");
             color_frame_provider->startStream();
         } catch (const std::runtime_error& error) {
