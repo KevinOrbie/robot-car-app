@@ -25,8 +25,6 @@ class TrajectoryFollower: public InputSource {
    public:
     TrajectoryFollower(PoseProvider *pose_provider=nullptr, NodeTrajectory trajectory={}): pose_provider_(pose_provider), trajectory_(trajectory) {};
 
-    // TODO: Add option to make trajectory circular, maybe do in Node Trajectory ?
-
     Input getInput() {
         if (!pose_provider_) {
             return {};
