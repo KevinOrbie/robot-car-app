@@ -76,16 +76,22 @@ public:
         if (Front.x == 0) {
             Yaw = (Front.z > 0) ? 90.0f : -90.0f;
         } else {
-            Yaw = glm::degrees(atan(Front.z/Front.x));
+            Yaw = glm::degrees(atan(Front.z/abs(Front.x)));  // Limited to +- 90
+            LOGW("Yaw: %f", Yaw);
+            if (Front.x < 0) {
+                LOGW("Yaw Added: %f", (Front.z > 0) ? 180.0f : -180.0f);  // TODO: Remove
+                Yaw = ((Front.z > 0) ? 180.0f : -180.0f) - Yaw;
+            } else {
+                LOGW("Yaw Added: %f", 0.0);
+            }
         }
         
         if (Front.x == 0 && Front.z == 0) {
             Pitch = (Front.y > 0) ? 89.0f : -89.0f;
         } else {
-            Pitch = glm::degrees(atan(abs(Front.y)/((abs(Front.x) > abs(Front.z)) ? Front.x : Front.z)));
-            Pitch = Pitch * ((Front.y > 0) ? 1 : -1);
+            Pitch = glm::degrees(asin(Front.y));
         }
-
+        
         updateCameraVectors();
     }
 

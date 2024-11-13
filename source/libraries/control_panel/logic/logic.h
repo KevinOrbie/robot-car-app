@@ -44,7 +44,9 @@ struct AppState {
     int fps_counter = 0;
     double fps_time = 0.0f;
     double time = 0.0f;
+    
     std::unique_ptr<Camera> camera  = nullptr;
+    bool camera_follow = false;
     
     /* OpenGL Variables */
     std::unique_ptr<CarModel> car = nullptr;

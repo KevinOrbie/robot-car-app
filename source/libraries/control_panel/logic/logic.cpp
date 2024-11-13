@@ -79,6 +79,9 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
         return false;
     }
 
+    /* Get Variables */
+    Pose pose_WO = pose_provider_->getPose(common::now()); // Car Object Frame w.r.t. World Frame
+
     /* FPS Counter */
     state->time += timedelta;
     state->fps_time += timedelta;
@@ -140,10 +143,15 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     if (input.scroll_y_offset != 0.0f) {
         state->camera->ProcessMouseScroll(input.scroll_y_offset);
     }
+    
     if (input.keys[Button::T].pressed) {
         state->camera->viewFrom(0.0f, 5.0f, 0.0f);
         state->camera->lookAt(0.0f, 0.0f, 0.0f);
         // TODO: Maybe fix camera to move in a plane?
+    }
+
+    if (input.keys[Button::F].pressed) {
+        state->camera_follow = !state->camera_follow;
     }
 
     /* Update Trajectory. */
@@ -181,6 +189,16 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
         );
     }
 
+    /* (optional) Update Follow Camera */
+    if (state->camera_follow) {
+        const position_t pos_OC_O = {-2.0, 3.0, 0.0};
+        const Pose pose_OC = Pose(pos_OC_O);
+        position_t pos_WO_W = pose_WO.getPosition();
+        position_t pos_WC_W = (pose_WO * pose_OC).getPosition();
+        state->camera->viewFrom(pos_WC_W[0], pos_WC_W[1], pos_WC_W[2]);
+        state->camera->lookAt(pos_WO_W[0], pos_WO_W[1], pos_WO_W[2]);
+    }
+    
     /* Transformations */
     glm::mat4 view = state->camera->GetViewMatrix();
     glm::mat4 projection = glm::perspective(
@@ -190,7 +208,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     );
 
     /* Update Objects. */
-    Pose pose_WO = pose_provider_->getPose(common::now()); // Car Object Frame w.r.t. World Frame
     state->car->position(pose_WO);
 
     position_t camera_offset_OC_O_ = {0.08f, 0.25f, 0.0f};

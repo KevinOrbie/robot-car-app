@@ -31,7 +31,7 @@ struct Button {
     /* Link indexes to button names. */
     enum {
         SPACE = 0,
-        T, C,
+        T, C, F,
         A, W, S, D,
         LEFT, RIGHT, UP, DOWN,
         BUTTON_COUNT

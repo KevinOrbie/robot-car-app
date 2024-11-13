@@ -128,7 +128,7 @@ class Pose {
      */
     Pose operator*(const Pose &other) { 
         rotation_t new_rot = getRotation() * other.getRotation();
-        position_t new_pos = getPosition() + other.getRotation().transpose() * other.getPosition();
+        position_t new_pos = getPosition() + getRotation() * other.getPosition();
         return Pose(new_pos, new_rot); 
     };
 

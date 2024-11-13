@@ -61,6 +61,7 @@ class Window final{
         /* Other Inputs */
         input_.keys[Button::T].updateState(glfwGetKey(window_, GLFW_KEY_T) == GLFW_PRESS);
         input_.keys[Button::C].updateState(glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS);
+        input_.keys[Button::F].updateState(glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS);
         input_.keys[Button::W].updateState(glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS);
         input_.keys[Button::A].updateState(glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS);
         input_.keys[Button::S].updateState(glfwGetKey(window_, GLFW_KEY_S) == GLFW_PRESS);
