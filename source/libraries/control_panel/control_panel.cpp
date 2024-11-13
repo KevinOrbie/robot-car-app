@@ -24,8 +24,15 @@
 
 
 /* ========================== Classes ========================== */
-ControlPanel::ControlPanel(FrameProvider *color_frame_provider, FrameProvider *depth_frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
-    stopwatch_(Timer()), application_(std::make_unique<Application>(color_frame_provider, depth_frame_provider, input_sink, pose_provider)) {
+ControlPanel::ControlPanel(Components components): 
+    stopwatch_(Timer()), application_(std::make_unique<Application>(
+        components.color_frame_provider,
+        components.depth_frame_provider, 
+        components.pose_provider,
+        components.input_source, 
+        components.input_sink
+    )) 
+{
     LOGI("Building Control Panel.");
 };
 

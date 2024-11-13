@@ -16,6 +16,7 @@
 
 /* Custom C++ Libraries */
 #include "video/frame_provider.h"
+#include "common/input_source.h"
 #include "common/input_sink.h"
 #include "common/looper.h"
 #include "common/pose.h"
@@ -29,7 +30,15 @@
 /* ========================== Classes ========================== */
 class ControlPanel final: public Looper {
    public:
-    ControlPanel(FrameProvider *color_frame_provider=nullptr, FrameProvider *depth_frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
+    struct Components {
+        FrameProvider *color_frame_provider = nullptr;
+        FrameProvider *depth_frame_provider = nullptr;
+        PoseProvider *pose_provider         = nullptr;
+        InputSource *input_source           = nullptr;
+        InputSink *input_sink               = nullptr;
+    };
+
+    ControlPanel(Components components);
 
     void iteration() override;
 

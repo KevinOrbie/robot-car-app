@@ -4,6 +4,7 @@ add_subdirectory(libraries/network)
 add_subdirectory(libraries/remote)
 add_subdirectory(libraries/robot)
 add_subdirectory(libraries/video)
+add_subdirectory(libraries/navigation)
 
 if((NOT DEFINED ENV{HOST}) OR (NOT $ENV{HOST} STREQUAL "robot"))
     # Requires extra libraries

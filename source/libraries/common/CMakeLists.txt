@@ -9,6 +9,7 @@ set(SOURCE_FILES "")
 list(APPEND SOURCE_FILES logger.cpp)
 
 ## Define Headers
+list(APPEND HEADER_FILES input_source.h)
 list(APPEND HEADER_FILES input_sink.h)
 list(APPEND HEADER_FILES looper.h)
 list(APPEND HEADER_FILES logger.h)

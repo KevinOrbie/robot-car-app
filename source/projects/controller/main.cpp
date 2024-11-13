@@ -16,6 +16,7 @@
 #include <vector>
 
 /* Custom C++ Libraries */
+#include "navigation/trajectory_follower.h"
 #include "control_panel/control_panel.h"
 #include "robot/robot_simulation.h"
 #include "video/video_reciever.h"
@@ -149,6 +150,9 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
     std::unique_ptr<remote::Robot> robot = nullptr;
 
+    NodeTrajectory trajectory = {{{2, 0, 0}}};
+    std::unique_ptr<TrajectoryFollower> trajectory_follower = std::make_unique<TrajectoryFollower>(simulation.get(), trajectory);
+
     /* Setup & Start Input Sink. */
     input_sink->add(simulation.get());
     if (enable_arduino) {
@@ -189,7 +193,13 @@ int main(int argc, char *argv[]) {
     }
 
     /* Setup & Start Controller. */
-    ControlPanel panel = {color_frame_provider.get(), depth_frame_provider.get(), input_sink.get(), simulation.get()};
+    ControlPanel::Components panel_components = {};
+    panel_components.color_frame_provider = color_frame_provider.get();
+    panel_components.depth_frame_provider = depth_frame_provider.get();
+    panel_components.pose_provider = simulation.get();
+    panel_components.input_source = trajectory_follower.get();
+    panel_components.input_sink = input_sink.get();
+    ControlPanel panel = {panel_components};
     panel.start();  // Run in main thread
 
     /* Command threads to finnish. */

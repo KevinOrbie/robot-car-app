@@ -16,6 +16,7 @@
 
 /* Custom C++ Libraries */
 #include "video/frame_provider.h"
+#include "common/input_source.h"
 #include "common/input_sink.h"
 #include "common/input.h"
 #include "common/pose.h"
@@ -57,7 +58,13 @@ struct AppState {
 
 class Application {
    public:
-    Application(FrameProvider *color_frame_provider=nullptr, FrameProvider *depth_frame_provider=nullptr, InputSink *input_sink=nullptr, PoseProvider *pose_provider=nullptr);
+    Application(
+        FrameProvider *color_frame_provider=nullptr, 
+        FrameProvider *depth_frame_provider=nullptr, 
+        PoseProvider *pose_provider=nullptr,
+        InputSource *input_source=nullptr,
+        InputSink *input_sink=nullptr
+    );
 
     void glsetup();
     void glcleanup();
@@ -69,5 +76,6 @@ class Application {
     FrameProvider *color_frame_provider_  = nullptr;
     FrameProvider *depth_frame_provider_  = nullptr;
     PoseProvider *pose_provider_    = nullptr;
+    InputSource *input_source_      = nullptr;
     InputSink *input_sink_          = nullptr;
 };

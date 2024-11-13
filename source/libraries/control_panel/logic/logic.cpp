@@ -27,8 +27,19 @@
 
 
 /* ========================== Classes ========================== */
-Application::Application(FrameProvider *color_frame_provider, FrameProvider *depth_frame_provider, InputSink *input_sink, PoseProvider *pose_provider): 
-        color_frame_provider_(color_frame_provider), depth_frame_provider_(depth_frame_provider), input_sink_(input_sink), pose_provider_(pose_provider) {
+Application::Application(
+        FrameProvider *color_frame_provider, 
+        FrameProvider *depth_frame_provider, 
+        PoseProvider *pose_provider,
+        InputSource *input_source,
+        InputSink *input_sink
+    ): 
+        color_frame_provider_(color_frame_provider), 
+        depth_frame_provider_(depth_frame_provider), 
+        pose_provider_(pose_provider), 
+        input_source_(input_source),
+        input_sink_(input_sink)
+{
     /* Initialize Application State. */
     state = std::make_unique<AppState>();
 
@@ -62,7 +73,7 @@ void Application::glcleanup() {
     state->car.release();
 };
 
-bool Application::processFrame(float timedelta, int width, int height, Input& input) {
+bool Application::processFrame(float timedelta, int width, int height, Input& user_input) {
     /* Make sure OpenGL is initialized. */
     if (!state->opengl_initialized) {
         return false;
@@ -79,6 +90,37 @@ bool Application::processFrame(float timedelta, int width, int height, Input& in
         state->fps_time -= 1.0f;
     }
 
+    /* Merge Inputs */
+    Input input = user_input;
+    static bool prev_control_by_user = true;
+    if (input_source_) {
+        /* Use control drive input, if no user drive input. */
+        if (
+            !user_input.keys[Button::UP].held && !user_input.keys[Button::UP].updated &&
+            !user_input.keys[Button::LEFT].held && !user_input.keys[Button::LEFT].updated &&
+            !user_input.keys[Button::DOWN].held && !user_input.keys[Button::DOWN].updated &&
+            !user_input.keys[Button::RIGHT].held && !user_input.keys[Button::RIGHT].updated
+        ) {
+            Input control_input = input_source_->getInput();
+            
+            input.keys[Button::UP] = control_input.keys[Button::UP];
+            input.keys[Button::LEFT] = control_input.keys[Button::LEFT];
+            input.keys[Button::DOWN] = control_input.keys[Button::DOWN];
+            input.keys[Button::RIGHT] = control_input.keys[Button::RIGHT];
+
+            if (prev_control_by_user){
+                /* This just sets one random button to be updated, to make sure that the sink gets this (possibly) the new input. */
+                input.keys[Button::UP].updated = true;
+                prev_control_by_user = false;
+            }
+        } else {
+            prev_control_by_user = true;
+        }
+
+        // NOTE: When simpy changing to the the button, this not set the updated flag to True, and thus, any changes here won't be tranferred to the sink
+        // NOTE: The current implementation using a static variable is a simple bootstrap, but does not account for the Input struct design issue, do we even need a updated flag for each button?
+    }
+    
     /* Process Input */
     if (input.keys[Button::W].held) {
         state->camera->ProcessKeyboard(FORWARD, timedelta); 
