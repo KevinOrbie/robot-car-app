@@ -79,7 +79,8 @@ struct RawInput final {
 };
 
 /**
- * @brief Converts raw inputs to logical actions.
+ * @brief Converts raw inputs to semantic input, directly related to what it' corresponding action is.
+ * @note This could later be used to add different key-bindings.
  */
 struct Input {
     bool car_backward = false;

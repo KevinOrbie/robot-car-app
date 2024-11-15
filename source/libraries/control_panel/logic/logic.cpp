@@ -114,9 +114,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
         } else {
             prev_control_by_user = true;
         }
-
-        // NOTE: When simpy changing to the the button, this not set the updated flag to True, and thus, any changes here won't be tranferred to the sink
-        // NOTE: The current implementation using a static variable is a simple bootstrap, but does not account for the Input struct design issue, do we even need a updated flag for each button?
     }
     
     /* Process Input */
