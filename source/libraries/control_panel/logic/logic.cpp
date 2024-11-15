@@ -98,22 +98,17 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     static bool prev_control_by_user = true;
     if (input_source_) {
         /* Use control drive input, if no user drive input. */
-        if (
-            !user_input.keys[Button::UP].held && !user_input.keys[Button::UP].updated &&
-            !user_input.keys[Button::LEFT].held && !user_input.keys[Button::LEFT].updated &&
-            !user_input.keys[Button::DOWN].held && !user_input.keys[Button::DOWN].updated &&
-            !user_input.keys[Button::RIGHT].held && !user_input.keys[Button::RIGHT].updated
-        ) {
+        if (!user_input.drive_ctrl_active) {
             Input control_input = input_source_->getInput();
             
-            input.keys[Button::UP] = control_input.keys[Button::UP];
-            input.keys[Button::LEFT] = control_input.keys[Button::LEFT];
-            input.keys[Button::DOWN] = control_input.keys[Button::DOWN];
-            input.keys[Button::RIGHT] = control_input.keys[Button::RIGHT];
+            input.drive_ctrl_updated = control_input.drive_ctrl_updated;
+            input.car_backward = control_input.car_backward; 
+            input.car_forward = control_input.car_forward;
+            input.car_right = control_input.car_right;
+            input.car_left = control_input.car_left;
 
             if (prev_control_by_user){
-                /* This just sets one random button to be updated, to make sure that the sink gets this (possibly) the new input. */
-                input.keys[Button::UP].updated = true;
+                input.drive_ctrl_updated = true;
                 prev_control_by_user = false;
             }
         } else {
@@ -125,33 +120,33 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     }
     
     /* Process Input */
-    if (input.keys[Button::W].held) {
+    if (input.cam_forward) {
         state->camera->ProcessKeyboard(FORWARD, timedelta); 
     }
-    if (input.keys[Button::A].held) {
+    if (input.cam_left) {
         state->camera->ProcessKeyboard(LEFT, timedelta); 
     }
-    if (input.keys[Button::S].held) {
+    if (input.cam_backward) {
         state->camera->ProcessKeyboard(BACKWARD, timedelta); 
     }
-    if (input.keys[Button::D].held) {
+    if (input.cam_right) {
         state->camera->ProcessKeyboard(RIGHT, timedelta); 
     }
-    if (input.mouse_xoffset != 0.0f || input.mouse_yoffset != 0.0f) {
-        state->camera->ProcessMouseMovement(input.mouse_xoffset, input.mouse_yoffset);
+    if (input.cam_move_xoffset != 0.0f || input.cam_move_yoffset != 0.0f) {
+        state->camera->ProcessMouseMovement(input.cam_move_xoffset, input.cam_move_yoffset);
     }
-    if (input.scroll_y_offset != 0.0f) {
-        state->camera->ProcessMouseScroll(input.scroll_y_offset);
+    if (input.cam_zoom_offset != 0.0f) {
+        state->camera->ProcessMouseScroll(input.cam_zoom_offset);
     }
     
-    if (input.keys[Button::T].pressed) {
+    if (input.switch_cam_to_topview) {
         LOGI("Camera moved to top view.");
         state->camera->viewFrom(0.0f, 5.0f, 0.0f);
         state->camera->lookAt(0.0f, 0.0f, 0.0f);
         // TODO: Maybe fix camera to move in a plane?
     }
 
-    if (input.keys[Button::F].pressed) {
+    if (input.cam_toggle_follow_mode) {
         state->camera_follow = !state->camera_follow;
         LOGI("Camera robot follow-mode %s.", (state->camera_follow) ? "enabled": "disabled");
     }
@@ -159,13 +154,14 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     /* Update Trajectory. */
     static double timer = 0.0;
     timer += timedelta;
-    if (timer > 0.3) {  // Update every 0.5 sec
+    if (timer > 0.3) {  // Update every 0.3 sec
         state->trajectory->update();
         timer -= 0.3;
     }
 
     /* Forward Input to sink (optional). */
-    if (input_sink_ && input.keysUpdated()) {
+    if (input_sink_ && input.drive_ctrl_updated) {
+        LOGW("Sinking Input!");
         input_sink_->sink(input);
     }
 

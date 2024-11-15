@@ -57,22 +57,22 @@ class RobotInputSimulation: public InputSink, public PoseProvider {
         Direction direction = Direction::STRAIGHT;
         Throttle throttle = Throttle::STANDBY;
 
-        if (input.keys[Button::LEFT].held == input.keys[Button::RIGHT].held) {
+        if (input.car_left == input.car_right) {
             // Both left and right on/off.
             direction = Direction::STRAIGHT;
 
-            if (input.keys[Button::UP].held == input.keys[Button::DOWN].held) {
+            if (input.car_forward == input.car_backward) {
                 // Both forward and backward on/off.
                 throttle = Throttle::STANDBY;
-            } else if (input.keys[Button::UP].held) {
+            } else if (input.car_forward) {
                 throttle = Throttle::FORWARD;
-            } else if (input.keys[Button::DOWN].held) {
+            } else if (input.car_backward) {
                 throttle = Throttle::REVERSE;
             }
 
-        } else if (input.keys[Button::LEFT].held) {
+        } else if (input.car_left) {
             direction = Direction::LEFT;
-        } else if (input.keys[Button::RIGHT].held) {
+        } else if (input.car_right) {
             direction = Direction::RIGHT;
         }
 

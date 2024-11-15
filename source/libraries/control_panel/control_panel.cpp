@@ -80,9 +80,10 @@ void ControlPanel::iteration() {
 
     /* Input Update. */
     window_->updateInput();
+    user_input_.update(window_->input_);
 
     /* Logic & Rendering. */
-    application_->processFrame(timedelta, window_->width_, window_->height_, window_->input_);
+    application_->processFrame(timedelta, window_->width_, window_->height_, user_input_);
 
     /* Draw Window. */
     window_->loop();

@@ -190,7 +190,7 @@ class Window final{
 
     /* ------------------- Object Variables ------------------- */
    public:
-    Input input_ = {};
+    RawInput input_ = {};
 
     bool running_ = false;
     int height_ = SCR_HEIGHT;

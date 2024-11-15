@@ -41,33 +41,39 @@ class TrajectoryFollower: public InputSource {
         double rotation_offset = getYAngle(pos_WFront_W, pos_OcOn_W);
         double position_offset = pos_OcOn_W.norm();
 
+        /* Declare Next State's Control Variables. */
+        bool set_car_backward   = false;
+        bool set_car_forward    = false;
+        bool set_car_right      = false;
+        bool set_car_left       = false;
+
         /* First rotate. */
         static bool rotating = false;  // Added rotation trigger hysteresis, to avoid constant corrections.
         if (abs(rotation_offset) > ROTATION_TOLERANCE_MAX || 
             (rotating && abs(rotation_offset) > ROTATION_TOLERANCE_MIN)) {
             if (rotation_offset < 0) {
-                control_input_.keys[Button::RIGHT].updateState(true);
-                control_input_.keys[Button::LEFT].updateState(false);
+                set_car_right = true;
+                set_car_left = false;
             } else {
-                control_input_.keys[Button::RIGHT].updateState(false);
-                control_input_.keys[Button::LEFT].updateState(true);
+                set_car_right = false;
+                set_car_left = true;
             }
 
             rotating = true;
-            return control_input_;
         } else {
-            control_input_.keys[Button::RIGHT].updateState(false);
-            control_input_.keys[Button::LEFT].updateState(false);
+            set_car_right = false;
+            set_car_left = false;
             rotating = false;
         }
 
         /* If rotation sufficient, move. */
-        if (position_offset > POSITION_TOLERANCE) {
-            control_input_.keys[Button::UP].updateState(true);
+        if (!rotating && position_offset > POSITION_TOLERANCE) {
+            set_car_forward = true;
         } else {
-            control_input_.keys[Button::UP].updateState(false);
+            set_car_forward = false;
         }
         
+        control_input_.update(set_car_forward, set_car_backward, set_car_left, set_car_right);
         return control_input_;
     };
 

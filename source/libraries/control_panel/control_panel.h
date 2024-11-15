@@ -47,6 +47,7 @@ class ControlPanel final: public Looper {
 
    private:
     Timer stopwatch_;
+    Input user_input_ = {};
     Window *window_ = nullptr;
     std::unique_ptr<Application> application_ = nullptr;
 };
