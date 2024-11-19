@@ -20,6 +20,7 @@
 
 /* Custom c++ Libraries */
 #include "common/logger.h"
+#include "texture.h"
 #include "shader.h"
 
 
@@ -30,20 +31,12 @@
  */
 class DepthImageCloud {
    public:
-    DepthImageCloud() {
+    DepthImageCloud(std::shared_ptr<Texture> depth_texture, std::shared_ptr<Texture> color_texture=nullptr): depth_texture_(depth_texture), color_texture_(color_texture) {
         /* Setting up GPU instanced Vertex Data. */
         float vertex[] = { 0.0f,  0.0f,  0.0f };
 
         /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/depth_image_cloud.vs", "./shaders/depth_image_cloud.fs");
-
-        /* Setting up Texture Data. */
-        glGenTextures(1, &depth_texture_);
-        glBindTexture(GL_TEXTURE_2D, depth_texture_);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         /* Setting up Vertex Data Structures. */
         glGenVertexArrays(1, &VAO_);
@@ -68,21 +61,7 @@ class DepthImageCloud {
         glDeleteBuffers(1, &VBO_);
     }
 
-    void load_texture(uint8_t* data, int width, int height, GLenum format=GL_RGBA) {
-        image_width_ = width;
-        image_height_ = height;
-
-        if (data) {   
-            //std::cout << "Loading Texture: width, height, channels = " << width << ", " << height << ", " << channels << std::endl;
-            glBindTexture(GL_TEXTURE_2D, depth_texture_);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            LOGW("Failed to load texture!");
-        }
-    }
-
-    void draw(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection, unsigned int color_texture=33) {
+    void draw(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection) {
         shader_->use();
 
         /* Apply transforms. */
@@ -91,36 +70,31 @@ class DepthImageCloud {
         shader_->setMat4("projection", projection);
 
         /* Set texture. */
-        shader_->setInt("image_width", image_width_);
-        shader_->setInt("image_height", image_height_);
-        shader_->setInt("plane_width", image_width_);
-        shader_->setInt("plane_height", image_height_);
+        shader_->setInt("image_width", depth_texture_->getWidth());
+        shader_->setInt("image_height", depth_texture_->getHeight());
 
-        glActiveTexture(GL_TEXTURE0);
-        shader_->setInt("depthTexture", 0);
-        glBindTexture(GL_TEXTURE_2D, depth_texture_);
+        if (depth_texture_) {
+            shader_->setInt("depthTexture", 0);
+            depth_texture_->bind(0);
+        }
 
-        if (color_texture <= 32) {
-            glActiveTexture(GL_TEXTURE0 + 1);
+        if (color_texture_) {
             shader_->setInt("colorTexture", 1);
-            glBindTexture(GL_TEXTURE_2D, color_texture);
+            color_texture_->bind(1);
         }
 
         /* Draw quad triangles. */
         glBindVertexArray(VAO_);
         glPointSize(3);
-        glDrawArraysInstanced(GL_POINTS, 0, 1, image_width_ * image_height_);
+        glDrawArraysInstanced(GL_POINTS, 0, 1, depth_texture_->getWidth() * depth_texture_->getHeight());
     }
 
    private:
     std::unique_ptr<Shader> shader_  = nullptr;
-    unsigned int depth_texture_;
-    unsigned int color_texture_;
+    std::shared_ptr<Texture> depth_texture_;
+    std::shared_ptr<Texture> color_texture_;
     unsigned int VAO_;
     unsigned int VBO_;
-
-    int image_width_ = 0;
-    int image_height_ = 0;
 
     const float baseline_ = 0.120f;
     const float focus_length_ = 0.00245f;

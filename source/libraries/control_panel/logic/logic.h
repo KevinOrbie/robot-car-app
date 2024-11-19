@@ -26,6 +26,7 @@
 #include "depth_image_cloud.h"
 #include "quad_screen.h"
 #include "trajectory.h"
+#include "texture.h"
 #include "grid.h"
 #include "car.h"
 
@@ -49,6 +50,9 @@ struct AppState {
     bool camera_follow = false;
     
     /* OpenGL Variables */
+    std::shared_ptr<Texture> depth_video = nullptr;
+    std::shared_ptr<Texture> color_video = nullptr;
+
     std::unique_ptr<CarModel> car = nullptr;
     std::unique_ptr<QuadScreen> screen = nullptr;
     std::unique_ptr<ShaderGrid2D> grid = nullptr;

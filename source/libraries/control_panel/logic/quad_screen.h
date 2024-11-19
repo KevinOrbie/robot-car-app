@@ -3,8 +3,7 @@
  * @author Kevin Orbie
  */
 
-#ifndef GRASS_H
-#define GRASS_H
+#pragma once
 
 /* ========================== Include ========================== */
 /* C/C++ Libraries */
@@ -21,6 +20,7 @@
 
 /* Custom c++ Libraries */
 #include "common/logger.h"
+#include "texture.h"
 #include "shader.h"
 
 
@@ -31,7 +31,7 @@
  */
 class QuadScreen {
    public:
-    QuadScreen() {
+    QuadScreen(std::shared_ptr<Texture> screen_texture=nullptr): texture_(screen_texture) {
         /* Setting up Vertex Data. */
         float vertices[] = {
             // Vertex Coords        // Texture Coords (inverted)
@@ -43,14 +43,6 @@ class QuadScreen {
 
         /* Build / Compile Shader */
         shader_ = std::make_unique<Shader>("./shaders/quad_screen.vs", "./shaders/quad_screen.fs");
-
-        /* Setting up Texture Data. */
-        glGenTextures(1, &texture_);
-        glBindTexture(GL_TEXTURE_2D, texture_);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         /* Setting up Vertex Data Structures. */
         glGenVertexArrays(1, &VAO_);
@@ -73,17 +65,6 @@ class QuadScreen {
     ~QuadScreen() {
         glDeleteVertexArrays(1, &VAO_);
         glDeleteBuffers(1, &VBO_);
-    }
-
-    void load_texture(uint8_t* data, int width, int height, GLenum format=GL_RGBA) {
-        if (data) {   
-            //std::cout << "Loading Texture: width, height, channels = " << width << ", " << height << ", " << channels << std::endl;
-            glBindTexture(GL_TEXTURE_2D, texture_);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            LOGW("Failed to load texture!");
-        }
     }
 
     /**
@@ -118,9 +99,9 @@ class QuadScreen {
         shader_->setMat4("model", model);
 
         /* Set texture. */
-        glActiveTexture(GL_TEXTURE0);
-        shader_->setInt("screenTexture", 0);
-        glBindTexture(GL_TEXTURE_2D, texture_);
+        if (texture_) {
+            texture_->bind(0);
+        }
 
         /* Draw quad triangles. */
         glBindVertexArray(VAO_);
@@ -133,9 +114,7 @@ class QuadScreen {
 
    public:
     std::unique_ptr<Shader> shader_  = nullptr;
-    unsigned int texture_;
+    std::shared_ptr<Texture> texture_;
     unsigned int VAO_;
     unsigned int VBO_;
 };
-
-#endif

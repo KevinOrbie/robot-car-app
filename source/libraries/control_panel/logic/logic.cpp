@@ -52,9 +52,12 @@ void Application::glsetup() {
     LOGI("Initializing GL.");
 
     /* Initialize OpenGL Objects */
-    state->depth_cloud = std::make_unique<DepthImageCloud>();
+    state->depth_video = std::make_shared<Texture>();
+    state->color_video = std::make_shared<Texture>();
+
+    state->depth_cloud = std::make_unique<DepthImageCloud>(state->depth_video, state->color_video);
     state->trajectory = std::make_unique<Trajectory>(pose_provider_);
-    state->screen = std::make_unique<QuadScreen>();
+    state->screen = std::make_unique<QuadScreen>(state->color_video);
     state->grid = std::make_unique<ShaderGrid2D>();
     state->car = std::make_unique<CarModel>();
 
@@ -166,22 +169,24 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     if (depth_frame_provider_) {
         // NOTE: Depth image must be loaded first
         Frame new_frame = depth_frame_provider_->getFrame(state->time, PixelFormat::YUV);
-        state->depth_cloud->load_texture(
+        state->depth_video->load(
             new_frame.image.getData(), 
             new_frame.image.getWidth(), 
             new_frame.image.getHeight(), 
             GL_RGB
         );
+        // LOGW("A");
     }
 
     if (color_frame_provider_) {
         Frame new_frame = color_frame_provider_->getFrame(state->time, PixelFormat::YUV);
-        state->screen->load_texture(
+        state->color_video->load(
             new_frame.image.getData(), 
             new_frame.image.getWidth(), 
             new_frame.image.getHeight(), 
             GL_RGB
         );
+        // LOGW("B");
     }
 
     /* (optional) Update Follow Camera */
@@ -215,7 +220,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    state->depth_cloud->draw(cloud_model, view, projection, state->screen->texture_);
+    state->depth_cloud->draw(cloud_model, view, projection);
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
