@@ -6,11 +6,12 @@ A C++ software suite to control and monitor a custom-built miniature vision-base
 ## Notable Highlights
 - Low-latency visualization of remote camera stream (via ffmpeg)
 - 3D pointcloud visualization (from stereo depth estimation)
+- Real-time trajectory visualization
 - Real-time user drive controls
 - Unique OpenGL based GUI
-- Tested on Linux 18.04 LTS
-- No use of OpenCV (more lightweight)
+- Tested on Linux 18.04 LTS (for Jetson Nano)
 - Fully multi-threaded
+- No use of OpenCV
 - Modular design
 
 ## State of project
@@ -22,9 +23,10 @@ Some ideas I would have implemented given more time:
 - Track point cloud accross time, and build 3D mesh of environment.
 - Do 2D trajectory optimization to calculate trajectory to target location commanded by user.
 - Setup CI pipeline to make sure code does not break or result in worse performance.
-- Improve code coverage for the unit tests
-- Add integration tests
-- Add regression tests
+- Give the user the ability to set a trajectory from the GUI, just by clicking.
+- Improve code coverage for the unit tests.
+- Add integration tests.
+- Add regression tests.
 
 
 ## Installation & Setup
@@ -143,7 +145,7 @@ rca-test-run <regex>
 The code for this project is split into multiple directories:
 - **source**: the main source code for the application.
     - **arduino**: the code that runs on the on-board arduino.
-    - **libraries**: multiple custom made libraries that are used inside the projects. Here you will find all the logic.
+    - **libraries**: multiple custom made libraries that are used inside the projects (main logic).
     - **projects**: projects that compile to an executable.
 - **test**: all test related code, like unit-tests and integration tests.
 - **pilots**: code that is not used by the main project, but was used to test seperate parts.
