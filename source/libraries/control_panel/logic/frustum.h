@@ -34,18 +34,25 @@
  */
 class Frustum {
    public:
-    Frustum(float near, float far, float angle_horiz_deg, float angle_verti_deg, std::shared_ptr<Texture> screen_texture=nullptr): texture_(screen_texture) {
+    Frustum(float near, float far, float angle_horiz_deg, float angle_verti_deg, std::shared_ptr<Texture> screen_texture=nullptr): 
+            near_(near), far_(far), 
+            angle_horiz_deg_(angle_horiz_deg), 
+            angle_verti_deg_(angle_horiz_deg) {
+        if (screen_texture) {
+            far_plane_ = std::make_unique<QuadScreen>(screen_texture);
+        }
+
         /* Setting up Vertex Data. */
-        float far_plane_half_h = far * glm::tan(glm::radians(angle_horiz_deg/2.0f));
-        float far_plane_half_v = far * glm::tan(glm::radians(angle_verti_deg/2.0f));
+        far_plane_half_width_ = far * glm::tan(glm::radians(angle_horiz_deg/2.0f));
+        far_plane_half_height_ = far * glm::tan(glm::radians(angle_verti_deg/2.0f));
         float vertices[] = {
             // Vertex Coords 
              0.0f,  0.0f,  0.0f,  // Camera Center
-             far,  far_plane_half_v,  far_plane_half_h,
-             far,  far_plane_half_v, -far_plane_half_h,
-             far, -far_plane_half_v, -far_plane_half_h,
-             far, -far_plane_half_v,  far_plane_half_h,
-             far,  far_plane_half_v,  far_plane_half_h  // Go to first point again in FAN
+             far,  far_plane_half_height_,  far_plane_half_width_,
+             far,  far_plane_half_height_, -far_plane_half_width_,
+             far, -far_plane_half_height_, -far_plane_half_width_,
+             far, -far_plane_half_height_,  far_plane_half_width_,
+             far,  far_plane_half_height_,  far_plane_half_width_  // Go to first point again in FAN
         };
 
         /* Build / Compile Shader */
@@ -78,21 +85,32 @@ class Frustum {
         shader_->setMat4("model", model);
         shader_->setMat4("view", view);
 
-        /* Set texture. */
-        if (texture_) {
-            texture_->bind(0);
-        }
-
         /* Draw quad triangles. */
         glBindVertexArray(VAO_);
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glDrawArrays(GL_TRIANGLE_FAN, 0, 18);
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+        if (far_plane_) {
+            glm::mat4 transform = glm::mat4(1.0f);
+            transform = glm::translate(transform, glm::vec3(far_, 0.0f, 0.0f));
+            transform = glm::scale(transform, glm::vec3(0.0f, far_plane_half_height_, far_plane_half_width_));
+            transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 final_transform = projection * view * model * transform;  // Note: this line prints a warning, but is not broken.
+            far_plane_->draw(final_transform);
+        }
     }
 
    public:
     std::unique_ptr<Shader> shader_  = nullptr;
-    std::shared_ptr<Texture> texture_;
+    std::unique_ptr<QuadScreen> far_plane_ = nullptr;
     unsigned int VAO_;
     unsigned int VBO_;
+
+    const float near_;
+    const float far_;
+    const float angle_horiz_deg_;
+    const float angle_verti_deg_;
+    float far_plane_half_width_;
+    float far_plane_half_height_;
 };

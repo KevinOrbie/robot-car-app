@@ -55,11 +55,11 @@ void Application::glsetup() {
     state->depth_video = std::make_shared<Texture>();
     state->color_video = std::make_shared<Texture>();
 
+    state->frustum = std::make_unique<Frustum>(0.00245f, 0.45101245f, 105.0f, 58.0f, state->color_video);
     state->depth_cloud = std::make_unique<DepthImageCloud>(state->depth_video, state->color_video);
     state->trajectory = std::make_unique<Trajectory>(pose_provider_);
     state->screen = std::make_unique<QuadScreen>(state->color_video);
     state->grid = std::make_unique<ShaderGrid2D>();
-    state->frustum = std::make_unique<Frustum>(0.00245f, 0.45101245f, 105.0f, 58.0f);
     state->car = std::make_unique<CarModel>();
 
     /* Initialize OpenGL */
@@ -176,7 +176,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
             new_frame.image.getHeight(), 
             GL_RGB
         );
-        // LOGW("A");
     }
 
     if (color_frame_provider_) {
@@ -187,17 +186,19 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
             new_frame.image.getHeight(), 
             GL_RGB
         );
-        // LOGW("B");
     }
 
     /* (optional) Update Follow Camera */
     if (state->camera_follow) {
-        const position_t pos_OC_O = {-2.0, 1.5, 0.0};
+        const position_t pos_OC_O = {-1.0, 0.9, 0.0};  // Camera w.r.t Object, expressed in Object frame
+        const position_t pos_OB_O = {0.50, 0.0, 0.0};  // Image plane Base w.r.t Object, expressed in Object frame
         const Pose pose_OC = Pose(pos_OC_O);
+        const Pose pose_OB = Pose(pos_OB_O);
         position_t pos_WO_W = pose_WO.getPosition();
         position_t pos_WC_W = (pose_WO * pose_OC).getPosition();
+        position_t pos_WB_W = (pose_WO * pose_OB).getPosition();
         state->camera->viewFrom(pos_WC_W[0], pos_WC_W[1], pos_WC_W[2]);
-        state->camera->lookAt(pos_WO_W[0], pos_WO_W[1], pos_WO_W[2]);
+        state->camera->lookAt(pos_WB_W[0], pos_WB_W[1], pos_WB_W[2]);
     }
     
     /* Transformations */
@@ -221,7 +222,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    state->depth_cloud->draw(cloud_model, view, projection);
+    // state->depth_cloud->draw(cloud_model, view, projection);
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
