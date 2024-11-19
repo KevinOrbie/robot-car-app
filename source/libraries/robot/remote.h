@@ -39,6 +39,4 @@ class Remote final: public server::Server {
     InputSink* input_sink_;
 };
 
-// TODO: Update / Make Software Diagrams
-
 } // namespace robot
