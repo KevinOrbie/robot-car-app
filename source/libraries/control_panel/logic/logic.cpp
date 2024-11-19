@@ -59,6 +59,7 @@ void Application::glsetup() {
     state->trajectory = std::make_unique<Trajectory>(pose_provider_);
     state->screen = std::make_unique<QuadScreen>(state->color_video);
     state->grid = std::make_unique<ShaderGrid2D>();
+    state->frustum = std::make_unique<Frustum>(0.00245f, 0.45101245f, 105.0f, 58.0f);
     state->car = std::make_unique<CarModel>();
 
     /* Initialize OpenGL */
@@ -191,7 +192,7 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
 
     /* (optional) Update Follow Camera */
     if (state->camera_follow) {
-        const position_t pos_OC_O = {-2.0, 3.0, 0.0};
+        const position_t pos_OC_O = {-2.0, 1.5, 0.0};
         const Pose pose_OC = Pose(pos_OC_O);
         position_t pos_WO_W = pose_WO.getPosition();
         position_t pos_WC_W = (pose_WO * pose_OC).getPosition();
@@ -225,5 +226,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
     state->car->draw(view, projection);
+    state->frustum->draw(cloud_model, view, projection);
     return true;
 };

@@ -27,6 +27,7 @@
 #include "quad_screen.h"
 #include "trajectory.h"
 #include "texture.h"
+#include "frustum.h"
 #include "grid.h"
 #include "car.h"
 
@@ -54,6 +55,7 @@ struct AppState {
     std::shared_ptr<Texture> color_video = nullptr;
 
     std::unique_ptr<CarModel> car = nullptr;
+    std::unique_ptr<Frustum> frustum = nullptr;
     std::unique_ptr<QuadScreen> screen = nullptr;
     std::unique_ptr<ShaderGrid2D> grid = nullptr;
     std::unique_ptr<Trajectory> trajectory = nullptr;
