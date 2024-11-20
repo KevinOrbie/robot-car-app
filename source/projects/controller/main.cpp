@@ -144,6 +144,15 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
     }
 
+    if (enable_arduino && test_mode) {
+        LOGE("Arduino can not be enabled (-m) with test mode (-t).");
+        help();
+        return EXIT_SUCCESS;
+    } else if (enable_arduino) {
+        robot_ip = "none";
+    }
+    
+
     if (test_mode) {
         robot_ip = "none";
         enable_arduino = false;
@@ -163,8 +172,9 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<ArduinoDriver> arduino_driver = nullptr;
     std::unique_ptr<remote::Robot> robot = nullptr;
 
-    NodeTrajectory trajectory = {{{0, 0, 0}, {0.9, 0, 0}, {0.9, 0, -0.6}, {0, 0, -0.6}}, false};
-    std::unique_ptr<TrajectoryFollower> trajectory_follower = std::make_unique<TrajectoryFollower>(simulation.get(), trajectory);
+    // NodeTrajectory trajectory = {{{0, 0, 0}, {0.9, 0, 0}, {0.9, 0, -0.6}, {0, 0, -0.6}}, false};
+    // std::unique_ptr<TrajectoryFollower> trajectory_follower = std::make_unique<TrajectoryFollower>(simulation.get(), trajectory);
+    std::unique_ptr<TrajectoryFollower> trajectory_follower = nullptr;
 
     /* Setup & Start Input Sink. */
     input_sink->add(simulation.get());

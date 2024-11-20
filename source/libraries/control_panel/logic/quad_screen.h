@@ -88,15 +88,20 @@ class QuadScreen {
         model = glm::scale(model, glm::vec3(scale_width, scale_height, 1.0f));
         shader_->setMat4("model", model);
 
+        glm::mat4 view = glm::mat4(1.0f);  // NOP
+        glm::mat4 projection = glm::mat4(1.0f);  // NOP
+
         /* Draw with transform */
-        draw(model);
+        draw(model, view, projection);
     }
 
-    void draw(glm::mat4 &model) {
+    void draw(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection) {
         shader_->use();
 
         /* Apply model transform. */
         shader_->setMat4("model", model);
+        shader_->setMat4("view", view);
+        shader_->setMat4("projection", projection);
 
         /* Set texture. */
         if (texture_) {

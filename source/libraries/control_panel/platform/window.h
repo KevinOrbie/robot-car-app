@@ -115,7 +115,7 @@ class Window final{
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
         /* Create a Window */
-        window_ = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Simple Cube", NULL, NULL);
+        window_ = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RCA", NULL, NULL);
         if (window_ == NULL)
         {
             LOGE("Failed to create GLFW window.");
