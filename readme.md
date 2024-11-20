@@ -1,7 +1,7 @@
 # Robotic Car Application
 A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on-target robot code and a custom, low-latency, OpenGL based GUI to control / monitor the robot remotely.
 
-![Remote Control GUI](./assets/videos/local_pointcloud.webm "Control GUI with Pointcloud")
+![Remote Control GUI](./assets/videos/local_pointcloud.mov "Control GUI with Pointcloud")
 
 ## Notable Highlights
 - Low-latency visualization of remote camera stream (via ffmpeg)
