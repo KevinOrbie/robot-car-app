@@ -39,32 +39,60 @@ class CarModel {
    public:
     CarModel() {
         model_matrix_ = glm::mat4(1.0f);
+
+        const float car_half_length = 0.1100f;
+        const float car_half_width = 0.1025f;
+        const float car_height = 0.2700f;
         
         /* Setting up vertex data. */
-        std::vector<glm::vec3> vertices = {
-            glm::vec3( 0.1100f, 0.00f, -0.1025f),  // Bottom - left  - front
-            glm::vec3( 0.1100f, 0.00f,  0.1025f),  // Bottom - right - front
-            glm::vec3(-0.1100f, 0.00f, -0.1025f),  // Bottom - left  - back
-            glm::vec3(-0.1100f, 0.00f,  0.1025f),  // Bottom - right - back
-            glm::vec3( 0.1100f, 0.27f, -0.1025f),  // Top    - left  - front
-            glm::vec3( 0.1100f, 0.27f,  0.1025f),  // Top    - right - front
-            glm::vec3(-0.1100f, 0.27f, -0.1025f),  // Top    - left  - back
-            glm::vec3(-0.1100f, 0.27f,  0.1025f)   // Top    - right - back
-        };
+        const std::vector<glm::vec3> vertices = {
+            /* Bottom Face: */
+            glm::vec3( car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
+            glm::vec3(-car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
+            glm::vec3( car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
+            glm::vec3( car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
+            glm::vec3(-car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
+            glm::vec3(-car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f, -1.0f,  0.0f), 
 
-        std::vector<unsigned int> indices = {
-            1, 2, 0, // Bottom
-            1, 2, 3, // Bottom
-            5, 6, 4, // Top
-            5, 6, 7, // Top
-            4, 2, 0, // Left
-            4, 2, 6, // Left
-            5, 3, 1, // Right
-            5, 3, 7, // Right
-            4, 1, 5, // Front
-            4, 1, 0, // Front
-            6, 3, 2, // Back
-            6, 3, 7  // Back
+            /* Top Face: */
+            glm::vec3( car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+            glm::vec3(-car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+            glm::vec3( car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+            glm::vec3( car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+            glm::vec3(-car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+            glm::vec3(-car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  1.0f,  0.0f),
+
+            /* Left Face: */
+            glm::vec3( car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+            glm::vec3(-car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+            glm::vec3( car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+            glm::vec3( car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+            glm::vec3(-car_half_length, 0.0000000f, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+            glm::vec3(-car_half_length, car_height, -car_half_width), glm::vec3( 0.0f,  0.0f, -1.0f), 
+
+            /* Right Face: */
+            glm::vec3( car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+            glm::vec3(-car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+            glm::vec3( car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+            glm::vec3( car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+            glm::vec3(-car_half_length, 0.0000000f,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+            glm::vec3(-car_half_length, car_height,  car_half_width), glm::vec3( 0.0f,  0.0f,  1.0f), 
+
+            /* Front Face: */
+            glm::vec3( car_half_length, car_height, -car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+            glm::vec3( car_half_length, 0.0000000f,  car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+            glm::vec3( car_half_length, car_height,  car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+            glm::vec3( car_half_length, car_height, -car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+            glm::vec3( car_half_length, 0.0000000f,  car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+            glm::vec3( car_half_length, 0.0000000f, -car_half_width), glm::vec3( 1.0f,  0.0f,  0.0f), 
+
+            /* Back Face: */
+            glm::vec3(-car_half_length, car_height, -car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(-car_half_length, 0.0000000f,  car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(-car_half_length, 0.0000000f, -car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(-car_half_length, car_height, -car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(-car_half_length, 0.0000000f,  car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(-car_half_length, car_height,  car_half_width), glm::vec3(-1.0f,  0.0f,  0.0f) 
         };
  
         /* Build / Compile Shader */
@@ -72,22 +100,21 @@ class CarModel {
 
         /* Setting up Vertex Data Structures. */
         glGenVertexArrays(1, &VAO_);
-        glGenBuffers(1, &EBO_);  
         glGenBuffers(1, &VBO_);
 
         glBindVertexArray(VAO_);
 
-        // Load trajectory vertices into buffers.
+        // Load all data vertices into buffer.
         glBindBuffer(GL_ARRAY_BUFFER, VBO_);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW); 
 
-        // Load indexes to form cube.
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);  
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+        // Position attribute (refers to bound VBO) 
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
 
-        // Position attribute.
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);	
+        // Normal attribute (refers to bound VBO) 
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);	
 
         /* Unset Bindings. */
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -97,7 +124,6 @@ class CarModel {
     ~CarModel() {
         glDeleteVertexArrays(1, &VAO_);
         glDeleteBuffers(1, &VBO_);
-        glDeleteBuffers(1, &EBO_);
     };
 
     void position(Pose pose) {
@@ -111,20 +137,24 @@ class CarModel {
         shader_->use();
         glBindVertexArray(VAO_);
 
+        /* Normal Matrix */
+        /* Link: https://learnopengl.com/Lighting/Basic-Lighting */
+        glm::mat3 normal = glm::transpose(glm::inverse(model_matrix_));
+
         /* Update Uniform Values */
         shader_->setMat4("projection", projection);
         shader_->setMat4("model", model_matrix_);
+        shader_->setMat3("normal", normal);
         shader_->setMat4("view", view);
 
         /* Draw Grid Plane */
-        glDrawElements(GL_TRIANGLES, 6 * 2 * 3, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(24 * 2));
         glBindVertexArray(0);
     };
 
    private:
     unsigned int VAO_;
     unsigned int VBO_;
-    unsigned int EBO_;
     glm::mat4 model_matrix_;
     std::unique_ptr<Shader> shader_;
 };
