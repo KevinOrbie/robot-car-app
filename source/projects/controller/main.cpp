@@ -39,7 +39,7 @@ static void help() {
     msg += "\nOptions:\n";
     msg += "  -h              display this help message\n";
     msg += "  -a              enable camera and arduino driver\n";
-    msg += "  -m              enable the arduino driver (don't require remote connection)\n";
+    msg += "  -m              enable the arduino driver\n";
     msg += "  -d              enable the depth estimation (experimental)\n";
     msg += "  -c              stream from the camera\n";
     msg += "  -t              standalone test configuration\n";

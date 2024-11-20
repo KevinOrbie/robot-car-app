@@ -41,6 +41,7 @@ class ArduinoDriver: public InputSink {
         Reciever(ArduinoDriver &driver): driver_(driver) {};
         void iteration() override;
         void setup() override;
+        void flush();
 
        private:
         ArduinoDriver &driver_;

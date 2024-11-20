@@ -40,6 +40,10 @@ void ArduinoDriver::Reciever::setup() {
     LOGI("Running ArduinoDriver Reciever (TID = %d)", gettid());
 };
 
+void ArduinoDriver::Reciever::flush() {
+    driver_.socket().flush();
+}
+
 void ArduinoDriver::LifePulser::iteration() {
     /* Pulse if enough time has passed without life update. */
     if (!threaded()) { 
@@ -82,7 +86,8 @@ ArduinoDriver::ArduinoDriver(): life_pulser_(*this), reciever_(*this) {};
 
 void ArduinoDriver::setupIMU() {
     LOGI("Setting up Arduino Connection...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // Wait until baudrate was found for IMU
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Wait until baudrate was found for IMU
+    reciever_.flush();  // Throw away old messages.
     setIMUBaudrate(arduino::BaudRate::BD_9600);
     setIMUOutputRate(arduino::OutputRate::OR_50HZ);
     setIMUContent(
@@ -91,6 +96,7 @@ void ArduinoDriver::setupIMU() {
         static_cast<int32_t>(arduino::Content::CNT_ANGLE)
     );
     calibrateAccGyro();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));  // Give commands time to finnish before continuing.
 };
 
 /* ---------------------------- Looper Interface ---------------------------- */
