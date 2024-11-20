@@ -7,7 +7,7 @@ Trajectory Visualization Demo:
 
 Point Cloud Visualization Demo (experimental):
 
-https://github.com/user-attachments/assets/cd9ec1cf-5b75-48fd-abaf-e78456553407
+https://github.com/user-attachments/assets/80c5267d-4e4d-4de6-8bd6-b46b8f434de5
 
 ## Notable Highlights
 - Low-latency visualization of remote camera stream (via ffmpeg)
