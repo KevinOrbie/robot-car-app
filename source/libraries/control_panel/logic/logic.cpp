@@ -49,7 +49,7 @@ Application::Application(
 };
 
 void Application::glsetup() {
-    LOGI("Initializing GL.");
+    LOGI("Initializing OpenGL.");
 
     /* Initialize OpenGL Objects */
     state->depth_video = std::make_shared<Texture>();
@@ -69,12 +69,16 @@ void Application::glsetup() {
 };
 
 void Application::glcleanup() {
-    /* Destory OpenGL Objects */
+    /* Destroy OpenGL Objects */
     state->depth_cloud.release();
     state->trajectory.release();
+    state->frustum.release();
     state->screen.release();
     state->grid.release();
     state->car.release();
+
+    state->color_video.reset();
+    state->depth_video.reset();
 };
 
 bool Application::processFrame(float timedelta, int width, int height, Input& user_input) {
@@ -162,7 +166,6 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
 
     /* Forward Input to sink (optional). */
     if (input_sink_ && input.drive_ctrl_updated) {
-        LOGW("Sinking Input!");
         input_sink_->sink(input);
     }
 
@@ -222,11 +225,16 @@ bool Application::processFrame(float timedelta, int width, int height, Input& us
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Objects
-    // state->depth_cloud->draw(cloud_model, view, projection);
+    if (depth_frame_provider_) {
+        /* Use depth cloud, only when a depth_frame_provider is given. */
+        state->depth_cloud->draw(cloud_model, view, projection);
+    } else {
+        state->frustum->draw(cloud_model, view, projection);
+    }
+    
     state->screen->draw(10, 10, 16 * 30, 9 * 30, width, height);
     state->trajectory->draw(view, projection);
     state->grid->draw(view, projection);
     state->car->draw(view, projection);
-    state->frustum->draw(cloud_model, view, projection);
     return true;
 };

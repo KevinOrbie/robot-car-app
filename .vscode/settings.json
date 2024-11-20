@@ -84,6 +84,8 @@
         "socket": "cpp",
         "timer": "cpp",
         "future": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "filesystem": "cpp",
+        "codecvt": "cpp"
     }
 }

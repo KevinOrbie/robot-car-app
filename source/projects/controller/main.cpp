@@ -8,6 +8,7 @@
 /* ========================== Include ========================== */
 /* Standard C Libraries */
 #include <unistd.h>  // getopt
+#include <sys/stat.h>  // stat
 
 /* Standard C++ Libraries */
 #include <stdexcept>
@@ -38,7 +39,8 @@ static void help() {
     msg += "\nOptions:\n";
     msg += "  -h              display this help message\n";
     msg += "  -a              enable camera and arduino driver\n";
-    msg += "  -d              enable the arduino driver (don't require remote connection)\n";
+    msg += "  -m              enable the arduino driver (don't require remote connection)\n";
+    msg += "  -d              enable the depth estimation (experimental)\n";
     msg += "  -c              stream from the camera\n";
     msg += "  -t              standalone test configuration\n";
     msg += "  -v <path>       stream from the video file\n";
@@ -49,7 +51,7 @@ static void help() {
     fprintf(stderr, "%s", msg.c_str());
 };
 
-static void summary(std::string robot_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino, bool test_mode) {
+static void summary(std::string robot_ip, std::string video_file, bool use_camera, bool use_video_file, bool enable_arduino, bool test_mode, bool enable_depth) {
     std::string frame_provider = "";
     if (use_camera) {
         frame_provider = "camera";
@@ -71,9 +73,10 @@ static void summary(std::string robot_ip, std::string video_file, bool use_camer
     }
 
     LOGI("--------- Summary ---------");
-    LOGI("  > Frame Provider : %s", frame_provider.c_str());
-    LOGI("  > Input Sink     : %s", input_sink.c_str());
-    LOGI("  > Robot IP       : %s", robot_ip.c_str());
+    LOGI("  > Frame Provider   : %s", frame_provider.c_str());
+    LOGI("  > Depth Estimation : %s", (enable_depth) ? "enabled":"disabled");
+    LOGI("  > Input Sink       : %s", input_sink.c_str());
+    LOGI("  > Robot IP         : %s", robot_ip.c_str());
     LOGI("---------------------------");
 };
 
@@ -84,12 +87,13 @@ int main(int argc, char *argv[]) {
 
     bool test_mode      = false;
     bool use_camera     = false;
+    bool enable_depth   = false;
     bool use_video_file = false;
     bool enable_arduino = false;
 
     /* ----------------- Parse User Input ----------------- */
     int option;
-    while ((option = getopt(argc, argv, "actv:di:h")) != -1) {
+    while ((option = getopt(argc, argv, "actv:mdi:h")) != -1) {
         switch (option) {
             case 'a': {
                 use_camera = true;
@@ -103,8 +107,11 @@ int main(int argc, char *argv[]) {
             case 'c':
                 use_camera = true;
                 break;
-            case 'd':
+            case 'm':
                 enable_arduino = true;
+                break;
+            case 'd':
+                enable_depth = true;
                 break;
             case 'i':
                 robot_ip = std::string(optarg);
@@ -131,6 +138,12 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
     }
 
+    if (enable_depth && !use_camera) {
+        LOGE("Depth estimation (-d) can only be enabled when the camera is also enabled (-c).");
+        help();
+        return EXIT_SUCCESS;
+    }
+
     if (test_mode) {
         robot_ip = "none";
         enable_arduino = false;
@@ -138,7 +151,7 @@ int main(int argc, char *argv[]) {
     
     /* Notify user of used settings. */
     LOGI("CONTROLLER: Version %d", CONTROLLER_VERSION);
-    summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino, test_mode);
+    summary(robot_ip, video_file, use_camera, use_video_file, enable_arduino, test_mode, enable_depth);
 
     /* ---------------- Setup & Run System ---------------- */
     std::unique_ptr<FrameProvider> color_frame_provider = nullptr;
@@ -169,8 +182,21 @@ int main(int argc, char *argv[]) {
     /* Setup & Start Frame Provider. */
     if (use_camera) {
         try {
-            depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
-            depth_frame_provider->startStream();
+            if (enable_depth) {
+                struct stat buffer; 
+                /**
+                 * @note: Depending on the platfrom, the camera gets recognized as four or two video devices, with the depth video device corresponding to:
+                 * - "/dev/video1" when only two video devices are found.
+                 * - "/dev/video2" when four video devices are found.
+                 */
+                if (stat("/dev/video2", &buffer) == 0) { // the "/dev/video2" file exists
+                    depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video2");
+                } else {
+                    depth_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video1");
+                }
+                
+                depth_frame_provider->startStream();
+            }
             color_frame_provider = std::make_unique<VideoCam>(VideoCam::CamType::MYNT_EYE_SINGLE, VideoCam::IO_Method::MMAP, "/dev/video0");
             color_frame_provider->startStream();
         } catch (const std::runtime_error& error) {
@@ -184,11 +210,13 @@ int main(int argc, char *argv[]) {
     } else if (test_mode) {
         color_frame_provider = nullptr;
     } else {
-        // depth_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8998");
-        // depth_frame_provider->startStream();
+        if (enable_depth) {
+            depth_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8998");
+            depth_frame_provider->startStream();
+            dynamic_cast<VideoReciever*>(depth_frame_provider.get())->thread();
+        }
         color_frame_provider = std::make_unique<VideoReciever>("udp://" + robot_ip + ":8999");
         color_frame_provider->startStream();
-        // dynamic_cast<VideoReciever*>(depth_frame_provider.get())->thread();
         dynamic_cast<VideoReciever*>(color_frame_provider.get())->thread();
     }
 
@@ -210,6 +238,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (!use_camera && !use_video_file) {
+        if (enable_depth) {
+            dynamic_cast<VideoReciever*>(depth_frame_provider.get())->stop();
+        }
         dynamic_cast<VideoReciever*>(color_frame_provider.get())->stop();
     }
 
