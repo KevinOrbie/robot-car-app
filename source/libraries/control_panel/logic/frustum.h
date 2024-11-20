@@ -22,6 +22,7 @@
 #include "common/logger.h"
 #include "texture.h"
 #include "shader.h"
+#include "utils.h"
 
 
 /* ========================== Classes ========================== */
@@ -96,7 +97,8 @@ class Frustum {
             transform = glm::translate(transform, glm::vec3(far_, 0.0f, 0.0f));
             transform = glm::scale(transform, glm::vec3(0.0f, far_plane_half_height_, far_plane_half_width_));
             transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0.0f, 1.0f, 0.0f));
-            far_plane_->draw(model, view, projection);
+            transform = utils::convert(utils::convert(model) * utils::convert(transform));  // NOTE: Change to Eigen to prevent constexpr glm warnings
+            far_plane_->draw(transform, view, projection);
         }
     }
 

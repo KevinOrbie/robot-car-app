@@ -40,4 +40,17 @@ inline glm::mat4 convert(transform_t mat) {
     return result;
 }
 
+/**
+ * @brief Convert a Eigen matrix to a GLM matrix.
+ */
+inline transform_t convert(glm::mat4 mat) {
+    transform_t result;
+    for (size_t i = 0; i < 4; ++i) {
+        for (size_t j = 0; j < 4; ++j) {
+            result(j, i) = mat[i][j];
+        }
+    }
+    return result;
+}
+
 }
