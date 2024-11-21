@@ -1,6 +1,8 @@
 # Robotic Car Application
 A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on-target robot code and a custom, low-latency, OpenGL based GUI to control / monitor the robot remotely.
 
+![Controller GUI](./assets/images/controller.png "Controller GUI")
+
 Trajectory Visualization Demo:
 
 
