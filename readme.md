@@ -1,5 +1,5 @@
 # Robotic Car Application
-A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on-target robot code and a custom, low-latency, OpenGL based GUI to control / monitor the robot remotely.
+A C++ software suite to control and monitor a custom-built miniature vision-based robotic car. It provides both the on-target robot code and a custom, low-latency, OpenGL-based GUI to control / monitor the robot remotely.
 
 ![Controller GUI](./assets/images/controller.png "Controller GUI")
 
@@ -12,20 +12,20 @@ Point Cloud Visualization Demo (experimental):
 https://github.com/user-attachments/assets/80c5267d-4e4d-4de6-8bd6-b46b8f434de5
 
 ## Notable Highlights
-- Low-latency visualization of remote camera stream (via ffmpeg)
+- Low-latency visualization of remote camera stream (via libav)
 - 3D pointcloud visualization (from stereo depth estimation)
 - Real-time trajectory visualization
 - Real-time user drive controls
-- Unique OpenGL based GUI
+- Custom OpenGL-based GUI
 - Tested on Linux 18.04 LTS (for Jetson Nano)
 - Fully multi-threaded
 - No use of OpenCV
 - Modular design
 
 ## State of project
-This project is made to consolidate all of the knowlegde I aquired at my previous job and some additional courses I completed. On top of that, it also gives me a deeper understanding of what it takes to create a robot, and gives me more hands-on experience accross the full stack of robot design and programming.
+This project is made to consolidate all of the knowlegde I acquired at my previous job, and some additional courses I completed. On top of that, it also gives me a deeper understanding of what it takes to create a robot, and gives me more hands-on experience accross the full stack of robot design and programming.
 
-Because this project is only meant as a learning experience, and was built by just a single person, it could still benefit polishing, and could do with a major refactor.
+Because this project is only meant as a learning experience, and was built by just a single person, it could still benefit with some polishing.
 
 Some ideas I would have implemented given more time:
 - Track point cloud accross time, and build 3D mesh of environment.
