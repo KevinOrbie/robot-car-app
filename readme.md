@@ -5,7 +5,7 @@ A C++ software suite to control and monitor a custom-built miniature vision-base
 
 Trajectory Visualization Demo:
 
-https://github.com/user-attachments/assets/8a81caae-4edc-4881-9d54-b0dd72dc6544
+https://github.com/user-attachments/assets/f824e83c-bd7f-4da9-ae19-13390087821a
 
 Point Cloud Visualization Demo (experimental):
 
