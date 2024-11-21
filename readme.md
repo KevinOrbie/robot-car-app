@@ -12,7 +12,7 @@ Point Cloud Visualization Demo (experimental):
 https://github.com/user-attachments/assets/80c5267d-4e4d-4de6-8bd6-b46b8f434de5
 
 ## Notable Highlights
-- Low-latency visualization of remote camera stream (via libav)
+- Low-latency visualization of remote camera stream (via FFmpeg libraries)
 - 3D pointcloud visualization (from stereo depth estimation)
 - Real-time trajectory visualization
 - Real-time user drive controls
