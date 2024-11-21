@@ -96,7 +96,7 @@ class Frustum {
             glm::mat4 transform = glm::mat4(1.0f);
             transform = glm::translate(transform, glm::vec3(far_, 0.0f, 0.0f));
             transform = glm::scale(transform, glm::vec3(0.0f, far_plane_half_height_, far_plane_half_width_));
-            transform = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0.0f, 1.0f, 0.0f));
+            transform = glm::rotate(transform, static_cast<float>(-M_PI_2), glm::vec3(0.0f, 1.0f, 0.0f));
             transform = utils::convert(utils::convert(model) * utils::convert(transform));  // NOTE: Change to Eigen to prevent constexpr glm warnings
             far_plane_->draw(transform, view, projection);
         }
